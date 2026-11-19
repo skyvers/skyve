@@ -1,7 +1,6 @@
 package util.sail;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -15,7 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -24,10 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -44,12 +41,16 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Step;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
+import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.WaitFor;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -62,7 +63,7 @@ import jakarta.annotation.Nullable;
  * <ul>
  * <li>{@value SailSettings#SNAPSHOT_DIR}: after each step (and when a step fails, before the test strategy acts on
  * it), a screenshot named by sequence, interaction and step, and an {@code index.html} film strip of the steps, under
- * their interactions: each step in words ({@link #summary(String)}) and as SAIL, its outcome and duration, and its
+ * their interactions: each step in words ({@link #summary(Step)}) and as SAIL, its outcome and duration, and its
  * screenshot. With {@value SailSettings#SNAPSHOT_SOURCE}{@code =true}, also each page's source.</li>
  * <li>{@value SailSettings#VIDEO_DIR}: the browser's frames, from Chrome's DevTools screencast, with their times,
  * and a {@code player.html} that plays them at their real timing, fitted to the window, captioned with the step that
@@ -117,11 +118,10 @@ public final class SailMedia {
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
 	/**
-	 * The runs of the unit (a workflow) running on this thread, whose media is kept or deleted together; null outside
-	 * a unit. Set by {@link #beginUnit()} and removed by {@link #endUnit(boolean)}, which its caller calls in a
-	 * {@code finally}.
+	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit()} and removed by
+	 * {@link #endUnit(boolean)}, which its caller calls in a {@code finally}.
 	 */
-	private static final ThreadLocal<List<SailMedia>> UNIT = new ThreadLocal<>();
+	private static final ThreadLocal<Unit> UNIT = new ThreadLocal<>();
 	/**
 	 * This JVM's run of tests, for the list of runs to show each session's runs together in the order they ran: when
 	 * this class was loaded, as a folder time.
@@ -129,8 +129,14 @@ public final class SailMedia {
 	static final String SESSION = FOLDER_TIME.format(LocalDateTime.now());
 	/** Numbers the units (see {@link #beginUnit()}) of this session. */
 	private static final AtomicInteger UNITS = new AtomicInteger();
-	/** The unit running on this thread: its number and how many runs it has started; null outside a unit. */
-	private static final ThreadLocal<int[]> UNIT_PLACE = new ThreadLocal<>();
+
+	/** A unit (a workflow): its number in the session, how many runs (legs) it has started, and its finished runs. */
+	private static final class Unit {
+		private final int number = UNITS.incrementAndGet();
+		private int legs = 0;
+		/** Its finished runs, whose media is kept or deleted together. */
+		private final List<SailMedia> runs = new ArrayList<>();
+	}
 
 	/**
 	 * Where a run is in its session: the unit (a workflow) it is a leg of, and which leg.
@@ -143,10 +149,14 @@ public final class SailMedia {
 		// a value
 	}
 
-	/** One executed step: where it ran, what it was, when, how it went, and its snapshot. */
+	/**
+	 * One executed step: where it ran, what it was (in words, see {@link SailMedia#summary(Step)}, and as SAIL), when,
+	 * how it went, and its snapshot.
+	 */
 	record StepRecord(int sequence,
 						@Nonnull String procedure,
 						int number,
+						@Nonnull String summary,
 						@Nonnull String xml,
 						long startMillis,
 						long endMillis,
@@ -205,6 +215,7 @@ public final class SailMedia {
 	private int sequence = 0;
 	private String procedure;
 	private int number;
+	private String stepSummary;
 	private String xml;
 	private String fileStem;
 	private long startMillis;
@@ -218,8 +229,8 @@ public final class SailMedia {
 		this.selenide = selenide;
 		this.automation = automation;
 		this.info = info;
-		int[] unit = UNIT_PLACE.get();
-		this.place = (unit == null) ? new Place(SESSION, 0, 0) : new Place(SESSION, unit[0], ++unit[1]);
+		Unit unit = UNIT.get();
+		this.place = (unit == null) ? new Place(SESSION, 0, 0) : new Place(SESSION, unit.number, ++unit.legs);
 		this.snapshotRun = snapshotRun;
 		this.videoRun = videoRun;
 		this.saveSource = settings.snapshotSource();
@@ -339,8 +350,15 @@ public final class SailMedia {
 		sequence++;
 		procedure = procedureName;
 		number = stepNumber;
+		try {
+			stepSummary = summary(step);
+		}
+		catch (RuntimeException e) { // the media must never change how a step fails: the step reports its own problem
+			selenide.trace("Could not put step " + sequence + " in words for the SAIL media: " + e);
+			stepSummary = words(InterpretedWebDriverExecutor.opCode(step));
+		}
 		xml = stepXml(step);
-		fileStem = String.format("%03d-%s", Integer.valueOf(sequence), sanitise(procedureName + '-' + opCode(xml), 80));
+		fileStem = String.format("%03d-%s", Integer.valueOf(sequence), sanitise(procedureName + '-' + InterpretedWebDriverExecutor.opCode(step), 80));
 		if (videoRun != null) {
 			WebDriver driver = selenide.driver;
 			if ((driver != null) && (driver != screencastDriver)) {
@@ -388,7 +406,7 @@ public final class SailMedia {
 				}
 			}
 		}
-		steps.add(new StepRecord(sequence, procedure, number, xml, startMillis, endMillis,
+		steps.add(new StepRecord(sequence, procedure, number, stepSummary, xml, startMillis, endMillis,
 									(failure == null) ? null : hidePasswords(failure), screenshot, source));
 		xml = null;
 	}
@@ -410,8 +428,7 @@ public final class SailMedia {
 	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
 	 */
 	static void beginUnit() {
-		UNIT.set(new ArrayList<>());
-		UNIT_PLACE.set(new int[] {UNITS.incrementAndGet(), 0});
+		UNIT.set(new Unit());
 	}
 
 	/**
@@ -423,12 +440,12 @@ public final class SailMedia {
 	 * @param unitPassed	whether the unit passed
 	 */
 	static void endUnit(boolean unitPassed) {
-		List<SailMedia> runs = UNIT.get();
+		Unit unit = UNIT.get();
 		UNIT.remove();
-		UNIT_PLACE.remove();
-		if ((runs == null) || (! unitPassed)) {
+		if ((unit == null) || (! unitPassed)) {
 			return;
 		}
+		List<SailMedia> runs = unit.runs;
 		for (SailMedia run : runs) {
 			if (! run.passed) {
 				return;
@@ -457,9 +474,9 @@ public final class SailMedia {
 		}
 		passed = automationPassed && steps.stream().noneMatch(StepRecord::failed);
 		writePages();
-		List<SailMedia> unit = UNIT.get();
+		Unit unit = UNIT.get();
 		if (unit != null) {
-			unit.add(this);
+			unit.runs.add(this);
 		}
 		else if (passed && (keepMedia == SailSettings.KeepMedia.FAILED)) {
 			delete();
@@ -539,7 +556,7 @@ public final class SailMedia {
 
 	/**
 	 * Renders a step as one line of SAIL XML, as the schema writes it; or, if it cannot be marshalled on its own, as the
-	 * executor describes it.
+	 * executor describes it. It is shown as it is (escaped), never parsed: the words come from the step itself.
 	 */
 	@Nonnull String stepXml(@Nonnull Step step) {
 		String result = null;
@@ -552,12 +569,55 @@ public final class SailMedia {
 		return hidePasswords((result == null) ? InterpretedWebDriverExecutor.describe(step) : result);
 	}
 
+	/** What a hidden password shows as. */
+	private static final String HIDDEN = "********";
+
 	/**
-	 * Hides a login's password in a step's XML or a failure that quotes it, unless it is a variable, so that the pages
-	 * can be shown to others.
+	 * Hides a login's password in a step's XML or a failure that quotes it, and the value of a call's parameter whose
+	 * name has "password" in it, unless it is a variable, so that the pages can be shown to others.
 	 */
 	static @Nonnull String hidePasswords(@Nonnull String stepXml) {
-		return stepXml.replaceAll("(\\bpassword=\")(?!\\{var:)[^\"]*\"", "$1********\"");
+		return hideParameterPasswords(stepXml.replaceAll("(\\bpassword=\")(?!\\{var:)[^\"]*\"", "$1" + HIDDEN + '"'));
+	}
+
+	/** Hides the value of each {@code <parameter>} whose name has "password" in it, unless it is a variable. */
+	private static @Nonnull String hideParameterPasswords(@Nonnull String stepXml) {
+		StringBuilder result = new StringBuilder(stepXml.length());
+		int from = 0;
+		int tag = stepXml.indexOf("<parameter ");
+		while (tag >= 0) {
+			int tagEnd = stepXml.indexOf('>', tag);
+			if (tagEnd < 0) {
+				break;
+			}
+			String element = stepXml.substring(tag, tagEnd);
+			String name = attribute(element, "name");
+			String value = attribute(element, "value");
+			if ((name != null) && (value != null) && (! hidden(name, value).equals(value))) {
+				int valueStart = tag + element.indexOf(" value=\"") + 8;
+				result.append(stepXml, from, valueStart).append(HIDDEN);
+				from = valueStart + value.length();
+			}
+			tag = stepXml.indexOf("<parameter ", tagEnd);
+		}
+		return result.append(stepXml, from, stepXml.length()).toString();
+	}
+
+	/** Returns an element's attribute as written in its start tag, or null if it has none. */
+	private static @Nullable String attribute(@Nonnull String element, @Nonnull String name) {
+		String start = ' ' + name + "=\"";
+		int valueStart = element.indexOf(start);
+		if (valueStart < 0) {
+			return null;
+		}
+		valueStart += start.length();
+		int valueEnd = element.indexOf('"', valueStart);
+		return (valueEnd < 0) ? null : element.substring(valueStart, valueEnd);
+	}
+
+	/** Returns a named value, hidden if its name has "password" in it and it is not a variable. */
+	static @Nonnull String hidden(@Nonnull String name, @Nonnull String value) {
+		return (name.toLowerCase(Locale.ROOT).contains("password") && (! value.startsWith("{var:"))) ? HIDDEN : value;
 	}
 
 	/**
@@ -586,12 +646,6 @@ public final class SailMedia {
 				.replaceAll("<(/?)\\w+:", "<$1")
 				.replaceAll("\\s+", " ")
 				.trim();
-	}
-
-	/** Returns the op-code of a step's XML, e.g. {@code dataEnter}. */
-	static @Nonnull String opCode(@Nonnull String stepXml) {
-		Matcher matcher = Pattern.compile("^<\\s*([\\w]+)").matcher(stepXml);
-		return matcher.find() ? matcher.group(1) : "step";
 	}
 
 	/** Makes text safe for a file name: letters, digits and dashes, at most {@code max} characters. */
@@ -625,125 +679,61 @@ public final class SailMedia {
 	/**
 	 * Returns a step in plain words, for the step lists: what it does, without the SAIL markup. A comment is its text,
 	 * a test script its message, a call its class's name in words with its parameters, a script or a wait its code
-	 * (shortened), a login who signs in, and any other step its op-code in words with its attributes.
+	 * (shortened), a login who signs in, and any other step its op-code in words with its simple properties.
 	 *
-	 * @param stepXml	the step's XML, as {@link #stepXml(Step)} renders it
+	 * @param step	the step
 	 * @return the summary
 	 */
-	static @Nonnull String summary(@Nonnull String stepXml) {
-		StepParts step = StepParts.parse(stepXml);
-		Map<String, String> attributes = step.attributes();
-		String variable = attributes.get("variable");
-		String into = (variable == null) ? "" : " (into " + variable + ")";
-		return switch (step.op()) {
-			case "comment" -> shorten(step.text(), 400);
-			case "testScript" -> "Check: " + (attributes.containsKey("message") ? attributes.get("message") : script(step.code()));
-			case "waitFor" -> "Wait for: " + script(step.code());
-			case "execute", "executeAsync" -> "Run: " + script(step.code()) + into;
-			case "call" -> words(simpleName(attributes.getOrDefault("className", "call"))) + pairs(step.parameters()) + into;
-			case "login" -> "Sign in as " + attributes.getOrDefault("user", "?") + ("true".equals(attributes.get("remember")) ? ", remembered" : "");
-			case "logout" -> "Sign out";
-			case "navigateLink" -> "Go to " + attributes.getOrDefault("href", "?");
-			case "pause" -> "Pause " + attributes.getOrDefault("millis", "?") + " ms";
-			default -> {
-				Map<String, String> shown = new LinkedHashMap<>(attributes);
-				shown.remove("timeoutMillis");
-				yield words(step.op()) + pairs(shown);
-			}
-		};
+	static @Nonnull String summary(@Nonnull Step step) {
+		if (step instanceof Comment comment) {
+			return shorten(text(comment.getComment()), 400);
+		}
+		if (step instanceof TestScript test) {
+			return "Check: " + ((test.getMessage() == null) ? script(text(test.getScript())) : test.getMessage());
+		}
+		if (step instanceof WaitFor wait) {
+			return "Wait for: " + script(text(wait.getScript()));
+		}
+		if (step instanceof Execute execute) {
+			return scriptRun(execute.getScript(), execute.getVariable());
+		}
+		if (step instanceof ExecuteAsync execute) {
+			return scriptRun(execute.getScript(), execute.getVariable());
+		}
+		if (step instanceof Call call) {
+			Map<String, String> parameters = new LinkedHashMap<>();
+			// a call is validated when it runs, so a class or parameter may be missing here
+			call.getParameters().forEach(parameter -> parameters.put(text(parameter.getName()), hidden(text(parameter.getName()), text(parameter.getValue()))));
+			String className = text(call.getClassName());
+			return words(simpleName(className.isEmpty() ? "call" : className)) + pairs(parameters) + into(call.getVariable());
+		}
+		if (step instanceof Login login) {
+			return "Sign in as " + text(login.getUser()) + (Boolean.TRUE.equals(login.getRemember()) ? ", remembered" : "");
+		}
+		if (step instanceof Logout) {
+			return "Sign out";
+		}
+		if (step instanceof NavigateLink link) {
+			return "Go to " + ((link.getHref() == null) ? text(link.getText()) : link.getHref());
+		}
+		if (step instanceof Pause pause) {
+			return "Pause " + pause.getMillis() + " ms";
+		}
+		Map<String, String> shown = new TreeMap<>(InterpretedWebDriverExecutor.properties(step));
+		shown.remove("timeoutMillis");
+		return words(InterpretedWebDriverExecutor.opCode(step)) + pairs(shown);
 	}
 
-	/**
-	 * A step's parts, for {@link #summary(String)}: its op-code, attributes, text and parameters.
-	 *
-	 * @param op	the op-code, e.g. {@code waitFor}
-	 * @param attributes	the attributes, in order
-	 * @param text	the text inside it (outside its child elements), trimmed
-	 * @param parameters	a call's parameters, by name, in order
-	 */
-	record StepParts(@Nonnull String op, @Nonnull Map<String, String> attributes, @Nonnull String text, @Nonnull Map<String, String> parameters) {
-		/** The script a scripted step runs: its {@code script} attribute (an executor's description) or its text. */
-		@Nonnull String code() {
-			String script = attributes.get("script");
-			return (script == null) ? text : script;
-		}
-
-		/**
-		 * Parses a step's XML; or, when it is not well-formed (an executor's description, which does not escape its
-		 * values), takes its op-code and attributes as they are written.
-		 */
-		static @Nonnull StepParts parse(@Nonnull String stepXml) {
-			try {
-				DocumentBuilder builder;
-				synchronized (XML) { // a factory is not thread-safe, and a load run's users write pages at once
-					builder = XML.newDocumentBuilder();
-				}
-				builder.setErrorHandler(new DefaultHandler()); // fails on a fatal error, without printing it
-				Element root = builder.parse(new InputSource(new StringReader(stepXml))).getDocumentElement();
-				Map<String, String> attributes = new LinkedHashMap<>();
-				NamedNodeMap nodes = root.getAttributes();
-				for (int i = 0, l = nodes.getLength(); i < l; i++) {
-					Node node = nodes.item(i);
-					attributes.put(node.getNodeName(), node.getNodeValue());
-				}
-				StringBuilder text = new StringBuilder();
-				Map<String, String> parameters = new LinkedHashMap<>();
-				for (Node child = root.getFirstChild(); child != null; child = child.getNextSibling()) {
-					if ((child.getNodeType() == Node.TEXT_NODE) || (child.getNodeType() == Node.CDATA_SECTION_NODE)) {
-						text.append(child.getNodeValue());
-					}
-					else if ((child instanceof Element parameter) && "parameter".equals(parameter.getTagName())) {
-						parameters.put(parameter.getAttribute("name"), parameter.getAttribute("value"));
-					}
-				}
-				return new StepParts(root.getTagName(), attributes, text.toString().trim(), parameters);
-			}
-			catch (@SuppressWarnings("unused") ParserConfigurationException | SAXException | IOException e) {
-				return new StepParts(opCode(stepXml), describedAttributes(stepXml), "", Map.of());
-			}
-		}
+	private static @Nonnull String text(@Nullable String text) {
+		return (text == null) ? "" : text;
 	}
 
-	/**
-	 * Returns the {@code name="value"} attributes of an executor's description of a step, which does not escape its
-	 * values (so it is not XML); a value runs to the next double quote. A description is one element, and its script may
-	 * hold {@code >}, so the whole text is read.
-	 */
-	static @Nonnull Map<String, String> describedAttributes(@Nonnull String description) {
-		Map<String, String> result = new LinkedHashMap<>();
-		int equals = description.indexOf("=\"");
-		while (equals >= 0) {
-			int nameStart = equals;
-			while ((nameStart > 0) && (Character.isLetterOrDigit(description.charAt(nameStart - 1)) || (description.charAt(nameStart - 1) == '_'))) {
-				nameStart--;
-			}
-			int valueEnd = description.indexOf('"', equals + 2);
-			if (valueEnd < 0) {
-				break;
-			}
-			if (nameStart < equals) {
-				result.put(description.substring(nameStart, equals), description.substring(equals + 2, valueEnd));
-			}
-			equals = description.indexOf("=\"", valueEnd + 1);
-		}
-		return result;
+	private static @Nonnull String scriptRun(@Nullable String script, @Nullable String variable) {
+		return "Run: " + script(text(script)) + into(variable);
 	}
 
-	/** Parses steps for {@link StepParts}; no DTDs or external entities (a step is never a document of its own). */
-	private static final DocumentBuilderFactory XML = xmlFactory();
-
-	private static @Nonnull DocumentBuilderFactory xmlFactory() {
-		try {
-			DocumentBuilderFactory result = DocumentBuilderFactory.newInstance();
-			result.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-			result.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			result.setXIncludeAware(false);
-			result.setExpandEntityReferences(false);
-			return result;
-		}
-		catch (ParserConfigurationException e) {
-			throw new IllegalStateException("No safe XML parser for the SAIL media pages", e);
-		}
+	private static @Nonnull String into(@Nullable String variable) {
+		return (variable == null) ? "" : " (into " + variable + ")";
 	}
 
 	/** A script as one shortened line, without a leading {@code return} or a trailing semicolon. */
@@ -1145,7 +1135,7 @@ public final class SailMedia {
 			}
 			result.append("<tr id=\"step-").append(step.sequence()).append('"').append(step.failed() ? " class=\"fail\"" : "").append('>')
 					.append("<td class=\"num\">").append(step.sequence()).append("</td>")
-					.append("<td><div class=\"summary\">").append(escape(summary(step.xml()))).append("</div>");
+					.append("<td><div class=\"summary\">").append(escape(step.summary())).append("</div>");
 			if (step.failed()) {
 				result.append("<div class=\"failure\">").append(escape(step.failure())).append("</div>");
 			}
@@ -1182,7 +1172,7 @@ public final class SailMedia {
 			Map<String, Object> data = new LinkedHashMap<>();
 			data.put("n", Integer.valueOf(step.sequence()));
 			data.put("p", step.procedure());
-			data.put("d", summary(step.xml()));
+			data.put("d", step.summary());
 			data.put("x", step.xml());
 			data.put("s", Long.valueOf(step.startMillis()));
 			data.put("e", Long.valueOf(step.endMillis()));
@@ -1321,12 +1311,45 @@ public final class SailMedia {
 	}
 
 	/**
-	 * Writes one session's table: its runs in order, under their suite files and units.
+	 * Writes one session's table: its runs in order, under their suite files and units. Each file heading and unit
+	 * heading takes the next group number; a run row names its file's and unit's groups ({@code data-g},
+	 * {@code data-u}), which is how the filters find the headings to hide with it.
 	 *
 	 * @return the next group number (groups number the file and unit headings across the page, for the filters)
 	 */
 	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup) {
 		int group = firstGroup;
+		sessionHeadingHtml(out, session, runs);
+		String label = null;
+		int fileGroup = 0;
+		for (int i = 0, sequence = 1; i < runs.size(); ) {
+			ListedRun run = runs.get(i);
+			String runLabel = run.label();
+			if (! Objects.equals(runLabel, label)) {
+				label = runLabel;
+				fileGroup = (label == null) ? 0 : ++group;
+				if (label != null) {
+					out.append("<tr class=\"group\" data-header=\"g").append(fileGroup).append("\"><td colspan=\"7\">")
+						.append(escape(label)).append("</td></tr>");
+				}
+			}
+			int end = unitEnd(runs, i);
+			int unitGroup = 0;
+			if (end - i > 1) {
+				unitGroup = ++group;
+				unitRowHtml(out, runs.subList(i, end), unitGroup);
+			}
+			for (int j = i; j < end; j++) {
+				runRowHtml(out, runs.get(j), sequence++, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1);
+			}
+			i = end;
+		}
+		out.append("</tbody></table></div></section>");
+		return group;
+	}
+
+	/** Writes a session's heading (when it started, how many runs, of which tests, how many failed) and opens its table. */
+	private static void sessionHeadingHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs) {
 		long failed = runs.stream().filter(ListedRun::failed).count();
 		Set<String> tests = new java.util.LinkedHashSet<>();
 		for (ListedRun run : runs) {
@@ -1343,47 +1366,29 @@ public final class SailMedia {
 			.append((failed == 0) ? "" : " <span class=\"badge fail\">" + failed + " failed</span>")
 			.append("</h2><div class=\"card table-wrap\"><table class=\"runs\"><thead><tr><th>#</th><th>Started</th><th>Run</th>")
 			.append("<th>Result</th><th>Steps</th><th>Time</th><th></th></tr></thead><tbody>");
-		String label = null;
-		int fileGroup = 0;
-		for (int i = 0, sequence = 1; i < runs.size(); ) {
-			ListedRun run = runs.get(i);
-			String runLabel = run.label();
-			if ((runLabel != null) && (! runLabel.equals(label))) {
-				label = runLabel;
-				fileGroup = ++group;
-				out.append("<tr class=\"group\" data-header=\"g").append(fileGroup).append("\"><td colspan=\"7\">")
-					.append(escape(label)).append("</td></tr>");
+	}
+
+	/** Returns the index after the last run of the unit the run at {@code start} is in (just after it, when it is not in one). */
+	private static int unitEnd(@Nonnull List<ListedRun> runs, int start) {
+		ListedRun run = runs.get(start);
+		int result = start + 1;
+		if (run.unit() != 0L) {
+			while ((result < runs.size()) && (runs.get(result).unit() == run.unit()) && runs.get(result).session().equals(run.session())) {
+				result++;
 			}
-			else if ((runLabel == null) && (label != null)) {
-				label = null;
-				fileGroup = 0;
-			}
-			// a unit's legs: the runs after this one in the same unit
-			int end = i + 1;
-			if (run.unit() != 0L) {
-				while ((end < runs.size()) && (runs.get(end).unit() == run.unit()) && runs.get(end).session().equals(run.session())) {
-					end++;
-				}
-			}
-			int unitGroup = 0;
-			if (end - i > 1) {
-				List<ListedRun> legs = runs.subList(i, end);
-				unitGroup = ++group;
-				boolean unitFailed = legs.stream().anyMatch(ListedRun::failed);
-				out.append("<tr class=\"unit").append(unitFailed ? " fail" : "").append("\" data-header=\"g").append(unitGroup)
-					.append("\"><td></td><td></td><td><div class=\"summary\">").append(escape(unitTitle(legs)))
-					.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div></td><td>")
-					.append(unitFailed ? "<span class=\"badge fail\">Failed</span>" : "<span class=\"badge pass\">Passed</span>")
-					.append("</td><td></td><td class=\"num\">")
-					.append(duration(legs.stream().mapToLong(ListedRun::millis).sum())).append("</td><td></td></tr>");
-			}
-			for (int j = i; j < end; j++) {
-				runRowHtml(out, runs.get(j), sequence++, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1);
-			}
-			i = end;
 		}
-		out.append("</tbody></table></div></section>");
-		return group;
+		return result;
+	}
+
+	/** Writes a unit's heading row: its title, how many legs, its outcome and total time. */
+	private static void unitRowHtml(@Nonnull StringBuilder out, @Nonnull List<ListedRun> legs, int unitGroup) {
+		boolean unitFailed = legs.stream().anyMatch(ListedRun::failed);
+		out.append("<tr class=\"unit").append(unitFailed ? " fail" : "").append("\" data-header=\"g").append(unitGroup)
+			.append("\"><td></td><td></td><td><div class=\"summary\">").append(escape(unitTitle(legs)))
+			.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div></td><td>")
+			.append(unitFailed ? "<span class=\"badge fail\">Failed</span>" : "<span class=\"badge pass\">Passed</span>")
+			.append("</td><td></td><td class=\"num\">")
+			.append(duration(legs.stream().mapToLong(ListedRun::millis).sum())).append("</td><td></td></tr>");
 	}
 
 	/** A unit's title: the words its legs' titles start with (e.g. the test's id), or its first leg's title. */
@@ -1462,9 +1467,12 @@ public final class SailMedia {
 		return (value instanceof Number n) ? n.longValue() : 0L;
 	}
 
+	/** A run or session folder's leading time, e.g. {@code 20261106-120000}. */
+	private static final Pattern FOLDER_STARTED = Pattern.compile("^(\\d{4})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2})");
+
 	/** When a run started, from its folder's name ({@code yyyyMMdd-HHmmss-SSS-...}); empty if it is not named so. */
 	private static @Nonnull String startedFromFolder(@Nonnull String folder) {
-		Matcher matcher = Pattern.compile("^(\\d{4})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2})").matcher(folder);
+		Matcher matcher = FOLDER_STARTED.matcher(folder);
 		return matcher.find() ? matcher.group(1) + '-' + matcher.group(2) + '-' + matcher.group(3) + ' ' +
 								matcher.group(4) + ':' + matcher.group(5) + ':' + matcher.group(6) : "";
 	}

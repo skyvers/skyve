@@ -19,7 +19,19 @@ import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.json.Json;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CallParameter;
+import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.web.UserAgentType;
 
 import util.sail.SailMedia.Frame;
@@ -36,10 +48,10 @@ class SailMediaTest {
 													"2026-11-06 12:00:00", "tablet",
 													List.of("testStrategy=Verify (-Dsail.testStrategy)", "var.password=******** (code)"));
 	private static final List<StepRecord> STEPS = List.of(
-			new StepRecord(1, "Contacts: create", 1, "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null),
-			new StepRecord(2, "Contacts: create", 2, "<dataEnter binding=\"name\" value=\"a &lt; b\"/>", 1250L, 1300L,
+			new StepRecord(1, "Contacts: create", 1, "Navigate menu (item: Contacts, module: admin)", "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null),
+			new StepRecord(2, "Contacts: create", 2, "Data enter (binding: name, value: a < b)", "<dataEnter binding=\"name\" value=\"a &lt; b\"/>", 1250L, 1300L,
 							"Interaction \"Contacts: create\" step 2: <boom> & more", "002-Contacts-create-dataEnter.png", "002-Contacts-create-dataEnter.html"),
-			new StepRecord(3, "Contacts: create", 3, "<save/>", 1300L, 1700L, "second failure", null, null));
+			new StepRecord(3, "Contacts: create", 3, "Save", "<save/>", 1300L, 1700L, "second failure", null, null));
 
 	@Test
 	void theFilmStripHasARowPerStepAndLeadsToTheFirstFailure() {
@@ -205,9 +217,6 @@ class SailMediaTest {
 					() -> assertTrue(html.contains("<button id=\"prev\"") && html.contains("<button id=\"next\""), "step by step"),
 					() -> assertTrue(html.contains("<option value=\"0.5\">0.5x</option>") && html.contains("<option value=\"8\">8x</option>"), "speed"),
 					() -> assertTrue(html.contains("<div id=\"steps\"></div>"), "the step list"),
-					() -> assertTrue(html.contains("s.d || s.x"), "the steps in words"),
-					() -> assertTrue(html.contains("F[i+1][1]-F[i][1]"), "frames at their real timing"),
-					() -> assertTrue(html.contains("pin = k"), "a clicked step stays the one shown"),
 					() -> assertTrue(html.contains("<a class=\"btn\" href=\"../snapshots/index.html\">Steps</a>"), "the film strip link"),
 					() -> assertTrue(html.contains("<h1>Contacts: create</h1>") && html.contains("2 failed"), "the run's title and outcome"),
 					() -> assertTrue(html.contains("<div id=\"settings\" class=\"pop\" popover>"), "the settings in a pop-up"));
@@ -299,30 +308,64 @@ class SailMediaTest {
 
 	@Test
 	void aStepIsSummarisedInWords() {
-		assertAll(() -> assertEquals("Wait for: !! document.querySelector('.home')",
-										SailMedia.summary("<waitFor timeoutMillis=\"30000\"> <![CDATA[ return !! document.querySelector('.home'); ]]> </waitFor>")),
-					() -> assertEquals("Wait for: a && b", SailMedia.summary("<waitFor timeoutMillis=\"60000\" script=\"return a && b;\" />"),
-										"an executor's description, which is not well-formed XML"),
-					() -> assertEquals(Map.of("user", "a", "script", "x => y < 2"),
-										SailMedia.describedAttributes("<login user=\"a\" script=\"x => y < 2\" =\"nameless\" unclosed=\"z"),
-										"a description's attributes: a value may hold '>', a nameless or unclosed one is skipped"),
-					() -> assertEquals("Check: the header says offline", SailMedia.summary("<testScript message=\"the header says offline\">return x;</testScript>")),
-					() -> assertEquals("Check: x === 1", SailMedia.summary("<testScript>return x === 1;</testScript>")),
-					() -> assertEquals("Lower quota (headroomKb: 512)",
-										SailMedia.summary("<call className=\"sail.inspection.LowerQuota\"> <parameter name=\"headroomKb\" value=\"512\"/> </call>")),
-					() -> assertEquals("Switch tab (into tabs)", SailMedia.summary("<call className=\"sail.inspection.SwitchTab\" variable=\"tabs\"/>")),
-					() -> assertEquals("Run: location.reload()", SailMedia.summary("<execute>location.reload();</execute>")),
-					() -> assertEquals("Sign in as sail.pm, remembered",
-										SailMedia.summary("<login password=\"{var:password}\" remember=\"true\" user=\"sail.pm\"/>")),
-					() -> assertEquals("Sign out", SailMedia.summary("<logout/>")),
-					() -> assertEquals("Go to basix/a.xhtml?i=1&inspect", SailMedia.summary("<navigateLink href=\"basix/a.xhtml?i=1&amp;inspect\"/>")),
-					() -> assertEquals("Discard is offered only online", SailMedia.summary("<comment>Discard is offered only online</comment>")),
-					() -> assertEquals("Pause 5000 ms", SailMedia.summary("<pause millis=\"5000\"/>")),
-					() -> assertEquals("Navigate edit (bizId: 1, document: Inspection, module: tenancy)",
-										SailMedia.summary("<navigateEdit bizId=\"1\" document=\"Inspection\" module=\"tenancy\"/>")),
-					() -> assertEquals("Test success", SailMedia.summary("<testSuccess/>")),
-					() -> assertEquals("Wait for: " + "x".repeat(139) + '\u2026', SailMedia.summary("<waitFor>" + "x".repeat(200) + "</waitFor>"),
-										"a long script is shortened"));
+		WaitFor wait = new WaitFor();
+		wait.setScript(" return !! document.querySelector('.home'); ");
+		wait.setTimeoutMillis(Integer.valueOf(30000));
+		TestScript message = new TestScript();
+		message.setScript("return x;");
+		message.setMessage("the header says offline");
+		TestScript check = new TestScript();
+		check.setScript("return x === 1;");
+		Call lowerQuota = new Call();
+		lowerQuota.setClassName("sail.inspection.LowerQuota");
+		CallParameter headroom = new CallParameter();
+		headroom.setName("headroomKb");
+		headroom.setValue("512");
+		lowerQuota.getParameters().add(headroom);
+		Call switchTab = new Call();
+		switchTab.setClassName("sail.inspection.SwitchTab");
+		switchTab.setVariable("tabs");
+		Execute reload = new Execute();
+		reload.setScript("location.reload();");
+		Login login = new Login();
+		login.setUser("sail.pm");
+		login.setPassword("{var:password}");
+		login.setRemember(Boolean.TRUE);
+		NavigateLink link = new NavigateLink();
+		link.setHref("basix/a.xhtml?i=1&inspect");
+		NavigateLink byText = new NavigateLink();
+		byText.setText("Inspections");
+		Comment comment = new Comment();
+		comment.setComment("Discard is offered only online");
+		Pause pause = new Pause();
+		pause.setMillis(5000L);
+		NavigateEdit edit = new NavigateEdit();
+		edit.setModuleName("tenancy");
+		edit.setDocumentName("Inspection");
+		edit.setBizId("1");
+		Call incomplete = new Call();
+		CallParameter noValue = new CallParameter();
+		noValue.setName("x");
+		incomplete.getParameters().add(noValue);
+		WaitFor longWait = new WaitFor();
+		longWait.setScript("x".repeat(200));
+		assertAll(() -> assertEquals("Wait for: !! document.querySelector('.home')", SailMedia.summary(wait)),
+					() -> assertEquals("Check: the header says offline", SailMedia.summary(message)),
+					() -> assertEquals("Check: x === 1", SailMedia.summary(check)),
+					() -> assertEquals("Lower quota (headroomKb: 512)", SailMedia.summary(lowerQuota)),
+					() -> assertEquals("Switch tab (into tabs)", SailMedia.summary(switchTab)),
+					() -> assertEquals("Run: location.reload()", SailMedia.summary(reload)),
+					() -> assertEquals("Sign in as sail.pm, remembered", SailMedia.summary(login)),
+					() -> assertEquals("Sign out", SailMedia.summary(new Logout())),
+					() -> assertEquals("Go to basix/a.xhtml?i=1&inspect", SailMedia.summary(link)),
+					() -> assertEquals("Go to Inspections", SailMedia.summary(byText), "a link by its text"),
+					() -> assertEquals("Discard is offered only online", SailMedia.summary(comment)),
+					() -> assertEquals("Pause 5000 ms", SailMedia.summary(pause)),
+					() -> assertEquals("Navigate edit (bizId: 1, documentName: Inspection, moduleName: tenancy)", SailMedia.summary(edit),
+										"any other step: its properties, by name"),
+					() -> assertEquals("Test success", SailMedia.summary(new TestSuccess())),
+					() -> assertEquals("Call (x: )", SailMedia.summary(incomplete), "a call with no class or value: the call reports that when it runs"),
+					() -> assertEquals("Wait for: " + "x".repeat(139) + '\u2026', SailMedia.summary(longWait), "a long script is shortened"));
 	}
 
 	@Test
@@ -360,9 +403,34 @@ class SailMediaTest {
 		assertEquals("<dataEnter binding=\"text\" value=\"a &lt; b\"/>", SailMedia.marshal(automation, step));
 	}
 
+	/** A step's simple properties, which describe a step that cannot be marshalled and summarise most steps. */
+	@Test
+	void aStepsPropertiesHideItsPassword() {
+		Login login = new Login();
+		login.setUser("admin");
+		login.setPassword("secret");
+		assertAll(() -> assertEquals("admin", InterpretedWebDriverExecutor.properties(login).get("user")),
+					() -> assertEquals("****", InterpretedWebDriverExecutor.properties(login).get("password")),
+					() -> assertEquals("login", InterpretedWebDriverExecutor.opCode(login)));
+	}
+
 	@Test
 	void passwordsAreHidden() {
-		assertAll(() -> assertEquals("<login password=\"********\" user=\"admin\"/>", SailMedia.hidePasswords("<login password=\"admin\" user=\"admin\"/>")),
+		Call call = new Call();
+		call.setClassName("sail.SignUp");
+		for (String[] pair : new String[][] {{"user", "a"}, {"newPassword", "Secret1"}, {"password", "{var:password}"}}) {
+			CallParameter parameter = new CallParameter();
+			parameter.setName(pair[0]);
+			parameter.setValue(pair[1]);
+			call.getParameters().add(parameter);
+		}
+		assertAll(() -> assertEquals("Sign up (user: a, newPassword: ********, password: {var:password})", SailMedia.summary(call), "a call's password parameter"),
+					() -> assertEquals("<call className=\"sail.SignUp\"> <parameter name=\"user\" value=\"a\"/> <parameter name=\"newPassword\" value=\"********\"/>" +
+											" <parameter name=\"password\" value=\"{var:password}\"/> </call>",
+										SailMedia.hidePasswords("<call className=\"sail.SignUp\"> <parameter name=\"user\" value=\"a\"/> <parameter name=\"newPassword\" value=\"Secret1\"/>" +
+																	" <parameter name=\"password\" value=\"{var:password}\"/> </call>"),
+										"in the step's XML"),
+					() -> assertEquals("<login password=\"********\" user=\"admin\"/>", SailMedia.hidePasswords("<login password=\"admin\" user=\"admin\"/>")),
 					() -> assertEquals("<login password=\"{var:password}\" user=\"a\"/>", SailMedia.hidePasswords("<login password=\"{var:password}\" user=\"a\"/>")),
 					() -> assertEquals("<save/>", SailMedia.hidePasswords("<save/>")));
 	}
@@ -372,7 +440,6 @@ class SailMediaTest {
 		assertAll(() -> assertEquals("Contacts-create-save", SailMedia.sanitise("Contacts: create / save", 80)),
 					() -> assertEquals("abc", SailMedia.sanitise("abc-def", 4)),
 					() -> assertEquals("step", SailMedia.sanitise("::", 10)),
-					() -> assertEquals("dataEnter", SailMedia.opCode("<dataEnter binding=\"x\"/>")),
-					() -> assertEquals("step", SailMedia.opCode("")));
+					() -> assertEquals("step", SailMedia.sanitise("", 10)));
 	}
 }

@@ -1961,6 +1961,7 @@ ITs where you meant to run unit tests.
 | `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
 | `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
+| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, file and workflow headings and sessions with nothing to show. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2866,6 +2867,7 @@ that show it, relative to the repository root:
 | Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java`, and the two under `skyve-war/src/test/java/util/sail/`: `SelenideFocusProbeSailIT.java` and `PrimeFacesSelenideClickSailIT.java` |
 | The Maven profile | the `sail` profile in `pom.xml` |
 | Snapshots, the film strip, video, `keepMedia` and media units | `skyve-war/src/test/java/util/sail/SailMediaTest.java` |
+| The video player's controls and the list of runs' filters, in a browser | `skyve-war/src/test/java/util/sail/SailMediaPagesSailIT.java` |
 | A suite's browser lifecycle: handed on, stopped after a failure, closed at the end | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
 | A click on a covered element | `skyve-war/src/test/java/util/sail/PrimeFacesSelenideClickSailIT.java` |
 | A load run | `skyve-war/src/test/java/sail/load/KitchenSinkLoadSailIT.java`; the runner's shape, thresholds and stopping: `skyve-war/src/test/java/util/sail/SailLoadTest.java`; its statistics and report: `skyve-war/src/test/java/util/sail/SailLoadReportTest.java` |
