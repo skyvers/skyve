@@ -97,8 +97,8 @@ class SailMediaPagesSailIT {
 	}
 
 	private void openThePlayer() throws IOException {
-		Files.writeString(root.resolve("player.html"), SailMedia.playerHtml(INFO, STEPS, null));
-		Files.writeString(root.resolve("video.js"), SailMedia.videoScript(INFO, FRAMES, STEPS, null));
+		Files.writeString(root.resolve("player.html"), SailRunPages.playerHtml(INFO, STEPS, null));
+		Files.writeString(root.resolve("video.js"), SailRunPages.videoScript(INFO, FRAMES, STEPS, null));
 		driver.get(url + "player.html");
 	}
 
@@ -174,7 +174,7 @@ class SailMediaPagesSailIT {
 		listedRun(runs, "20261106-120100-000-B.test", "HM2 phone: works offline", "10-home.xml", new Place(none.session(), 7, 1), true);
 		listedRun(runs, "20261106-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new Place(none.session(), 7, 2), false);
 		listedRun(runs, "20261106-120300-000-B.test", "CK1 checks out", "20-checkout.xml", none, true);
-		Files.writeString(runs.resolve("index.html"), SailMedia.runsIndexHtml(runs));
+		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(runs));
 		driver.get(url + "runs/index.html");
 	}
 

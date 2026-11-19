@@ -55,7 +55,7 @@ class SailMediaTest {
 
 	@Test
 	void theFilmStripHasARowPerStepAndLeadsToTheFirstFailure() {
-		String html = SailMedia.filmStripHtml(INFO, STEPS, "../video/player.html");
+		String html = SailRunPages.filmStripHtml(INFO, STEPS, "../video/player.html");
 		assertAll(() -> assertEquals(3, html.split("<tr id=\"step-", -1).length - 1, "one row per step"),
 					() -> assertEquals(1, html.split("<tr class=\"group\">", -1).length - 1, "one heading for the steps' interaction"),
 					() -> assertEquals(2, html.split("<tr id=\"step-[0-9]+\" class=\"fail\"", -1).length - 1, "the failed steps are highlighted"),
@@ -80,7 +80,7 @@ class SailMediaTest {
 
 	@Test
 	void aFilmStripWithoutFailuresSaysSo() {
-		String html = SailMedia.filmStripHtml(INFO, STEPS.subList(0, 1), null);
+		String html = SailRunPages.filmStripHtml(INFO, STEPS.subList(0, 1), null);
 		assertAll(() -> assertTrue(html.contains("<span class=\"badge pass\">Passed</span>")),
 					() -> assertFalse(html.contains("Jump to the first failure")),
 					() -> assertFalse(html.contains(">Video<")));
@@ -89,7 +89,7 @@ class SailMediaTest {
 	@Test
 	void aRunWithDefaultSettingsSaysSo() {
 		RunInfo info = new RunInfo("r", "T.t", "T.t", null, "2026-11-17 12:00:00", "desktop", List.of());
-		String html = SailMedia.filmStripHtml(info, STEPS, null);
+		String html = SailRunPages.filmStripHtml(info, STEPS, null);
 		assertTrue(html.contains("Settings: all defaults"), html);
 	}
 
@@ -190,7 +190,7 @@ class SailMediaTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	void theVideoDataHasTheFramesAndTheStepsWithTheirTimes() {
-		String script = SailMedia.videoScript(INFO, List.of(new Frame("frames/000001.jpg", 900L), new Frame("frames/000002.jpg", 1260L)),
+		String script = SailRunPages.videoScript(INFO, List.of(new Frame("frames/000001.jpg", 900L), new Frame("frames/000002.jpg", 1260L)),
 												STEPS, "../snapshots/index.html");
 		assertTrue(script.startsWith("window.SAIL_VIDEO = ") && script.endsWith(";\n"), script);
 		Map<String, Object> video = new Json().toType(script.substring("window.SAIL_VIDEO = ".length(), script.length() - 2), Json.MAP_TYPE);
@@ -211,7 +211,7 @@ class SailMediaTest {
 
 	@Test
 	void thePlayerPlaysTheVideoDataWithItsControls() {
-		String html = SailMedia.playerHtml(INFO, STEPS, "../snapshots/index.html");
+		String html = SailRunPages.playerHtml(INFO, STEPS, "../snapshots/index.html");
 		assertAll(() -> assertTrue(html.contains("<script src=\"video.js\"></script>"), "loads its data"),
 					() -> assertTrue(html.contains("<button id=\"play\" class=\"btn primary\" type=\"button\">Play</button>"), "play and pause"),
 					() -> assertTrue(html.contains("<button id=\"prev\"") && html.contains("<button id=\"next\""), "step by step"),
@@ -237,7 +237,7 @@ class SailMediaTest {
 		listedRun(base, "20261106-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new SailMedia.Place(none.session(), 7, 2), false);
 		listedRun(base, "20261106-120300-000-B.test", "CK1 checks out", "20-checkout.xml", none, true);
 		Files.createDirectories(base.resolve("not-a-run"));
-		String html = SailMedia.runsIndexHtml(base);
+		String html = SailRunsList.runsIndexHtml(base);
 		int newSession = html.indexOf("Session started 2026-11-06 11:59:00");
 		int oldSession = html.indexOf("Session started 2026-11-06 08:59:00");
 		int earlier = html.indexOf("Earlier runs");
@@ -349,33 +349,33 @@ class SailMediaTest {
 		incomplete.getParameters().add(noValue);
 		WaitFor longWait = new WaitFor();
 		longWait.setScript("x".repeat(200));
-		assertAll(() -> assertEquals("Wait for: !! document.querySelector('.home')", SailMedia.summary(wait)),
-					() -> assertEquals("Check: the header says offline", SailMedia.summary(message)),
-					() -> assertEquals("Check: x === 1", SailMedia.summary(check)),
-					() -> assertEquals("Lower quota (headroomKb: 512)", SailMedia.summary(lowerQuota)),
-					() -> assertEquals("Switch tab (into tabs)", SailMedia.summary(switchTab)),
-					() -> assertEquals("Run: location.reload()", SailMedia.summary(reload)),
-					() -> assertEquals("Sign in as sail.pm, remembered", SailMedia.summary(login)),
-					() -> assertEquals("Sign out", SailMedia.summary(new Logout())),
-					() -> assertEquals("Go to basix/a.xhtml?i=1&inspect", SailMedia.summary(link)),
-					() -> assertEquals("Go to Inspections", SailMedia.summary(byText), "a link by its text"),
-					() -> assertEquals("Discard is offered only online", SailMedia.summary(comment)),
-					() -> assertEquals("Pause 5000 ms", SailMedia.summary(pause)),
-					() -> assertEquals("Navigate edit (bizId: 1, documentName: Inspection, moduleName: tenancy)", SailMedia.summary(edit),
+		assertAll(() -> assertEquals("Wait for: !! document.querySelector('.home')", SailStepWords.summary(wait)),
+					() -> assertEquals("Check: the header says offline", SailStepWords.summary(message)),
+					() -> assertEquals("Check: x === 1", SailStepWords.summary(check)),
+					() -> assertEquals("Lower quota (headroomKb: 512)", SailStepWords.summary(lowerQuota)),
+					() -> assertEquals("Switch tab (into tabs)", SailStepWords.summary(switchTab)),
+					() -> assertEquals("Run: location.reload()", SailStepWords.summary(reload)),
+					() -> assertEquals("Sign in as sail.pm, remembered", SailStepWords.summary(login)),
+					() -> assertEquals("Sign out", SailStepWords.summary(new Logout())),
+					() -> assertEquals("Go to basix/a.xhtml?i=1&inspect", SailStepWords.summary(link)),
+					() -> assertEquals("Go to Inspections", SailStepWords.summary(byText), "a link by its text"),
+					() -> assertEquals("Discard is offered only online", SailStepWords.summary(comment)),
+					() -> assertEquals("Pause 5000 ms", SailStepWords.summary(pause)),
+					() -> assertEquals("Navigate edit (bizId: 1, documentName: Inspection, moduleName: tenancy)", SailStepWords.summary(edit),
 										"any other step: its properties, by name"),
-					() -> assertEquals("Test success", SailMedia.summary(new TestSuccess())),
-					() -> assertEquals("Call (x: )", SailMedia.summary(incomplete), "a call with no class or value: the call reports that when it runs"),
-					() -> assertEquals("Wait for: " + "x".repeat(139) + '\u2026', SailMedia.summary(longWait), "a long script is shortened"));
+					() -> assertEquals("Test success", SailStepWords.summary(new TestSuccess())),
+					() -> assertEquals("Call (x: )", SailStepWords.summary(incomplete), "a call with no class or value: the call reports that when it runs"),
+					() -> assertEquals("Wait for: " + "x".repeat(139) + '\u2026', SailStepWords.summary(longWait), "a long script is shortened"));
 	}
 
 	@Test
 	void namesAndDurationsAreInWords() {
-		assertAll(() -> assertEquals("Replace front elevation", SailMedia.words("ReplaceFrontElevation")),
-					() -> assertEquals("Check URL bar", SailMedia.words("CheckURLBar")),
-					() -> assertEquals("Execute async", SailMedia.words("executeAsync")),
-					() -> assertEquals("250 ms", SailMedia.duration(250L)),
-					() -> assertEquals("1.3 s", SailMedia.duration(1250L)),
-					() -> assertEquals("2 min 5 s", SailMedia.duration(125_000L)));
+		assertAll(() -> assertEquals("Replace front elevation", SailStepWords.words("ReplaceFrontElevation")),
+					() -> assertEquals("Check URL bar", SailStepWords.words("CheckURLBar")),
+					() -> assertEquals("Execute async", SailStepWords.words("executeAsync")),
+					() -> assertEquals("250 ms", SailMediaHtml.duration(250L)),
+					() -> assertEquals("1.3 s", SailMediaHtml.duration(1250L)),
+					() -> assertEquals("2 min 5 s", SailMediaHtml.duration(125_000L)));
 	}
 
 	@Test
@@ -424,7 +424,7 @@ class SailMediaTest {
 			parameter.setValue(pair[1]);
 			call.getParameters().add(parameter);
 		}
-		assertAll(() -> assertEquals("Sign up (user: a, newPassword: ********, password: {var:password})", SailMedia.summary(call), "a call's password parameter"),
+		assertAll(() -> assertEquals("Sign up (user: a, newPassword: ********, password: {var:password})", SailStepWords.summary(call), "a call's password parameter"),
 					() -> assertEquals("<call className=\"sail.SignUp\"> <parameter name=\"user\" value=\"a\"/> <parameter name=\"newPassword\" value=\"********\"/>" +
 											" <parameter name=\"password\" value=\"{var:password}\"/> </call>",
 										SailMedia.hidePasswords("<call className=\"sail.SignUp\"> <parameter name=\"user\" value=\"a\"/> <parameter name=\"newPassword\" value=\"Secret1\"/>" +
