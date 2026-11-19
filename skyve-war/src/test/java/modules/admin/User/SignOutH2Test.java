@@ -24,10 +24,10 @@ import util.AbstractH2Test;
  */
 @SuppressWarnings("static-method")
 class SignOutH2Test extends AbstractH2Test {
-	private static final String CUSTOMER = "bizhub";
+	private static final String TEST_CUSTOMER = "bizhub";
 	private static final String USER_ID = "sign-out-user-id";
-	private static final String PRINCIPAL = CUSTOMER + "/signOutUser";
-	private static final String OTHER_PRINCIPAL = CUSTOMER + "/someoneElse";
+	private static final String PRINCIPAL = TEST_CUSTOMER + "/signOutUser";
+	private static final String OTHER_PRINCIPAL = TEST_CUSTOMER + "/someoneElse";
 
 	private Persistence p;
 	private MockHttpServletRequest request;
@@ -37,9 +37,9 @@ class SignOutH2Test extends AbstractH2Test {
 	void setup() {
 		p = CORE.getPersistence();
 		for (String series : List.of("phone", "tablet", "pc")) {
-			RememberMeTokens.add(p, CUSTOMER, PRINCIPAL, series);
+			RememberMeTokens.add(p, TEST_CUSTOMER, PRINCIPAL, series);
 		}
-		RememberMeTokens.add(p, CUSTOMER, OTHER_PRINCIPAL, "pc2");
+		RememberMeTokens.add(p, TEST_CUSTOMER, OTHER_PRINCIPAL, "pc2");
 
 		request = new MockHttpServletRequest();
 		thisSession = (MockHttpSession) request.getSession();
@@ -61,7 +61,7 @@ class SignOutH2Test extends AbstractH2Test {
 
 	@Test
 	void everywhereRemovesAllTheUsersTokensAndSessionsButNoOneElses() {
-		SignOut.everywhere(p, CUSTOMER, "signOutUser", USER_ID);
+		SignOut.everywhere(p, TEST_CUSTOMER, "signOutUser", USER_ID);
 
 		assertEquals(List.of(), RememberMeTokens.series(p, PRINCIPAL));
 		assertEquals(List.of("pc2"), RememberMeTokens.series(p, OTHER_PRINCIPAL));
@@ -73,7 +73,7 @@ class SignOutH2Test extends AbstractH2Test {
 	void otherDevicesKeepsThisBrowsersSeriesAndSession() {
 		request.setCookies(new Cookie("remember", cookie("pc")));
 
-		int signedOut = SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request);
+		int signedOut = SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request);
 
 		assertEquals(List.of("pc"), RememberMeTokens.series(p, PRINCIPAL));
 		assertEquals(Set.of(thisSession.getId()), StateUtil.getSessions(USER_ID));
@@ -85,17 +85,17 @@ class SignOutH2Test extends AbstractH2Test {
 	/** The real shape: the cookie holds the URL-encoded Base64 series, the token store the decoded one. */
 	@Test
 	void otherDevicesMatchesTheSeriesAsSpringWritesItInTheCookie() {
-		RememberMeTokens.add(p, CUSTOMER, PRINCIPAL, "0PjFbQ0J05e+YG2CIMTo7A==");
+		RememberMeTokens.add(p, TEST_CUSTOMER, PRINCIPAL, "0PjFbQ0J05e+YG2CIMTo7A==");
 		request.setCookies(new Cookie("remember", cookie("0PjFbQ0J05e%2BYG2CIMTo7A%3D%3D")));
 
-		SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request);
+		SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request);
 
 		assertEquals(List.of("0PjFbQ0J05e+YG2CIMTo7A=="), RememberMeTokens.series(p, PRINCIPAL));
 	}
 
 	@Test
 	void otherDevicesWithoutACookieRemovesAllTheTokensButKeepsTheSession() {
-		SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request);
+		SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request);
 
 		assertEquals(List.of(), RememberMeTokens.series(p, PRINCIPAL));
 		assertEquals(Set.of(thisSession.getId()), StateUtil.getSessions(USER_ID));
@@ -105,7 +105,7 @@ class SignOutH2Test extends AbstractH2Test {
 	void otherDevicesWithAnUnknownSeriesCookieRemovesAllTheTokens() {
 		request.setCookies(new Cookie("remember", cookie("someSeriesOfNoOne")));
 
-		SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request);
+		SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request);
 
 		assertEquals(List.of(), RememberMeTokens.series(p, PRINCIPAL));
 	}
@@ -117,16 +117,16 @@ class SignOutH2Test extends AbstractH2Test {
 		request.setCookies(new Cookie("remember", cookie("pc")));
 
 		// two other tokens, no other sessions
-		assertEquals(2, SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request));
+		assertEquals(2, SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request));
 		// nothing is left to sign out
-		assertEquals(0, SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, request));
+		assertEquals(0, SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, request));
 	}
 
 	@Test
 	void otherDevicesWithoutASessionEndsAllTheSessions() {
 		MockHttpServletRequest noSession = new MockHttpServletRequest();
 
-		int signedOut = SignOut.otherDevices(p, CUSTOMER, "signOutUser", USER_ID, noSession);
+		int signedOut = SignOut.otherDevices(p, TEST_CUSTOMER, "signOutUser", USER_ID, noSession);
 
 		assertEquals(Set.of(), StateUtil.getSessions(USER_ID));
 		assertEquals(3, signedOut);

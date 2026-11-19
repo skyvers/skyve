@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -36,7 +37,6 @@ import util.AbstractH2Test;
 /**
  * The administrator's "Sign out everywhere" on a user.
  */
-@SuppressWarnings("static-method")
 class SignOutEverywhereH2Test extends AbstractH2Test {
 	private Persistence p;
 	private DataBuilder db;
@@ -94,7 +94,7 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 		StateUtil.addSession(admin.getId(), new MockHttpSession(null, "adminPhoneSession"));
 		request.setCookies(new Cookie("remember",
 				Base64.getEncoder().encodeToString("pc:token".getBytes(StandardCharsets.UTF_8))));
-		UserExtension self = p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, admin.getId());
+		UserExtension self = Objects.requireNonNull(p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, admin.getId()));
 
 		new SignOutEverywhere().execute(self, new MockWebContext());
 
@@ -103,7 +103,18 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void aNonAdministratorCannotSignAnotherUserOut() throws Exception {
+	void anUnsavedUserHasNothingToSignOut() throws Exception {
+		UserExtension unsaved = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		unsaved.setUserName("neverSaved");
+		RememberMeTokens.add(p, unsaved.getBizCustomer(), unsaved.getBizCustomer() + "/neverSaved", "stale");
+
+		new SignOutEverywhere().execute(unsaved, new MockWebContext());
+
+		assertEquals(List.of("stale"), RememberMeTokens.series(p, unsaved.getBizCustomer() + "/neverSaved"));
+	}
+
+	@Test
+	void aNonAdministratorCannotSignAnotherUserOut() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		org.skyve.metadata.user.User originalUser = persistence.getUser();
 		try {
@@ -119,14 +130,15 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 			assertTrue(basicUser.isInRole(AdminRole.BASIC_USER));
 			persistence.setUser(basicUser);
 			UserExtension victim = target;
+			SignOutEverywhere action = new SignOutEverywhere();
+			MockWebContext webContext = new MockWebContext();
 
-			assertThrows(AccessException.class, () -> new SignOutEverywhere().execute(victim, new MockWebContext()));
+			assertThrows(AccessException.class, () -> action.execute(victim, webContext));
 
 			persistence.setUser(originalUser);
 			assertEquals(List.of("pc", "phone", "tablet"), RememberMeTokens.series(p, targetPrincipal));
 			assertEquals(Set.of("targetSession1", "targetSession2"), StateUtil.getSessions(target.getBizId()));
-		}
-		finally {
+		} finally {
 			persistence.setUser(originalUser);
 		}
 	}

@@ -21,14 +21,15 @@ public final class RememberMeTokens {
 	 * @param series the token series
 	 */
 	public static void add(Persistence p, String customer, String principal, String series) {
-		p.newSQL("insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) "
-					+ "values (:bizId, 0, '20260101000000000admin', :userName, :customer, 'SYSTEM', :userName, :series, 'token', :lastUsed)")
-			.putParameter("bizId", UUID.randomUUID().toString(), false)
-			.putParameter("userName", principal, false)
-			.putParameter("customer", customer, false)
-			.putParameter("series", series, false)
-			.putParameter("lastUsed", new Timestamp())
-			.execute();
+		p.newSQL(
+				"insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) "
+						+ "values (:bizId, 0, '20260101000000000admin', :userName, :customer, 'SYSTEM', :userName, :series, 'token', :lastUsed)")
+				.putParameter("bizId", UUID.randomUUID().toString(), false)
+				.putParameter("userName", principal, false)
+				.putParameter("customer", customer, false)
+				.putParameter("series", series, false)
+				.putParameter("lastUsed", new Timestamp())
+				.execute();
 	}
 
 	/**

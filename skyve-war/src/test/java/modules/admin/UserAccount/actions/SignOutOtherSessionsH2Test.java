@@ -28,7 +28,6 @@ import util.AbstractH2Test;
 /**
  * "Sign out of all other sessions" keeps this browser's Remember me series and session, and ends the rest.
  */
-@SuppressWarnings("static-method")
 class SignOutOtherSessionsH2Test extends AbstractH2Test {
 	private Persistence p;
 	private User user;

@@ -1,5 +1,7 @@
 package util.sail;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -29,21 +31,23 @@ class SignOutOtherSessionsSmartClientSailIT extends AbstractSmartClientInterpret
 
 	@Test
 	void signOutOfAllOtherSessionsOnTheAccountPage() {
-		sailString(automation(LOGIN +
+		String script = automation(LOGIN +
 								"<navigateEdit module=\"admin\" document=\"UserAccount\" />" +
 								"<tabSelect path=\"My Current Sessions\" />" +
 								"<action name=\"SignOutOtherSessions\" confirm=\"true\" />" +
 								"<testMessage contains=\"Signed out of\" type=\"info\" />" +
-								STILL_SIGNED_IN));
+								STILL_SIGNED_IN);
+		assertDoesNotThrow(() -> sailString(script));
 	}
 
 	@Test
 	void signOutEverywhereOnTheUserView() {
-		sailString(automation(LOGIN +
+		String script = automation(LOGIN +
 								"<navigateList module=\"admin\" document=\"User\" />" +
 								"<listGridZoom row=\"0\" />" +
 								"<action name=\"SignOutEverywhere\" confirm=\"true\" />" +
 								"<testMessage contains=\"Signed out everywhere else\" type=\"info\" />" +
-								STILL_SIGNED_IN));
+								STILL_SIGNED_IN);
+		assertDoesNotThrow(() -> sailString(script));
 	}
 }

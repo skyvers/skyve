@@ -288,6 +288,24 @@ class UserBizletH2Test extends AbstractH2Test {
 		assertEquals(1, tokenCount(p, bean.getBizCustomer() + '/' + bean.getUserName()));
 	}
 
+	/** The whole route: preSave notes the old name of a saved user, postSave removes its tokens. */
+	@Test
+	void renamingASavedUserThroughPreSaveAndPostSaveRemovesTheOldNamesTokens() throws Exception {
+		Persistence p = CORE.getPersistence();
+		bean.setInactive(Boolean.FALSE);
+		bean.setActivated(Boolean.TRUE);
+		UserExtension saved = p.save(bean);
+		String oldPrincipal = saved.getBizCustomer() + '/' + saved.getUserName();
+		RememberMeTokens.add(p, saved.getBizCustomer(), oldPrincipal, "oldPhone");
+		saved.setUserName("renamed" + saved.getUserName());
+		UserBizlet injected = injectedBizlet();
+
+		injected.preSave(saved);
+		injected.postSave(saved);
+
+		assertEquals(0, tokenCount(p, oldPrincipal));
+	}
+
 	private static int tokenCount(Persistence p, String userName) {
 		Number count = p.newSQL("select count(*) from ADM_UserToken where userName = :userName")
 				.putParameter("userName", userName, false)

@@ -1,5 +1,7 @@
 package modules.admin.User.actions;
 
+import java.util.Objects;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.AccessException;
@@ -13,12 +15,14 @@ import org.skyve.web.WebContext;
 import modules.admin.User.SignOut;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.AdminRole;
+import modules.admin.domain.UserProxy;
 
 /**
  * Signs a user out of everything, for a security administrator: removes all their remember-me tokens and ends
  * all their sessions.
  *
- * <p>If the administrator targets themself, this browser's session and Remember me stay (as "Sign out of all other
+ * <p>
+ * If the administrator targets themself, this browser's session and Remember me stay (as "Sign out of all other
  * sessions" in their account), so the request does not end its own session.
  */
 public class SignOutEverywhere implements ServerSideAction<UserExtension> {
@@ -34,29 +38,29 @@ public class SignOutEverywhere implements ServerSideAction<UserExtension> {
 	public ServerSideActionResult<UserExtension> execute(UserExtension bean, WebContext webContext) throws Exception {
 		User admin = CORE.getUser();
 		// The action privilege already limits this to SecurityAdministrators; this is the second check
-		if ((! admin.isInRole(AdminRole.SECURITY_ADMINISTRATOR)) || (! admin.getCustomerName().equals(bean.getBizCustomer()))) {
+		if ((!admin.isInRole(AdminRole.SECURITY_ADMINISTRATOR))
+				|| (!Objects.equals(admin.getCustomerName(), bean.getBizCustomer()))) {
 			throw new AccessException("SignOutEverywhere", admin.getName());
 		}
 
 		// The tokens are keyed by the saved user name, not one typed into the form and not yet saved
-		Object savedUserName = bean.originalValues().get(modules.admin.domain.User.userNamePropertyName);
+		Object savedUserName = bean.originalValues().get(UserProxy.userNamePropertyName);
 		String userName = (savedUserName instanceof String name) ? name : bean.getUserName();
 
+		String customer = Objects.requireNonNull(bean.getBizCustomer());
 		String message;
-		if (! bean.isPersisted()) {
+		if (!bean.isPersisted()) {
 			message = Util.i18n("admin.user.actions.signOutEverywhere.notSaved");
-		}
-		else if (bean.getBizId().equals(admin.getId())) {
-			SignOut.otherDevices(CORE.getPersistence(), bean.getBizCustomer(), userName, bean.getBizId(), EXT.getHttpServletRequest());
+		} else if (bean.getBizId().equals(admin.getId())) {
+			SignOut.otherDevices(CORE.getPersistence(), customer, userName, bean.getBizId(), EXT.getHttpServletRequest());
 			message = Util.i18n("admin.user.actions.signOutEverywhere.self");
-		}
-		else {
-			SignOut.everywhere(CORE.getPersistence(), bean.getBizCustomer(), userName, bean.getBizId());
+		} else {
+			SignOut.everywhere(CORE.getPersistence(), customer, userName, bean.getBizId());
 			message = Util.i18n("admin.user.actions.signOutEverywhere.done", userName);
 		}
 
 		if (webContext != null) {
-			webContext.growl(MessageSeverity.info, message);
+			webContext.growl(MessageSeverity.info, Objects.requireNonNull(message));
 		}
 		return new ServerSideActionResult<>(bean);
 	}

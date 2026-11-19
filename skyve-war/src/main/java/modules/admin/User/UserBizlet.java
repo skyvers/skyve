@@ -2,6 +2,7 @@ package modules.admin.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -32,6 +33,7 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
+import modules.admin.domain.UserProxy;
 
 /**
  * Implements admin user document lifecycle rules for defaults, validation, and security events.
@@ -243,8 +245,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		}
 
 		// If the user name has changed, remember the old one (see postSave)
-		if (bean.isPersisted() && bean.originalValues().containsKey(User.userNamePropertyName)) {
-			Object previousUserName = bean.originalValues().get(User.userNamePropertyName);
+		if (bean.isPersisted() && bean.originalValues().containsKey(UserProxy.userNamePropertyName)) {
+			Object previousUserName = bean.originalValues().get(UserProxy.userNamePropertyName);
 			if (previousUserName instanceof String) {
 				CORE.getStash().put(PREVIOUS_USER_NAME_STASH_KEY, previousUserName);
 			}
@@ -335,6 +337,6 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 * @param userName The user name the tokens are keyed by, which is not the bean's if it was renamed.
 	 */
 	private static void signOutEverywhere(UserExtension bean, String userName) {
-		SignOut.everywhere(CORE.getPersistence(), bean.getBizCustomer(), userName, bean.getBizId());
+		SignOut.everywhere(CORE.getPersistence(), Objects.requireNonNull(bean.getBizCustomer()), userName, bean.getBizId());
 	}
 }

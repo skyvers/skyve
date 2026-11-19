@@ -1,5 +1,7 @@
 package modules.admin.UserAccount.actions;
 
+import java.util.Objects;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.MessageSeverity;
@@ -16,7 +18,8 @@ import modules.admin.domain.UserAccount;
 /**
  * Signs the current user out of all their other sessions and devices ("Sign out of all other sessions").
  *
- * <p>Removes all the user's remember-me tokens but the one in this browser's cookie, and ends all their sessions but this
+ * <p>
+ * Removes all the user's remember-me tokens but the one in this browser's cookie, and ends all their sessions but this
  * one. The user is always the signed-in user, never a parameter. Plain "Sign out" in the user menu still ends this device only.
  */
 public class SignOutOtherSessions implements ServerSideAction<UserAccount> {
@@ -32,17 +35,16 @@ public class SignOutOtherSessions implements ServerSideAction<UserAccount> {
 	public ServerSideActionResult<UserAccount> execute(UserAccount bean, WebContext webContext) throws Exception {
 		User user = CORE.getUser();
 		int signedOut = SignOut.otherDevices(CORE.getPersistence(),
-												user.getCustomerName(),
-												user.getName(),
-												user.getId(),
-												EXT.getHttpServletRequest());
+				Objects.requireNonNull(user.getCustomerName()),
+				Objects.requireNonNull(user.getName()),
+				user.getId(),
+				EXT.getHttpServletRequest());
 		UserAccountBizlet.populateSessions(bean);
 
 		if (webContext != null) {
-			webContext.growl(MessageSeverity.info,
-								(signedOut == 0) ?
-									Util.i18n("admin.userAccount.actions.signOutOtherSessions.none") :
-									Util.i18n("admin.userAccount.actions.signOutOtherSessions.done", String.valueOf(signedOut)));
+			String message = (signedOut == 0) ? Util.i18n("admin.userAccount.actions.signOutOtherSessions.none")
+					: Util.i18n("admin.userAccount.actions.signOutOtherSessions.done", String.valueOf(signedOut));
+			webContext.growl(MessageSeverity.info, Objects.requireNonNull(message));
 		}
 		return new ServerSideActionResult<>(bean);
 	}

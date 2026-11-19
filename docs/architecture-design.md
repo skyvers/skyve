@@ -814,6 +814,7 @@ flowchart TD
 | `SkyveLegacyAuthenticationProvider` | skyve-ext | Direct-SQL credential authentication (legacy database auth) |
 | `SkyveRememberMeTokenRepository` | skyve-ext | JDBC remember-me token persistence |
 | `SkyveRememberMeServices` | skyve-web | Remember-me services whose sign out removes only the signing-out browser's token series, not the user's other devices' |
+| `SignOut` (`modules.admin.User`) | skyve-war | Ends a user's remember-me tokens and sessions for every device, or every device but the current browser's (admin's Sign out everywhere and Sign out of all other sessions); `UserBizlet` calls it when a user is disabled, deleted or renamed |
 
 ### Multi-Tenancy Model
 
