@@ -62,7 +62,7 @@ class TabCallsTest {
 												"switchToTab 3 PT7S", "tabCount",
 												"closeTab", "tabCount"),
 										browser.calls(), "relative to the base URL, or absolute; the leg's timeout"),
-					() -> assertEquals("SwitchTab's action must be open, switch or close, not move",
+					() -> assertEquals("SwitchTab's action must be one of [OPEN, SWITCH, CLOSE], not move",
 										message(IllegalArgumentException.class, () -> run(new SwitchTab(), context, "action", "move"))),
 					() -> assertEquals("SwitchTab needs the parameter url",
 										message(IllegalArgumentException.class, () -> run(new SwitchTab(), context, "action", "open"))),

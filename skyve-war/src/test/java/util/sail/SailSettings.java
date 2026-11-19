@@ -96,8 +96,8 @@ public final class SailSettings {
 	/** The scripts and suites the generic runner runs: classpath resources or file paths, comma separated. */
 	public static final String RUN = "sail.run";
 	/**
-	 * The folder the device profiles of {@code StartDevice} go in, each at {@code <folder>/<run token>/<profile>}
-	 * (default {@link #DEFAULT_PROFILES_DIR} under the working directory).
+	 * The folder the device profiles of {@code StartDevice} go in, each at
+	 * {@code <folder>/<run token>-<pid>/<profile>} (default {@link #DEFAULT_PROFILES_DIR} under the working directory).
 	 */
 	public static final String PROFILES = "sail.profiles";
 	/** Which runs keep their device profiles when they end; see {@link KeepProfiles}. */

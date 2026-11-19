@@ -265,30 +265,40 @@ public record RequestRule(@Nonnull String urlPattern, @Nullable String method, @
 		int star = -1; // the pattern position after the last *
 		int starText = -1; // where in the text that * started matching
 		while (t < text.length()) {
-			if (p < pattern.length()) {
-				char c = pattern.charAt(p);
-				if (c == '*') {
-					star = ++p;
-					starText = t;
-					continue;
-				}
-				boolean escaped = (c == '\\') && (p + 1 < pattern.length());
-				char literal = escaped ? pattern.charAt(p + 1) : c;
-				if (((! escaped) && (c == '?')) || (literal == text.charAt(t))) {
-					p += escaped ? 2 : 1;
+			if ((p < pattern.length()) && (pattern.charAt(p) == '*')) {
+				star = ++p;
+				starText = t;
+			}
+			else {
+				int width = (p < pattern.length()) ? matchedWidth(pattern, p, text.charAt(t)) : 0;
+				if (width > 0) {
+					p += width;
 					t++;
-					continue;
+				}
+				else {
+					if (star < 0) {
+						return false;
+					}
+					p = star; // let the last * take one more character
+					t = ++starText;
 				}
 			}
-			if (star < 0) {
-				return false;
-			}
-			p = star; // let the last * take one more character
-			t = ++starText;
 		}
 		while ((p < pattern.length()) && (pattern.charAt(p) == '*')) {
 			p++;
 		}
 		return p == pattern.length();
+	}
+
+	/**
+	 * Returns how much of a glob, at a position that isn't {@code *}, one character of the text matches: 1 for a
+	 * literal or {@code ?}, 2 for a literal escaped with {@code \}, or 0 if it doesn't match.
+	 */
+	private static int matchedWidth(@Nonnull String pattern, int p, char c) {
+		char g = pattern.charAt(p);
+		if ((g == '\\') && (p + 1 < pattern.length())) {
+			return (pattern.charAt(p + 1) == c) ? 2 : 0;
+		}
+		return ((g == '?') || (g == c)) ? 1 : 0;
 	}
 }

@@ -39,6 +39,10 @@ import util.sail.browser.SailCapabilityUnavailableException;
  * afresh, and applies the device's network and touch; {@link RestartDevice} starts it again on the same folder.
  */
 class DeviceCallsTest {
+	private static final long PID = ProcessHandle.current().pid();
+	/** The folder of the run {@code run1} of this JVM. */
+	private static final String RUN = "run1-" + PID;
+
 	@TempDir
 	Path root;
 
@@ -66,7 +70,7 @@ class DeviceCallsTest {
 
 	@Test
 	void aDeviceStartsOnItsRunsProfileFolderWithItsNetworkAndTouch() throws Exception {
-		Path folder = root.resolve("run1").resolve("phone1");
+		Path folder = root.resolve(RUN).resolve("phone1");
 		String started = run(new StartDevice(), context, "profile", "phone1", "offline", "true", "touch", "true");
 		List<String> first = List.copyOf(browser.calls());
 		browser.calls().clear();
@@ -74,7 +78,7 @@ class DeviceCallsTest {
 		InOrder order = inOrder(selenide);
 		order.verify(selenide).stopBrowser();
 		order.verify(selenide).startBrowser(configuration, settings);
-		assertAll(() -> assertEquals(folder.toString(), started, "<sail.profiles>/<run>/<profile>"),
+		assertAll(() -> assertEquals(folder.toString(), started, "<sail.profiles>/<run>-<pid>/<profile>"),
 					() -> assertEquals(folder, configuration.getProfile(), "the browser started on it"),
 					() -> assertEquals(List.of("offline", "emulateTouch 5"), first),
 					() -> assertEquals(folder.toString(), again),
@@ -84,7 +88,7 @@ class DeviceCallsTest {
 
 	@Test
 	void anotherDeviceOrAFreshOneStartsTheBrowserAgain() throws Exception {
-		Path phone1 = root.resolve("run1").resolve("phone1");
+		Path phone1 = root.resolve(RUN).resolve("phone1");
 		Path kept = Files.createDirectories(phone1.resolve("Default")).resolve("kept");
 		Files.writeString(kept, "IndexedDB");
 		configuration.profile(phone1);
@@ -94,7 +98,7 @@ class DeviceCallsTest {
 		Path phone2 = configuration.getProfile();
 		run(new StartDevice(), context, "profile", "phone1", "remembered", "false");
 		assertAll(() -> assertTrue(keptWhenRemembered, "remembered: kept, and the browser left running"),
-					() -> assertEquals(root.resolve("run1").resolve("phone2"), phone2, "another device"),
+					() -> assertEquals(root.resolve(RUN).resolve("phone2"), phone2, "another device"),
 					() -> assertFalse(Files.exists(kept), "not remembered: started afresh"),
 					() -> assertEquals(phone1, configuration.getProfile()),
 					() -> verify(selenide, times(2)).stopBrowser(),
@@ -115,10 +119,11 @@ class DeviceCallsTest {
 
 	@Test
 	void aDeviceRestartsOnTheSameProfile() throws Exception {
-		IllegalStateException noProfile = assertThrows(IllegalStateException.class, () -> run(new RestartDevice(), context));
-		configuration.profile(root.resolve("run0").resolve("phone1"));
-		IllegalStateException anotherRuns = assertThrows(IllegalStateException.class, () -> run(new RestartDevice(), context));
-		Path folder = root.resolve("run1").resolve("phone1");
+		RestartDevice restart = new RestartDevice();
+		IllegalStateException noProfile = assertThrows(IllegalStateException.class, () -> run(restart, context));
+		configuration.profile(root.resolve("run0-" + PID).resolve("phone1"));
+		IllegalStateException anotherRuns = assertThrows(IllegalStateException.class, () -> run(restart, context));
+		Path folder = root.resolve(RUN).resolve("phone1");
 		configuration.profile(folder);
 		String restarted = run(new RestartDevice(), context, "offline", "true", "touch", "true");
 		List<String> first = List.copyOf(browser.calls());
@@ -141,7 +146,7 @@ class DeviceCallsTest {
 	void aDeviceNeedsTheNetworkOrTouchCapabilityOnlyToChangeThem() {
 		FakeBrowserControl mouseOnly = new FakeBrowserControl("chromium");
 		AbstractSailCall.Context limited = context(() -> mock(ChromeDriver.class), selenide, d -> mouseOnly);
-		assertAll(() -> assertEquals(root.resolve("run1").resolve("phone1").toString(), run(new StartDevice(), limited, "profile", "phone1")),
+		assertAll(() -> assertEquals(root.resolve(RUN).resolve("phone1").toString(), run(new StartDevice(), limited, "profile", "phone1")),
 					() -> assertEquals(List.of(), mouseOnly.calls(), "online and a mouse already"),
 					() -> assertEquals("StartDevice needs NETWORK_CONDITIONS, which chromium doesn't support",
 										message(SailCapabilityUnavailableException.class, () -> run(new StartDevice(), limited, "profile", "phone1", "offline", "true"))),

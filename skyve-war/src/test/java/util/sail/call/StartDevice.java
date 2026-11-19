@@ -23,11 +23,11 @@ import util.sail.browser.TouchEmulation;
  * someone else on another device, and picked up again with its unsent work. Use it first in a device's leg; the next
  * step is a navigate step.
  * <p>
- * The profile is the folder {@code <root>/<run token>/<profile>} that {@link SailProfiles} gives, with the root from
- * {@code sail.profiles} ({@code target/sail-profiles} under the working directory by default), so each run starts with
- * new devices; the run's folder is deleted when the run passes, and kept when it fails. If the leg's browser isn't on
- * that folder, it is stopped and started again on it, with the same settings; either way the device's network and touch
- * settings are applied afterwards, as a restarted browser has none.
+ * The profile is the folder {@code <root>/<run token>-<pid>/<profile>} that {@link SailProfiles} gives (the pid is
+ * the JVM's), with the root from {@code sail.profiles} ({@code target/sail-profiles} under the working directory by
+ * default), so each run starts with new devices; the run's folder is deleted when the run passes, and kept when it
+ * fails. If the leg's browser isn't on that folder, it is stopped and started again on it, with the same settings;
+ * either way the device's network and touch settings are applied afterwards, as a restarted browser has none.
  * <ul>
  * <li>{@code profile}: the device's name: letters, digits, {@code -} or {@code _}, such as {@code phone1} (required)</li>
  * <li>{@code offline}: {@code true} to take the device offline before any page opens, as a phone in a basement; it is

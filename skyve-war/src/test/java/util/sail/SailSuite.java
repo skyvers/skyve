@@ -187,7 +187,6 @@ public final class SailSuite {
 	/** True to run each member in a browser of its own, as {@link #browserPerMember()} asks; the suite file can ask too. */
 	private boolean browserPerMember;
 	/** The engine that runs the members, or null when a test or the older builder gives the runner. */
-	@SuppressWarnings("resource") // the caller's, which closes it
 	private SailWorkflow engine;
 	private SailSettings.Code settings = SailSettings.code();
 	/** The sources the settings resolve from: this JVM's, unless a test gives others. */
@@ -341,7 +340,6 @@ public final class SailSuite {
 	 * @param code	the test's settings; shared, so later changes to them apply
 	 * @return this suite
 	 */
-	@SuppressWarnings("resource") // the engine's setter returns the same engine, which the caller closes
 	public @Nonnull SailSuite settings(@Nonnull SailSettings.Code code) {
 		settings = code;
 		if (engine != null) {

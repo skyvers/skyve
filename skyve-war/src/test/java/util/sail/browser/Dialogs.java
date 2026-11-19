@@ -1,5 +1,6 @@
 package util.sail.browser;
 
+import java.time.Instant;
 import java.util.List;
 
 import jakarta.annotation.Nonnull;
@@ -25,6 +26,15 @@ public interface Dialogs {
 	 * Forgets the dialogs seen so far.
 	 */
 	void clearDialogs();
+
+	/**
+	 * Returns when the record of dialogs began: when the control began watching the browser, which is the first time a
+	 * step asked for the browser's control, not when the browser started. A dialog opened before then is not recorded,
+	 * so a check that the record began in its own step can't tell what happened before it.
+	 *
+	 * @return the time the record began
+	 */
+	@Nonnull Instant watchingSince();
 
 	/**
 	 * Answers the dialog open now in the page in front, as a user would.

@@ -1501,8 +1501,9 @@ public abstract class InterpretedWebDriverExecutor<
 		try {
 			result = handler.call(values, this);
 		}
-		catch (SailFailure e) {
-			// a step that the call ran through this executor failed, and said so
+		catch (SailFailure | TestAbortedException e) {
+			// a step that the call ran through this executor failed, and said so; or the browser lacks what the call
+			// needs, so the test is skipped, not failed
 			throw e;
 		}
 		catch (UIAssertionError e) {
@@ -1515,10 +1516,6 @@ public abstract class InterpretedWebDriverExecutor<
 			String message = e.getMessage();
 			check(false, () -> String.format("<call className=\"%s\" /> failed: %s", className, (message == null) ? e.toString() : message));
 			return;
-		}
-		catch (TestAbortedException e) {
-			// the browser lacks what the call needs: the test is skipped, not failed
-			throw e;
 		}
 		catch (Exception e) {
 			if (e instanceof InterruptedException) {

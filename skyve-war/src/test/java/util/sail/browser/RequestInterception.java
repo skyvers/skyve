@@ -31,7 +31,8 @@ public interface RequestInterception {
 	void clearRules();
 
 	/**
-	 * Returns how many requests are being held by a {@link RequestRule.Hold} rule.
+	 * Returns how many requests are being held by a {@link RequestRule.Hold} rule. A request whose page has gone to
+	 * another document (it navigated or reloaded) or closed is no longer held, as far as the browser says so.
 	 *
 	 * @return the count
 	 */

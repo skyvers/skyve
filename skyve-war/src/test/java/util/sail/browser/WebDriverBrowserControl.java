@@ -29,9 +29,6 @@ import jakarta.annotation.Nullable;
  * Threading: thread-confined, as its driver is.
  */
 public class WebDriverBrowserControl extends SailBrowserControl implements Cookies, Tabs, Keys, Window {
-	/** How often a wait checks for its event: as often as {@code Selenide.waitFor} does. */
-	private static final Duration POLLING = Duration.ofMillis(100);
-
 	private final WebDriver driver;
 
 	/**

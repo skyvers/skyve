@@ -42,7 +42,7 @@ public final class RestartDevice extends AbstractSailCall {
 		SailSettings settings = selenide.getSettings();
 		Path profile = (configuration == null) ? null : configuration.getProfile();
 		if ((configuration == null) || (settings == null) || (profile == null) ||
-				(! profile.equals(SailProfiles.folder(settings, context.runToken(), String.valueOf(profile.getFileName()))))) {
+				(! SailProfiles.runFolder(settings, context.runToken()).equals(profile.getParent()))) {
 			throw new IllegalStateException(name() + " needs the leg on a device profile: use StartDevice first");
 		}
 		selenide.stopBrowser();

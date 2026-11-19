@@ -136,7 +136,6 @@ public final class SailLoad {
 	/**
 	 * A virtual user, as its task sees it in an iteration.
 	 */
-	@SuppressWarnings("resource") // the engine is the load run's, which stops a browser it kept after each iteration
 	public static final class VirtualUser {
 		private final int number;
 		private final SailWorkflow workflow;
@@ -716,7 +715,6 @@ public final class SailLoad {
 	 * @throws AssertionError	or a RuntimeException, what the one failed entry threw; a {@link MultipleFailuresError}
 	 * 			with each failure if several failed
 	 */
-	@SuppressWarnings("resource") // the user's engine, which the load run stops a kept browser of after each iteration
 	static void runEntries(@Nonnull VirtualUser user, @Nonnull List<String> entries) {
 		List<Throwable> failures = new ArrayList<>();
 		SailWorkflow engine = user.workflow();
@@ -877,7 +875,6 @@ public final class SailLoad {
 	 * Runs one virtual user's iterations on its own thread, prepared as the test's thread is. Whatever it throws is noted
 	 * as a problem of the run: nothing reads a scheduled user's own failure.
 	 */
-	@SuppressWarnings("resource") // the user's engine shares no run across calls: each iteration stops a browser it kept
 	private void runUser(int number,
 							@Nonnull Plan plan,
 							long start,
@@ -916,7 +913,6 @@ public final class SailLoad {
 		}
 	}
 
-	@SuppressWarnings("resource") // the user's engine, still in use: only the browser it kept is stopped here
 	private void runIteration(@Nonnull VirtualUser user, int iteration, @Nonnull VirtualUserTask task, @Nonnull Recorder recorder) {
 		int number = user.number();
 		user.iteration = iteration;
@@ -958,7 +954,6 @@ public final class SailLoad {
 	 * Makes a virtual user's engine, with the test's settings and this run's view roles and browsers, that starts no
 	 * further leg or suite member once the run is stopping.
 	 */
-	@SuppressWarnings("resource") // the engine is the caller's; its setters return the same engine
 	@Nonnull SailWorkflow engine(@Nonnull AtomicBoolean stopping) {
 		SailViewRoles roles = new SailViewRoles();
 		for (String[] registration : viewRoles) {

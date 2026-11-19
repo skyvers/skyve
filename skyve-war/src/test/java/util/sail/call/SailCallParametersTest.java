@@ -71,8 +71,7 @@ class SailCallParametersTest {
 	@Test
 	void lists() {
 		assertAll(() -> assertEquals(List.of("a.jpg", "b c.jpg"), of(Map.of("list", " a.jpg, ,b c.jpg,")).list("list")),
-					() -> assertEquals(List.of(), of(Map.of()).list("list")),
-					() -> assertThrows(UnsupportedOperationException.class, () -> of(Map.of("list", "a")).list("list").add("b")));
+					() -> assertEquals(List.of(), of(Map.of()).list("list")));
 	}
 
 	@Test

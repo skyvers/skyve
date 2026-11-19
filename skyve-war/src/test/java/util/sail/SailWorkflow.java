@@ -66,7 +66,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * </ul>
  * Not thread-safe.
  */
-public final class SailWorkflow implements AutoCloseable {
+public final class SailWorkflow {
 	private final SailViewRoles viewRoles;
 	private final Map<UserAgentType, Supplier<BrowserConfiguration>> browsers = new EnumMap<>(UserAgentType.class);
 	private SailSettings.Code settings = SailSettings.code();
@@ -174,13 +174,14 @@ public final class SailWorkflow implements AutoCloseable {
 	 *
 	 * <p>Side effects: the run is never reset, so it holds the variables of every earlier call, including a failed one.
 	 * Like the runner, it is for one thread: do not share such a runner between threads. The run's device profiles end
-	 * only when the runner is {@linkplain #close() closed}, so close it when its calls are done (a test base does).
+	 * only when the runner is {@linkplain #close() closed}, so close it when its calls are done (a test base does). A
+	 * second call ends the run shared so far, as {@link #close()} would, and starts a new one.
 	 *
 	 * @return this runner
 	 */
 	public @Nonnull SailWorkflow shareRunAcrossCalls() {
+		endSharedRun();
 		sharedRun = new RunState();
-		sharedRunFailed = false;
 		return this;
 	}
 
@@ -384,19 +385,26 @@ public final class SailWorkflow implements AutoCloseable {
 	 * Ends the workflow: stops the browser a suite member left open, if any, then ends the device profiles of the run
 	 * shared across calls ({@link #shareRunAcrossCalls()}), if there is one: the run failed if any of its calls threw
 	 * (see {@link SailProfiles}). A run of its own has ended already, when its call returned. A test that shares a run
-	 * closes its runner when its calls are done, e.g. with try-with-resources; a test base closes its own.
+	 * closes its runner when its calls are done, in a {@code finally}; a test base closes its own. Afterwards no run is
+	 * shared: a later call is a run of its own.
 	 */
-	@Override
 	public void close() {
 		try {
 			closeBrowser();
 		}
 		finally {
-			RunState run = sharedRun;
-			if (run != null) {
-				SailProfiles.end(run.getRunToken(), ! sharedRunFailed);
-			}
+			endSharedRun();
 		}
+	}
+
+	/** Ends the device profiles of the run shared across calls, if there is one, and shares none. */
+	private void endSharedRun() {
+		RunState run = sharedRun;
+		sharedRun = null;
+		if (run != null) {
+			SailProfiles.end(run.getRunToken(), ! sharedRunFailed);
+		}
+		sharedRunFailed = false;
 	}
 
 	/** Ends the device profiles of the passed runs that waited for the kept browser, which has stopped. */

@@ -2,9 +2,11 @@ package util.sail.browser;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -53,10 +56,13 @@ import util.sail.browser.RequestRule.Stage;
  * {@code fetch}. A target that starts later (a new tab, a service worker Chrome starts again) waits until its settings
  * are applied. A service worker that Chrome stops and starts again keeps its DevTools session and so its settings.
  * <p>
- * <b>Lifetime.</b> It connects to DevTools as {@link SailBrowserControl#of(WebDriver)} makes it, so the request log and
- * the dialogs have what happened before a step first asks for them: a dialog already open when it attaches is never
- * reported. If it can't connect then, it tries again when a DevTools capability is used. Its settings last until the
- * browser stops; a browser started again (on the same profile, say) gets a new control, with none of them.
+ * <b>Lifetime.</b> It connects to DevTools as {@link SailBrowserControl#of(WebDriver)} makes it, which is the first time
+ * a step asks for the browser's control, not when the browser starts: the request log and the dialogs record from then
+ * on ({@link #watchingSince()}), and a dialog already open when it attaches is never reported. So a script that checks
+ * them starts watching with an earlier call, such as {@code RequestLog} with {@code clear=true}, before the steps it
+ * checks. If it can't connect then, it tries again when a DevTools capability is used, and records from then. Its
+ * settings last until the browser stops; a browser started again (on the same profile, say) gets a new control, with
+ * none of them.
  * <p>
  * <b>Raw DevTools.</b> Chrome's own protocol is spoken raw over its own connection ({@link SeleniumCdpConnection}),
  * as Selenium's typed {@code selenium-devtools-vNNN} bindings lag Chrome: Chrome 158 against devtools v142 printed
@@ -65,7 +71,12 @@ import util.sail.browser.RequestRule.Stage;
  * Ported from basix-cloud's {@code SailDevTools}.
  * <p>
  * Threading: methods may be called from any thread. Every DevTools command and event is handled in turn on one thread
- * of its own, so a target that attaches while a setting changes still ends up with the new setting.
+ * of its own, so a target that attaches while a setting changes still ends up with the new setting. Selenium hands
+ * each event to a pool of threads, though, so events can reach that thread in another order than Chrome sent them.
+ * What depends on the order copes with that: a request's log entry is filled in as its events come, a target that
+ * detaches before its attach is handled is not added, a setting sent to a session that has gone drops it, and a held
+ * request is dropped by a navigation of its frame only if it was held before the navigation (Selenium numbers the
+ * events as they arrive).
  */
 public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		implements RequestInterception, RequestLog, NetworkConditions, InitScripts, Dialogs, StorageQuota, PageLifecycle, TouchEmulation {
@@ -94,6 +105,13 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		}
 	}
 
+	/**
+	 * A request a rule holds: the frame that sent it, and where its event came in the order Chrome sent the events, so
+	 * a navigation of that frame drops only the requests held before it.
+	 */
+	private record HeldRequest(@Nonnull String frameId, long sequence) {
+	}
+
 	/** Sends one DevTools command to one session. */
 	private interface SessionCommand {
 		void send(@Nonnull String sessionId);
@@ -108,15 +126,31 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	 */
 	private static final Set<String> TOP_LEVEL_TYPES = Set.of("page", "service_worker", "shared_worker");
 	private static final String PREFIX = "SAIL browser control: ";
+	private static final String CONTINUE_REQUEST = "Fetch.continueRequest";
+	private static final String SET_AUTO_ATTACH = "Target.setAutoAttach";
+	private static final String REQUEST_ID = "requestId";
+	private static final String REQUEST = "request";
+	private static final String METHOD = "method";
+	private static final String RESPONSE_HEADERS = "responseHeaders";
+	/** What Chrome says when a command names a session that has gone. */
+	private static final String SESSION_NOT_FOUND = "Session with given id not found";
+	/**
+	 * What Chrome says when a command about a paused request goes to a session that didn't pause it: the request id is
+	 * another session's, or the session intercepts nothing.
+	 */
+	private static final List<String> NOT_THIS_SESSIONS_REQUEST = List.of("Invalid InterceptionId", "Fetch domain is not enabled", SESSION_NOT_FOUND);
 
 	/** The DevTools connection; guarded by {@code this}. */
 	@SuppressWarnings("resource") // closed by release()
 	private Connection connection;
 	/** The thread every DevTools command and event runs on, made with the connection; guarded by {@code this}. */
-	@SuppressWarnings("resource") // shut down by release()
 	private ExecutorService thread;
+	/** When the control began watching the browser: when it connected to DevTools; guarded by {@code this}. */
+	private Instant watchingSince;
 	/** The sessions by session id; changed only on the DevTools thread, read anywhere. */
 	private final Map<String, Target> sessions = new ConcurrentHashMap<>();
+	/** The sessions whose detach was handled before their attach, which is then ignored; only on the DevTools thread. */
+	private final Set<String> detachedFirst = new HashSet<>();
 
 	// The settings, applied to each target as it attaches. Touched only on the DevTools thread.
 	private Map<String, Object> network = networkConditions(false, 0, -1, -1);
@@ -124,7 +158,8 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	private final List<String> initScripts = new ArrayList<>();
 	private final List<RequestRule> rules = new ArrayList<>();
 	private final List<int[]> ruleUses = new ArrayList<>(); // how many times each rule has applied
-	private final List<String> held = new ArrayList<>(); // the request ids held
+	/** The requests held, by paused request id. */
+	private final Map<String, HeldRequest> held = new LinkedHashMap<>();
 	private final List<Dialog> dialogs = new ArrayList<>();
 	private final Map<String, RequestEntry> requests = new LinkedHashMap<>();
 
@@ -259,7 +294,8 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	/**
 	 * {@inheritDoc}
 	 *
-	 * <p>This control records the dialogs from when it was made, or else from when it first connected to DevTools.
+	 * <p>This control records the dialogs from when it was made, or else from when it first connected to DevTools
+	 * ({@link #watchingSince()}).
 	 */
 	@Override
 	public @Nonnull List<Dialog> dialogs() {
@@ -330,10 +366,16 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		});
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The held requests are let go and the rules cleared in one turn of the DevTools thread, so no request is held
+	 * in between and left counted.
+	 */
 	@Override
 	public void clearRules() {
-		releaseHeld();
 		call(() -> {
+			continueHeld(CONTINUE_REQUEST, Map.of());
 			rules.clear();
 			ruleUses.clear();
 			forEachSession(Target::hasNetwork, sessionId -> send(sessionId, "Fetch.disable", Map.of()));
@@ -381,7 +423,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 
 	@Override
 	public void releaseHeld() {
-		finishHeld("Fetch.continueRequest", Map.of());
+		finishHeld(CONTINUE_REQUEST, Map.of());
 	}
 
 	@Override
@@ -391,15 +433,34 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 
 	private void finishHeld(@Nonnull String method, @Nonnull Map<String, Object> params) {
 		call(() -> {
-			for (String requestId : held) {
-				Map<String, Object> p = new LinkedHashMap<>(params);
-				p.put("requestId", requestId);
-				toOwner(requestId, method, p);
-			}
-			held.clear();
-			heldChanged();
+			continueHeld(method, params);
 			return null;
 		});
+	}
+
+	/** Sends each held request a command, and holds none. Runs on the DevTools thread. */
+	private void continueHeld(@Nonnull String method, @Nonnull Map<String, Object> params) {
+		for (String requestId : held.keySet()) {
+			Map<String, Object> p = new LinkedHashMap<>(params);
+			p.put(REQUEST_ID, requestId);
+			toOwner(requestId, method, p);
+		}
+		held.clear();
+		heldChanged();
+	}
+
+	/**
+	 * Forgets the held requests of a frame that has gone to another document (it navigated or reloaded) or whose tab
+	 * has closed: they went with it, and DevTools reports nothing else of them (no {@code Network.loadingFailed}).
+	 * Runs on the DevTools thread.
+	 *
+	 * @param frameId	the frame, or for a whole page its target id, which is its main frame's id
+	 * @param sequence	where the navigation or detach came in the order of events: requests held after it are kept
+	 */
+	private void dropHeld(@Nonnull String frameId, long sequence) {
+		if (held.values().removeIf(h -> h.frameId().equals(frameId) && (h.sequence() < sequence))) {
+			heldChanged();
+		}
 	}
 
 	/** Publishes how many requests are held, and wakes a wait for them. Called on the DevTools thread. */
@@ -423,16 +484,21 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		return Map.of("patterns", patterns);
 	}
 
-	/** Takes a paused request: applies the first rule that matches and still has uses, or lets it carry on. */
-	private void paused(@Nonnull Map<String, Object> params) {
-		String requestId = string(params, "requestId");
-		Map<String, Object> request = map(params, "request");
+	/**
+	 * Takes a paused request: applies the first rule that matches and still has uses, or lets it carry on.
+	 *
+	 * @param sequence	where the event came in the order Chrome sent the events
+	 * @param params	the {@code Fetch.requestPaused} event
+	 */
+	private void paused(long sequence, @Nonnull Map<String, Object> params) {
+		String requestId = string(params, REQUEST_ID);
+		Map<String, Object> request = map(params, REQUEST);
 		Stage stage = (params.containsKey("responseStatusCode") || params.containsKey("responseErrorReason")) ? Stage.RESPONSE : Stage.REQUEST;
 		RequestRule rule = null;
 		for (int i = 0, l = rules.size(); i < l; i++) {
 			RequestRule candidate = rules.get(i);
 			int[] uses = ruleUses.get(i);
-			if (candidate.matches(string(request, "url"), string(request, "method"), stage) &&
+			if (candidate.matches(string(request, "url"), string(request, METHOD), stage) &&
 					((candidate.times() == 0) || (uses[0] < candidate.times()))) {
 				uses[0]++;
 				rule = candidate;
@@ -440,34 +506,39 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 			}
 		}
 		if ((rule != null) && (rule.action() instanceof Hold)) {
-			held.add(requestId);
+			held.put(requestId, new HeldRequest(string(params, "frameId"), sequence));
 			heldChanged();
 			return;
 		}
 		Map<String, Object> answer = answer(requestId, params, rule, stage);
-		toOwner(requestId, string(answer, "method"), map(answer, "params"));
+		toOwner(requestId, string(answer, METHOD), map(answer, "params"));
 	}
 
 	/**
 	 * Sends a command about a paused request to the session that paused it. The event doesn't say which session that
-	 * is, so each is tried: the others refuse the request id.
-	 *
-	 * @return whether a session took it (none does if the request has gone, such as a page that gave up on it)
+	 * is, so each is tried: the others refuse the request id. If the session that paused it refuses the command itself
+	 * (a status or header Chrome won't take), the request is failed, so the page isn't left waiting for it, and that is
+	 * printed.
 	 */
-	private boolean toOwner(@Nonnull String requestId, @Nonnull String method, @Nonnull Map<String, Object> params) {
+	private void toOwner(@Nonnull String requestId, @Nonnull String method, @Nonnull Map<String, Object> params) {
 		for (Entry<String, Target> session : sessions.entrySet()) {
 			if (session.getValue().hasNetwork()) {
 				try {
 					send(session.getKey(), method, params);
-					return true;
+					return;
 				}
-				catch (@SuppressWarnings("unused") RuntimeException e) {
-					// not this session's request
+				catch (RuntimeException e) {
+					if (! says(e, NOT_THIS_SESSIONS_REQUEST)) {
+						// this session's request, but it refused the command
+						System.out.println(PREFIX + "Chrome refused " + method + " for request " + requestId + ", so it fails: " + firstLine(e));
+						sendQuietly(session.getKey(), "Fetch.failRequest", Map.of(REQUEST_ID, requestId, "errorReason", devToolsName(ErrorReason.FAILED)));
+						return;
+					}
 				}
 			}
 		}
+		// none does if the request has gone, such as a page that gave up on it
 		System.out.println(PREFIX + "no session took " + method + " for request " + requestId);
-		return false;
 	}
 
 	/**
@@ -485,36 +556,36 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		if ((rule == null) || ((rule.action() instanceof Headers) && (stage == Stage.RESPONSE) && (status == null))) {
 			// no rule, or response headers to change on a response that failed and so has none
 			// a response that failed has no status for continueResponse, so it carries on as continueRequest has it
-			return command(((stage == Stage.REQUEST) || (status == null)) ? "Fetch.continueRequest" : "Fetch.continueResponse",
-							Map.of("requestId", requestId));
+			return command(((stage == Stage.REQUEST) || (status == null)) ? CONTINUE_REQUEST : "Fetch.continueResponse",
+							Map.of(REQUEST_ID, requestId));
 		}
 		if (rule.action() instanceof Fail fail) {
-			return command("Fetch.failRequest", Map.of("requestId", requestId, "errorReason", devToolsName(fail.reason())));
+			return command("Fetch.failRequest", Map.of(REQUEST_ID, requestId, "errorReason", devToolsName(fail.reason())));
 		}
 		if (rule.action() instanceof Fulfil fulfil) {
-			return command("Fetch.fulfillRequest", Map.of("requestId", requestId,
+			return command("Fetch.fulfillRequest", Map.of(REQUEST_ID, requestId,
 															"responseCode", Integer.valueOf(fulfil.status()),
-															"responseHeaders", headerList(fulfil.headers()),
+															RESPONSE_HEADERS, headerList(fulfil.headers()),
 															"body", Base64.getEncoder().encodeToString(fulfil.body().getBytes(StandardCharsets.UTF_8))));
 		}
 		Headers headers = (Headers) rule.action();
 		if (stage == Stage.REQUEST) {
-			Map<String, String> original = stringMap(map(map(params, "request"), "headers"));
-			return command("Fetch.continueRequest", Map.of("requestId", requestId, "headers", headerList(mergeHeaders(original, headers))));
+			Map<String, String> original = stringMap(map(map(params, REQUEST), "headers"));
+			return command(CONTINUE_REQUEST, Map.of(REQUEST_ID, requestId, "headers", headerList(mergeHeaders(original, headers))));
 		}
 		Map<String, String> original = new LinkedHashMap<>();
-		for (Object header : (List<?>) params.getOrDefault("responseHeaders", List.of())) {
+		for (Object header : (List<?>) params.getOrDefault(RESPONSE_HEADERS, List.of())) {
 			if (header instanceof Map<?, ?> h) {
 				original.put(String.valueOf(h.get("name")), String.valueOf(h.get("value")));
 			}
 		}
-		return command("Fetch.continueResponse", Map.of("requestId", requestId,
+		return command("Fetch.continueResponse", Map.of(REQUEST_ID, requestId,
 														"responseCode", status,
-														"responseHeaders", headerList(mergeHeaders(original, headers))));
+														RESPONSE_HEADERS, headerList(mergeHeaders(original, headers))));
 	}
 
 	private static @Nonnull Map<String, Object> command(@Nonnull String method, @Nonnull Map<String, Object> params) {
-		return Map.of("method", method, "params", params);
+		return Map.of(METHOD, method, "params", params);
 	}
 
 	/**
@@ -593,11 +664,24 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	/**
 	 * {@inheritDoc}
 	 *
-	 * <p>This control logs the requests from when it was made, or else from when it first connected to DevTools.
+	 * <p>This control logs the requests from when it was made, or else from when it first connected to DevTools
+	 * ({@link #watchingSince()}).
 	 */
 	@Override
 	public @Nonnull List<LoggedRequest> requests() {
 		return call(() -> requests.values().stream().map(RequestEntry::snapshot).toList());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>It is when this control connected to DevTools, connecting now if it hasn't: as {@link SailBrowserControl#of}
+	 * made it, or else the first time a DevTools capability was used.
+	 */
+	@Override
+	public synchronized @Nonnull Instant watchingSince() {
+		devTools();
+		return watchingSince;
 	}
 
 	@Override
@@ -609,7 +693,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	private @Nonnull RequestEntry logged(@Nonnull Map<String, Object> params) {
-		return requests.computeIfAbsent(string(params, "requestId"), id -> new RequestEntry());
+		return requests.computeIfAbsent(string(params, REQUEST_ID), id -> new RequestEntry());
 	}
 
 	// ---- storage quota
@@ -653,6 +737,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 			t.setDaemon(true);
 			return t;
 		});
+		watchingSince = Instant.now(); // before the first event can arrive
 		try {
 			start();
 		}
@@ -671,15 +756,25 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	/** Listens for the browser's events, then attaches to its current and future targets. */
 	private void start() {
 		listen("Target.attachedToTarget", this::attached);
-		listen("Target.detachedFromTarget", params -> sessions.remove(string(params, "sessionId")));
-		listen("Fetch.requestPaused", this::paused);
+		listen("Target.detachedFromTarget", (sequence, params) -> {
+			String sessionId = string(params, "sessionId");
+			Target gone = sessions.remove(sessionId);
+			if (gone == null) {
+				detachedFirst.add(sessionId); // its attach comes later
+			}
+			else {
+				dropHeld(gone.targetId(), sequence.longValue());
+			}
+		});
+		listen("Fetch.requestPaused", (sequence, params) -> paused(sequence.longValue(), params));
+		listen("Page.frameNavigated", (sequence, params) -> dropHeld(string(map(params, "frame"), "id"), sequence.longValue()));
 		listen("Page.javascriptDialogOpening", params -> dialogs.add(new Dialog(dialogType(string(params, "type")),
 																				string(params, "message"),
 																				string(params, "url"))));
 		listen("Network.requestWillBeSent", params -> {
-			Map<String, Object> request = map(params, "request");
+			Map<String, Object> request = map(params, REQUEST);
 			RequestEntry logged = logged(params);
-			logged.method = string(request, "method");
+			logged.method = string(request, METHOD);
 			logged.url = string(request, "url");
 		});
 		listen("Network.responseReceived", params -> {
@@ -693,7 +788,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		listen("Network.loadingFailed", params -> logged(params).failure = string(params, "errorText"));
 
 		call(() -> {
-			send(null, "Target.setAutoAttach", autoAttach(List.of("tab", "service_worker", "shared_worker")));
+			send(null, SET_AUTO_ATTACH, autoAttach(List.of("tab", "service_worker", "shared_worker")));
 			return null;
 		});
 		awaitCurrentTargets();
@@ -752,10 +847,13 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		String sessionId = string(params, "sessionId");
 		Map<String, Object> info = map(params, "targetInfo");
 		Target target = new Target(string(info, "targetId"), string(info, "type"));
-		sessions.put(sessionId, target);
 		try {
+			if (detachedFirst.remove(sessionId)) {
+				return; // it has gone already
+			}
+			sessions.put(sessionId, target);
 			if ("tab".equals(target.type())) {
-				send(sessionId, "Target.setAutoAttach", autoAttach(List.of("page")));
+				send(sessionId, SET_AUTO_ATTACH, autoAttach(List.of("page")));
 			}
 			else {
 				if (target.isPage()) {
@@ -766,7 +864,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 					if (touchPoints > 0) {
 						send(sessionId, "Emulation.setTouchEmulationEnabled", touch());
 					}
-					send(sessionId, "Target.setAutoAttach", autoAttach(List.of("worker", "iframe")));
+					send(sessionId, SET_AUTO_ATTACH, autoAttach(List.of("worker", "iframe")));
 				}
 				send(sessionId, "Network.enable", Map.of());
 				send(sessionId, "Network.emulateNetworkConditions", network);
@@ -793,8 +891,8 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	/**
-	 * Lets held requests carry on, stops the DevTools thread and closes the connection, once the driver has quit (or
-	 * the connection couldn't start).
+	 * Stops the DevTools thread and closes the connection, once the driver has quit (or the connection couldn't start).
+	 * Held requests are not answered: they went with the browser.
 	 */
 	@Override
 	@SuppressWarnings("resource") // the connection is this control's, closed here
@@ -837,26 +935,38 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 
 	/** Handles an event on the DevTools thread, in the order the events are queued. */
 	private void listen(@Nonnull String event, @Nonnull Consumer<Map<String, Object>> handler) {
+		listen(event, (sequence, params) -> handler.accept(params));
+	}
+
+	/**
+	 * Handles an event on the DevTools thread, in the order the events are queued, with where it came in the order
+	 * Chrome sent the events (Selenium numbers them as they arrive, before its pool of threads can reorder them).
+	 */
+	private void listen(@Nonnull String event, @Nonnull BiConsumer<Long, Map<String, Object>> handler) {
 		ExecutorService t = thread;
 		connection.addListener(new Event<>(event, ChromiumBrowserControl::read), (sequence, params) -> {
 			if (! t.isShutdown()) {
-				t.execute(() -> handler.accept(params));
+				t.execute(() -> handler.accept(sequence, params));
 			}
 		});
 	}
 
-	/** Sends a command to each session of a kind; one that detached meanwhile is skipped. Runs on the DevTools thread. */
+	/**
+	 * Sends a command to each session of a kind. A session that has gone is skipped and dropped: it detached meanwhile,
+	 * or its detach was handled before its attach. Runs on the DevTools thread.
+	 */
 	private void forEachSession(@Nonnull Predicate<Target> which, @Nonnull SessionCommand command) {
-		for (Entry<String, Target> session : sessions.entrySet()) {
+		for (Iterator<Entry<String, Target>> i = sessions.entrySet().iterator(); i.hasNext(); ) {
+			Entry<String, Target> session = i.next();
 			if (which.test(session.getValue())) {
 				try {
 					command.send(session.getKey());
 				}
 				catch (RuntimeException e) {
-					if (sessions.containsKey(session.getKey())) {
+					if (! says(e, List.of(SESSION_NOT_FOUND))) {
 						throw e;
 					}
-					// it detached meanwhile
+					i.remove();
 				}
 			}
 		}
@@ -887,6 +997,17 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		catch (@SuppressWarnings("unused") RuntimeException e) {
 			// the target went
 		}
+	}
+
+	/** Indicates whether a DevTools error says one of some things. */
+	private static boolean says(@Nonnull RuntimeException e, @Nonnull List<String> errors) {
+		String message = firstLine(e);
+		for (String error : errors) {
+			if (message.contains(error)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Returns the first line of an exception's message, as a DevTools error carries the whole build information after it. */

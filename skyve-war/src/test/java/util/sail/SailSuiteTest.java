@@ -292,28 +292,25 @@ class SailSuiteTest {
 					<restore file="99-gone.xml"/>
 				</suite>
 				""");
-		try (SailWorkflow engine = new SailWorkflow(new SailViewRoles())) {
-			String path = file.toString();
-			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.file(path, engine));
-			assertEquals("SAIL suite " + path + " names member files that do not exist: [pf/02-gone.xml, 99-gone.xml]", e.getMessage());
-		}
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		String path = file.toString();
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.file(path, engine));
+		assertEquals("SAIL suite " + path + " names member files that do not exist: [pf/02-gone.xml, 99-gone.xml]", e.getMessage());
 	}
 
 	/** A test's settings given to an engine-loaded suite are the engine's too, which runs the members. */
 	@Test
 	void aSuitesSettingsAreItsEnginesToo() {
-		try (SailWorkflow engine = new SailWorkflow(new SailViewRoles())) {
-			SailSettings.Code code = SailSettings.code();
-			SailSuite.resource("util/sail/fixtures/plain.suite.xml", engine).settings(code);
-			assertSame(code, engine.settings());
-		}
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		SailSettings.Code code = SailSettings.code();
+		SailSuite.resource("util/sail/fixtures/plain.suite.xml", engine).settings(code);
+		assertSame(code, engine.settings());
 	}
 
 	@Test
 	void anEntryThatIsNeitherAFileNorAResourceSaysSo() {
-		try (SailWorkflow engine = new SailWorkflow(new SailViewRoles())) {
-			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.runEntry("no/such/entry.xml", engine));
-			assertEquals("no/such/entry.xml is neither a file nor a resource on the test classpath", e.getMessage());
-		}
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.runEntry("no/such/entry.xml", engine));
+		assertEquals("no/such/entry.xml is neither a file nor a resource on the test classpath", e.getMessage());
 	}
 }

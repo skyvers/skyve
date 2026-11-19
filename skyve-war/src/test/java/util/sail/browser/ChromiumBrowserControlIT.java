@@ -173,7 +173,7 @@ class ChromiumBrowserControlIT {
 	 */
 	private void awaitControl(@Nonnull String event, @Nonnull Predicate<ChromiumBrowserControl> condition) {
 		new FluentWait<>(control).withTimeout(selenium.timeout())
-									.pollingEvery(Duration.ofMillis(100))
+									.pollingEvery(SailBrowserControl.POLLING)
 									.withMessage(event)
 									.until(c -> Boolean.valueOf(condition.test(c)));
 	}
@@ -185,7 +185,7 @@ class ChromiumBrowserControlIT {
 	 * @param value	the value it gives once the event has happened
 	 */
 	private void awaitScript(@Nonnull String script, @Nonnull Object value) {
-		new WebDriverWait(driver, selenium.timeout(), Duration.ofMillis(100))
+		new WebDriverWait(driver, selenium.timeout(), SailBrowserControl.POLLING)
 				.withMessage(script + " to give " + value)
 				.until(d -> Boolean.valueOf(value.equals(((ChromiumDriver) d).executeScript(script))));
 	}
@@ -295,6 +295,41 @@ class ChromiumBrowserControlIT {
 					() -> assertEquals(1, hits("/data"), "only the released request reached the server"));
 	}
 
+	/** A wait for held requests wakes when one is held after it began, and fails at its time when none is. */
+	@Test
+	void awaitingHeldRequestsWakesForOneHeldLater() {
+		control.addRule(RequestRule.hold("*/data*"));
+		// the page's own late action under test: it sends the request only after the wait has begun
+		js("setTimeout(() => { window.pending = (async () => { " + FETCH + " })(); }, 500);", "/data?late");
+		control.awaitHeld(1, selenium.timeout());
+		assertAll(() -> assertEquals(1, control.heldCount(), "held"),
+					() -> assertEquals(0, hits("/data"), "held before it is sent"));
+		control.releaseHeld();
+		assertEquals("200 real", js("return window.pending;"), "released");
+		Duration shortly = Duration.ofMillis(200);
+		AssertionError none = assertThrows(AssertionError.class, () -> control.awaitHeld(1, shortly));
+		assertEquals("Expected 1 held request(s) within PT0.2S, but 0 were held", none.getMessage());
+	}
+
+	/**
+	 * A held request the page gives up on (it reloaded) is no longer counted as held, and clearing the rules lets the
+	 * held requests go and leaves none held.
+	 */
+	@Test
+	void heldRequestsAreForgottenWhenThePageGivesUpOrTheRulesAreCleared() {
+		control.addRule(RequestRule.hold("*/data*"));
+		startFetch("/data?first");
+		control.awaitHeld(1, selenium.timeout());
+		driver.navigate().refresh();
+		awaitControl("the reloaded page's held request no longer held", c -> c.heldCount() == 0);
+		startFetch("/data?second");
+		control.awaitHeld(1, selenium.timeout());
+		control.clearRules();
+		assertAll(() -> assertEquals(0, control.heldCount(), "none held once the rules are cleared"),
+					() -> assertEquals("200 real", js("return window.pending;"), "the held request carried on"),
+					() -> assertEquals(1, hits("/data"), "only the second reached the server"));
+	}
+
 	@Test
 	void fulfilAtTheRequestAndTheResponse() {
 		control.addRule(RequestRule.fulfil("*/data*", 503, Map.of("Content-Type", "text/plain"), "busy").times(1));
@@ -358,6 +393,11 @@ class ChromiumBrowserControlIT {
 		awaitControl("the failed request, logged with its failure", c -> logged(c, r -> r.url().endsWith("/data?failed") &&
 																					(r.failure() != null) &&
 																					(r.status() == null)));
+		fetch("/sw/data?failed");
+		// Chrome gives the page's copy no answer, so nothing marks it as the worker's: CheckRequests documents this
+		awaitControl("a failed request through the worker, logged twice, as neither is marked",
+						c -> c.requests().stream().filter(r -> r.url().endsWith("/sw/data?failed") && (r.failure() != null) && (! r.fromServiceWorker()))
+													.count() == 2);
 		assertTrue(control.requests().stream().allMatch(r -> "GET".equals(r.method())), "methods: " + control.requests());
 	}
 

@@ -1,6 +1,7 @@
 package util.sail.browser;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -38,6 +39,8 @@ public class FakeBrowserControl extends SailBrowserControl
 	private final List<BrowserCookie> cookies = new ArrayList<>();
 	private int held;
 	private int tabs = 1;
+	/** When the request log and the dialogs began: long before any step, unless a test says otherwise. */
+	private Instant watchingSince = Instant.EPOCH;
 
 	/**
 	 * Makes a fake of a browser that has some capabilities.
@@ -120,6 +123,17 @@ public class FakeBrowserControl extends SailBrowserControl
 	}
 
 	/**
+	 * Sets when the request log and the record of dialogs began, as {@link #watchingSince()} reports it.
+	 *
+	 * @param since	the time; long ago to start with
+	 * @return this fake
+	 */
+	public @Nonnull FakeBrowserControl withWatchingSince(@Nonnull Instant since) {
+		watchingSince = since;
+		return this;
+	}
+
+	/**
 	 * Adds cookies to those that {@link #cookies()} reports.
 	 *
 	 * @param given	the cookies
@@ -152,10 +166,10 @@ public class FakeBrowserControl extends SailBrowserControl
 		return this;
 	}
 
-	private void record(@Nonnull Object... parts) {
+	private void note(@Nonnull Object... parts) {
 		StringBuilder call = new StringBuilder(64);
 		for (Object part : parts) {
-			if (call.length() > 0) {
+			if (! call.isEmpty()) {
 				call.append(' ');
 			}
 			call.append(part);
@@ -167,20 +181,20 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public void addRule(@Nonnull RequestRule rule) {
-		record("addRule", rule);
+		note("addRule", rule);
 		rules.add(rule);
 	}
 
 	@Override
 	public void clearRules() {
-		record("clearRules");
+		note("clearRules");
 		rules.clear();
 		held = 0;
 	}
 
 	@Override
 	public int heldCount() {
-		record("heldCount");
+		note("heldCount");
 		return held;
 	}
 
@@ -189,7 +203,7 @@ public class FakeBrowserControl extends SailBrowserControl
 	 */
 	@Override
 	public void awaitHeld(int count, @Nonnull Duration timeout) {
-		record("awaitHeld", Integer.valueOf(count), timeout);
+		note("awaitHeld", Integer.valueOf(count), timeout);
 		if (held < count) {
 			throw new AssertionError(String.format("Expected %d held requests within %s, but %d were held",
 													Integer.valueOf(count), timeout, Integer.valueOf(held)));
@@ -198,13 +212,13 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public void releaseHeld() {
-		record("releaseHeld");
+		note("releaseHeld");
 		held = 0;
 	}
 
 	@Override
 	public void failHeld(@Nonnull RequestRule.ErrorReason reason) {
-		record("failHeld", reason);
+		note("failHeld", reason);
 		held = 0;
 	}
 
@@ -212,38 +226,44 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public @Nonnull List<LoggedRequest> requests() {
-		record("requests");
+		note("requests");
 		return new ArrayList<>(requests);
 	}
 
 	@Override
 	public void clearRequests() {
-		record("clearRequests");
+		note("clearRequests");
 		requests.clear();
+	}
+
+	/** {@inheritDoc} It is not noted among the operations called. */
+	@Override
+	public @Nonnull Instant watchingSince() {
+		return watchingSince;
 	}
 
 	// ---- network
 
 	@Override
 	public void offline() {
-		record("offline");
+		note("offline");
 	}
 
 	@Override
 	public void online() {
-		record("online");
+		note("online");
 	}
 
 	@Override
 	public void throttle(@Nonnull Duration latency, long downloadBytesPerSecond, long uploadBytesPerSecond) {
-		record("throttle", latency, Long.valueOf(downloadBytesPerSecond), Long.valueOf(uploadBytesPerSecond));
+		note("throttle", latency, Long.valueOf(downloadBytesPerSecond), Long.valueOf(uploadBytesPerSecond));
 	}
 
 	// ---- init scripts
 
 	@Override
 	public void addInitScript(@Nonnull String source) {
-		record("addInitScript", source);
+		note("addInitScript", source);
 		if (! initScripts.contains(source)) {
 			initScripts.add(source);
 		}
@@ -253,26 +273,26 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public @Nonnull List<Dialog> dialogs() {
-		record("dialogs");
+		note("dialogs");
 		return new ArrayList<>(dialogs);
 	}
 
 	@Override
 	public void clearDialogs() {
-		record("clearDialogs");
+		note("clearDialogs");
 		dialogs.clear();
 	}
 
 	@Override
 	public void answerDialog(boolean accept, @Nullable String promptText) {
-		record("answerDialog", Boolean.valueOf(accept), promptText);
+		note("answerDialog", Boolean.valueOf(accept), promptText);
 	}
 
 	// ---- cookies
 
 	@Override
 	public @Nonnull List<BrowserCookie> cookies() {
-		record("cookies");
+		note("cookies");
 		return new ArrayList<>(cookies);
 	}
 
@@ -281,7 +301,7 @@ public class FakeBrowserControl extends SailBrowserControl
 	 */
 	@Override
 	public int deleteCookies(@Nonnull String name) {
-		record("deleteCookies", name);
+		note("deleteCookies", name);
 		int before = cookies.size();
 		cookies.removeIf(c -> c.name().equals(name));
 		return before - cookies.size();
@@ -291,38 +311,38 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public void overrideQuota(@Nonnull String origin, long bytes) {
-		record("overrideQuota", origin, Long.valueOf(bytes));
+		note("overrideQuota", origin, Long.valueOf(bytes));
 	}
 
 	@Override
 	public void clearQuotaOverride(@Nonnull String origin) {
-		record("clearQuotaOverride", origin);
+		note("clearQuotaOverride", origin);
 	}
 
 	// ---- page lifecycle
 
 	@Override
 	public void freeze(@Nonnull String windowHandle) {
-		record("freeze", windowHandle);
+		note("freeze", windowHandle);
 	}
 
 	@Override
 	public void resume(@Nonnull String windowHandle) {
-		record("resume", windowHandle);
+		note("resume", windowHandle);
 	}
 
 	// ---- touch
 
 	@Override
 	public void emulateTouch(int maxTouchPoints) {
-		record("emulateTouch", Integer.valueOf(maxTouchPoints));
+		note("emulateTouch", Integer.valueOf(maxTouchPoints));
 	}
 
 	// ---- tabs
 
 	@Override
 	public void openTab(@Nonnull String url) {
-		record("openTab", url);
+		note("openTab", url);
 		tabs++;
 	}
 
@@ -331,7 +351,7 @@ public class FakeBrowserControl extends SailBrowserControl
 	 */
 	@Override
 	public void switchToTab(int index, @Nonnull Duration timeout) {
-		record("switchToTab", Integer.valueOf(index), timeout);
+		note("switchToTab", Integer.valueOf(index), timeout);
 		if (index >= tabs) {
 			throw new AssertionError(String.format("Tab %d (0 being the first) did not open within %s: %d tab(s) are open",
 													Integer.valueOf(index), timeout, Integer.valueOf(tabs)));
@@ -340,13 +360,13 @@ public class FakeBrowserControl extends SailBrowserControl
 
 	@Override
 	public void closeTab() {
-		record("closeTab");
+		note("closeTab");
 		tabs--;
 	}
 
 	@Override
 	public int tabCount() {
-		record("tabCount");
+		note("tabCount");
 		return tabs;
 	}
 
@@ -356,7 +376,7 @@ public class FakeBrowserControl extends SailBrowserControl
 	 */
 	@Override
 	public @Nullable <T> T visitNewTab(@Nonnull Duration timeout, boolean close, @Nonnull Supplier<T> visit) {
-		record("visitNewTab", timeout, Boolean.valueOf(close));
+		note("visitNewTab", timeout, Boolean.valueOf(close));
 		if (tabs < 2) {
 			throw new AssertionError("No new tab opened within " + timeout);
 		}
@@ -381,14 +401,14 @@ public class FakeBrowserControl extends SailBrowserControl
 		for (CharSequence key : keys) {
 			names.add((key instanceof org.openqa.selenium.Keys k) ? k.name() : key.toString());
 		}
-		record("press", String.join("+", names));
+		note("press", String.join("+", names));
 	}
 
 	// ---- window
 
 	@Override
 	public @Nonnull Dimension resizeWindow(int width, int height) {
-		record("resizeWindow", Integer.valueOf(width), Integer.valueOf(height));
+		note("resizeWindow", Integer.valueOf(width), Integer.valueOf(height));
 		return new Dimension(width, height);
 	}
 }

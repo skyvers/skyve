@@ -14,17 +14,19 @@ import util.sail.browser.Cookies;
  * Its variable, if the step names one, is how many cookies it deleted. Needs {@code COOKIES}, which every browser has.
  */
 public final class DeleteCookies extends AbstractSailCall {
+	private static final String NAMES = "names";
+
 	/** Takes names. */
 	public DeleteCookies() {
-		super("names");
+		super(NAMES);
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
-		parameters.required("names");
+		parameters.required(NAMES);
 		Cookies cookies = require(context, Cookies.class);
 		int deleted = 0;
-		for (String name : parameters.list("names")) {
+		for (String name : parameters.list(NAMES)) {
 			deleted += cookies.deleteCookies(name);
 		}
 		return String.valueOf(deleted);

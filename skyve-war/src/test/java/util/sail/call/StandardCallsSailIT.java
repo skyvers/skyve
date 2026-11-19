@@ -2,20 +2,21 @@ package util.sail.call;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +48,8 @@ import util.AbstractInterpretedSailWorkflow;
 class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 	/** The requests the server got, by path. */
 	private static final Map<String, AtomicInteger> HITS = new ConcurrentHashMap<>();
+	/** The device profile folder a script reported to the server. */
+	private static final AtomicReference<String> DEVICE = new AtomicReference<>();
 
 	private static HttpServer server;
 	private static String origin;
@@ -79,6 +82,10 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 		}
 		else if ("/echo".equals(path)) {
 			body = String.valueOf(exchange.getRequestHeaders().getFirst("X-Test")).getBytes(StandardCharsets.UTF_8);
+		}
+		else if ("/device".equals(path)) {
+			DEVICE.set(URLDecoder.decode(exchange.getRequestURI().getRawQuery(), StandardCharsets.UTF_8));
+			body = "reported".getBytes(StandardCharsets.UTF_8);
 		}
 		else if ("/cookies".equals(path)) {
 			exchange.getResponseHeaders().add("Set-Cookie", "kept=1; Path=/; Max-Age=3600");
@@ -201,6 +208,8 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 					return sail.vars.opened.endsWith('/away?checked') && location.pathname === '/';
 				]]></testScript>
 				"""));
+		assertAll(() -> assertEquals(1, hits("/cookies"), "the cookies were set once"),
+					() -> assertEquals(3, hits("/away"), "each of the three new tabs loaded its page"));
 	}
 
 	/**
@@ -360,6 +369,9 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 							log.length === 1 && log[0].method === 'GET' && log[0].status === 200 && log[0].fromServiceWorker === false;
 				]]></testScript>
 				"""));
+		assertAll(() -> assertEquals(1, hits("/sw/counted"), "the worker sent the request it was asked for once"),
+					() -> assertEquals(1, hits("/late"), "the late request was sent once"),
+					() -> assertEquals(0, hits("/broken"), "the failed request never reached the server"));
 	}
 
 	/** Quota, a blocked IndexedDB, a shifted clock, a dialog and a frozen tab (Chromium). */
@@ -385,13 +397,16 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 
 				<call className="util.sail.call.BlockIndexedDb" />
 				<call className="util.sail.call.ShiftClock">
-					<parameter name="days" value="2" />
+					<parameter name="days" value="1" />
+				</call>
+				<call className="util.sail.call.ShiftClock">
+					<parameter name="days" value="1" />
 				</call>
 				<testScript message="Neither changes the page open now"><![CDATA[
 					return window.indexedDB !== undefined && Math.abs(Date.now() - (performance.timeOrigin + performance.now())) < 60000;
 				]]></testScript>
 				<navigateLink href="{var:origin}/away" />
-				<testScript message="In the next page, IndexedDB is blocked and the clock is two days ahead"><![CDATA[
+				<testScript message="In the next page, IndexedDB is blocked and the clock is two days ahead: the shifts add"><![CDATA[
 					const shift = Date.now() - (performance.timeOrigin + performance.now());
 					return window.indexedDB === undefined && shift > 1.9 * 86400000 && shift < 2.1 * 86400000;
 				]]></testScript>
@@ -438,6 +453,7 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 					<parameter name="action" value="close" />
 				</call>
 				""".formatted(store)));
+		assertEquals(2, hits("/away"), "the next page, and the tab that was frozen, each loaded once");
 	}
 
 	/**
@@ -445,15 +461,14 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 	 * run passed, so its profile folder is gone afterwards.
 	 */
 	@Test
-	void aDeviceKeepsItsProfileAcrossARestart() throws IOException {
-		long started = System.currentTimeMillis();
+	void aDeviceKeepsItsProfileAcrossARestart() {
 		sailWorkflowString(automation("devices", """
 				<call className="util.sail.call.StartDevice" variable="device">
 					<parameter name="profile" value="phone1" />
 					<parameter name="touch" value="true" />
 				</call>
 				<testScript message="StartDevice gave the run's profile folder"><![CDATA[
-					return sail.vars.device.endsWith('/' + sail.run + '/phone1');
+					return sail.vars.device.endsWith('/' + sail.run + '-%d/phone1');
 				]]></testScript>
 				<navigateLink href="{var:origin}/" />
 				<testScript message="A touch screen"><![CDATA[ return matchMedia('(pointer: coarse)').matches; ]]></testScript>
@@ -485,17 +500,13 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 				</call>
 				<navigateLink href="{var:origin}/" />
 				<testScript message="phone1 started afresh"><![CDATA[ return localStorage.getItem('device') === null; ]]></testScript>
-				"""));
-		Path profiles = settings().resolve().profiles();
-		List<String> left = List.of();
-		if (Files.isDirectory(profiles)) {
-			try (Stream<Path> list = Files.list(profiles)) {
-				// the run folders of runs since this test started
-				left = list.map(p -> p.getFileName().toString())
-							.filter(name -> name.matches("[0-9a-z]{8,13}") && (Long.parseLong(name, Character.MAX_RADIX) >= started))
-							.toList();
-			}
-		}
-		assertEquals(List.of(), left, "the passed run's profile folder is deleted from " + profiles);
+				<executeAsync variable="reported"><![CDATA[
+					return (await fetch('/device?' + encodeURIComponent(sail.vars.device), {cache: 'no-store'})).text();
+				]]></executeAsync>
+				""".formatted(Long.valueOf(ProcessHandle.current().pid()))));
+		// the folder the script's StartDevice gave, as the script reported it to the server
+		Path runFolder = Path.of(DEVICE.get()).getParent();
+		assertAll(() -> assertEquals(settings().resolve().profiles(), runFolder.getParent(), "under sail.profiles"),
+					() -> assertFalse(Files.exists(runFolder), "the passed run's profile folder " + runFolder + " is deleted"));
 	}
 }

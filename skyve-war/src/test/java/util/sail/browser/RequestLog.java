@@ -1,5 +1,6 @@
 package util.sail.browser;
 
+import java.time.Instant;
 import java.util.List;
 
 import jakarta.annotation.Nonnull;
@@ -23,4 +24,13 @@ public interface RequestLog {
 	 * Forgets the requests logged so far.
 	 */
 	void clearRequests();
+
+	/**
+	 * Returns when the log began: when the control began watching the browser, which is the first time a step asked for
+	 * the browser's control, not when the browser started. Nothing from before then is logged, so a check that the
+	 * log began in its own step can't tell what happened before it.
+	 *
+	 * @return the time the log began
+	 */
+	@Nonnull Instant watchingSince();
 }

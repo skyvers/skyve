@@ -1,6 +1,9 @@
 package util.sail.browser;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openqa.selenium.Capabilities;
@@ -24,6 +27,13 @@ import jakarta.annotation.Nonnull;
  * Threading: {@link #of(WebDriver)} is thread-safe. A control is thread-confined, as its driver is.
  */
 public abstract class SailBrowserControl {
+	/**
+	 * How often a SAIL condition wait checks again for an event that nothing signals, such as a new tab appearing, a
+	 * request reaching the log or a page's script holding: as often as {@code Selenide.waitFor} checks a page. Such a
+	 * wait polls because the browser raises no event the harness can wait on; it is bounded by a timeout.
+	 */
+	public static final Duration POLLING = Duration.ofMillis(100);
+
 	/** The control of each driver, until the driver quits. Guarded by itself. */
 	private static final Map<WebDriver, SailBrowserControl> CONTROLS = new IdentityHashMap<>();
 
@@ -39,10 +49,14 @@ public abstract class SailBrowserControl {
 	}
 
 	/**
-	 * Returns the control of a browser, made the first time it is asked for, by browser.
+	 * Returns the control of a browser, made the first time it is asked for, by browser. The control is made outside
+	 * the lock, as a Chromium control connects to DevTools then, so one browser's slow start doesn't hold up another's
+	 * steps; if two threads make one for the same driver at once, one is kept and the other released.
 	 *
 	 * <p>Side effects: forgets (and releases) the controls of drivers that have quit, so a browser started again (on the
-	 * same profile, say) gets a new control, with none of the old one's settings.
+	 * same profile, say) gets a new control, with none of the old one's settings. A quit driver's control is released
+	 * here, at the next call for any driver, not when its driver quits; until then it holds its DevTools connection,
+	 * whose thread is a daemon, so it never keeps the JVM running.
 	 *
 	 * <p>Complexity: O(d) in the number of drivers with a control, which is the number of browsers open.
 	 *
@@ -50,16 +64,31 @@ public abstract class SailBrowserControl {
 	 * @return the browser's control: the same one each time, until the driver quits
 	 */
 	public static @Nonnull SailBrowserControl of(@Nonnull WebDriver driver) {
+		List<SailBrowserControl> quit = new ArrayList<>();
+		SailBrowserControl result;
 		synchronized (CONTROLS) {
 			CONTROLS.entrySet().removeIf(entry -> {
 				if (hasQuit(entry.getKey())) {
-					entry.getValue().release();
+					quit.add(entry.getValue());
 					return true;
 				}
 				return false;
 			});
-			return CONTROLS.computeIfAbsent(driver, SailBrowserControl::create);
+			result = CONTROLS.get(driver);
 		}
+		quit.forEach(SailBrowserControl::release);
+		if (result != null) {
+			return result;
+		}
+		SailBrowserControl made = create(driver);
+		synchronized (CONTROLS) {
+			result = CONTROLS.putIfAbsent(driver, made);
+		}
+		if (result != null) { // another thread made one first
+			made.release();
+			return result;
+		}
+		return made;
 	}
 
 	/** Makes the control for a driver, chosen by its browser. */

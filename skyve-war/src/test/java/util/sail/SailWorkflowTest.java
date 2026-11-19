@@ -45,7 +45,7 @@ import org.skyve.web.UserAgentType;
  * per member, which stops it; one that fails stops it; a workflow on its own stops its browser when it ends; a browser
  * that fails to start is never reused.
  */
-@SuppressWarnings({"java:S5960", "resource"}) // test-only assertions; each test has its own engine, whose setters return it
+@SuppressWarnings("java:S5960") // test-only assertions
 class SailWorkflowTest {
 	private static final String AUTOMATION = "<automation uxui=\"tablet\" userAgentType=\"tablet\" xmlns=\"http://www.skyve.org/xml/sail\">" +
 												"<interaction name=\"i\"><method><comment>a step</comment></method></interaction></automation>";
@@ -144,7 +144,7 @@ class SailWorkflowTest {
 
 	/** Returns the device profile folder of the run of a leg, by the leg's place in the order the legs ran. */
 	private Path runFolder(int leg) {
-		return profiles.resolve(runs.get(leg).getRunToken());
+		return profiles.resolve(runs.get(leg).getRunToken() + '-' + ProcessHandle.current().pid());
 	}
 
 	private void member(String file) {
@@ -440,16 +440,18 @@ class SailWorkflowTest {
 		engine.settings().profiles(profiles);
 		makeProfile = true;
 		current = "w.xml";
-		boolean afterFirst;
-		boolean afterSecond;
-		try (SailWorkflow shared = engine.shareRunAcrossCalls()) {
+		SailWorkflow shared = engine.shareRunAcrossCalls();
+		boolean kept;
+		boolean keptAgain;
+		try {
 			shared.runStrings(AUTOMATION);
-			afterFirst = Files.isDirectory(runFolder(0).resolve("phone1"));
+			kept = Files.isDirectory(runFolder(0).resolve("phone1"));
 			shared.runStrings(AUTOMATION);
-			afterSecond = Files.isDirectory(runFolder(1).resolve("phone1"));
+			keptAgain = Files.isDirectory(runFolder(1).resolve("phone1"));
 		}
-		boolean kept = afterFirst;
-		boolean keptAgain = afterSecond;
+		finally {
+			shared.close();
+		}
 		assertAll(() -> assertSame(runs.get(0), runs.get(1), "one run"),
 					() -> assertTrue(kept, "kept after the first call"),
 					() -> assertTrue(keptAgain, "kept after the second call"),
@@ -462,14 +464,47 @@ class SailWorkflowTest {
 		engine.settings().profiles(profiles);
 		makeProfile = true;
 		current = "w.xml";
-		try (SailWorkflow shared = engine.shareRunAcrossCalls()) {
+		SailWorkflow shared = engine.shareRunAcrossCalls();
+		try {
 			shared.runStrings(AUTOMATION);
 			failing.add("w.xml");
 			assertThrows(AssertionError.class, () -> shared.runStrings(AUTOMATION));
 			failing.clear();
 			shared.runStrings(AUTOMATION);
 		}
+		finally {
+			shared.close();
+		}
 		assertTrue(Files.isDirectory(runFolder(0).resolve("phone1")), "kept on close: a call failed");
+	}
+
+	/**
+	 * Sharing a run again ends the run shared so far, as closing would: a failed one keeps its device profiles and a
+	 * passed one deletes them. After the close no run is shared, so the next call is a run of its own.
+	 */
+	@Test
+	void sharingARunAgainEndsTheRunSharedSoFar() {
+		engine.settings().profiles(profiles);
+		makeProfile = true;
+		current = "w.xml";
+		engine.shareRunAcrossCalls();
+		failing.add("w.xml");
+		assertThrows(AssertionError.class, () -> engine.runStrings(AUTOMATION));
+		failing.clear();
+		engine.shareRunAcrossCalls();
+		boolean failedKept = Files.isDirectory(runFolder(0).resolve("phone1"));
+		engine.runStrings(AUTOMATION);
+		engine.shareRunAcrossCalls();
+		boolean passedDeleted = ! Files.exists(runFolder(1));
+		engine.runStrings(AUTOMATION);
+		engine.close();
+		engine.runStrings(AUTOMATION);
+		assertAll(() -> assertTrue(failedKept, "the first shared run failed: kept when the second began"),
+					() -> assertTrue(passedDeleted, "the second passed: deleted when the third began"),
+					() -> assertNotSame(runs.get(0), runs.get(1), "a new run each time"),
+					() -> assertFalse(Files.exists(runFolder(2)), "the third deleted on close"),
+					() -> assertNotSame(runs.get(2), runs.get(3), "after the close, a run of its own"),
+					() -> assertFalse(Files.exists(runFolder(3)), "which ended when its call returned"));
 	}
 
 	/**

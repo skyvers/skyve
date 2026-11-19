@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import util.sail.browser.SailBrowserControl;
 import util.sail.browser.Tabs;
 
 /**
@@ -29,20 +30,19 @@ import util.sail.browser.Tabs;
  * Its variable, if the step names one, is the new tab's address. Needs {@code TABS}, which every browser has.
  */
 public final class CheckOpenedTab extends AbstractSailCall {
-	/** How often the script is run while waiting: as often as {@code Selenide.waitFor} checks a page. */
-	private static final Duration POLLING = Duration.ofMillis(100);
+	private static final String TIMEOUT_MILLIS = "timeoutMillis";
 
 	/** Takes script, timeoutMillis and close. */
 	public CheckOpenedTab() {
-		super("script", "timeoutMillis", "close");
+		super("script", TIMEOUT_MILLIS, "close");
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
 		String script = parameters.required("script");
-		Duration timeout = (parameters.optional("timeoutMillis") == null) ?
+		Duration timeout = (parameters.optional(TIMEOUT_MILLIS) == null) ?
 								context.timeout() :
-								Duration.ofMillis(parameters.integer("timeoutMillis", 1, 1));
+								Duration.ofMillis(parameters.integer(TIMEOUT_MILLIS, 1, 1));
 		boolean close = parameters.bool("close", true);
 		Tabs tabs = require(context, Tabs.class);
 		WebDriver driver = context.driver();
@@ -60,7 +60,7 @@ public final class CheckOpenedTab extends AbstractSailCall {
 	private static @Nonnull String awaitScript(@Nonnull WebDriver driver, @Nonnull String script, @Nonnull Duration timeout) {
 		String[] lastError = new String[1];
 		try {
-			return new WebDriverWait(driver, timeout, POLLING).until(d -> {
+			return new WebDriverWait(driver, timeout, SailBrowserControl.POLLING).until(d -> {
 				try {
 					return Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript(script)) ? d.getCurrentUrl() : null;
 				}

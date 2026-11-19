@@ -21,31 +21,33 @@ import util.sail.browser.Tabs;
  * has.
  */
 public final class SwitchTab extends AbstractSailCall {
+	/** What the step does to the tabs. */
+	private enum Action {
+		OPEN, SWITCH, CLOSE
+	}
+
+	private static final String ACTION = "action";
+
 	/** Takes action, url and index. */
 	public SwitchTab() {
-		super("action", "url", "index");
+		super(ACTION, "url", "index");
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
-		String action = parameters.required("action").trim();
-		Tabs tabs;
-		switch (action) {
-			case "open" -> {
-				String url = parameters.required("url").trim();
-				tabs = require(context, Tabs.class);
-				tabs.openTab(absolute(url, context));
-			}
-			case "switch" -> {
-				int index = parameters.requiredInteger("index", 0);
-				tabs = require(context, Tabs.class);
-				tabs.switchToTab(index, context.timeout());
-			}
-			case "close" -> {
-				tabs = require(context, Tabs.class);
-				tabs.closeTab();
-			}
-			default -> throw new IllegalArgumentException(name() + "'s action must be open, switch or close, not " + action);
+		parameters.required(ACTION);
+		Action action = parameters.choice(ACTION, Action.class, Action.OPEN);
+		String url = (action == Action.OPEN) ? parameters.required("url").trim() : "";
+		int index = (action == Action.SWITCH) ? parameters.requiredInteger("index", 0) : 0;
+		Tabs tabs = require(context, Tabs.class);
+		if (action == Action.OPEN) {
+			tabs.openTab(absolute(url, context));
+		}
+		else if (action == Action.SWITCH) {
+			tabs.switchToTab(index, context.timeout());
+		}
+		else {
+			tabs.closeTab();
 		}
 		return String.valueOf(tabs.tabCount());
 	}

@@ -567,13 +567,11 @@ class SailLoadTest {
 
 	@Test
 	void noEntryStartsOnceTheRunIsStopping() {
+		SailLoad.VirtualUser stopped = new SailLoad.VirtualUser(1, new SailWorkflow(new SailViewRoles()), clock,
+																new SailLoadReport.Recorder(), new AtomicBoolean(true));
 		List<String> entries = List.of("util/sail/fixtures/plain.suite.xml", "util/sail/fixtures/workflow.xml");
-		SailLoad.VirtualUser stopped;
-		IllegalStateException e;
-		try (SailWorkflow engine = new SailWorkflow(new SailViewRoles())) {
-			stopped = new SailLoad.VirtualUser(1, engine, clock, new SailLoadReport.Recorder(), new AtomicBoolean(true));
-			e = assertThrows(IllegalStateException.class, () -> SailLoad.runEntries(stopped, entries));
-		}
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> SailLoad.runEntries(stopped, entries));
 
 		assertAll(() -> assertEquals("SAIL load: util/sail/fixtures/plain.suite.xml did not start: the run is stopping", e.getMessage()),
 					() -> assertTrue(stopped.stopping()));
@@ -604,15 +602,12 @@ class SailLoadTest {
 	@Test
 	void aUsersEngineStartsNothingOnceTheRunIsStopping() {
 		AtomicBoolean stopping = new AtomicBoolean();
-		boolean before;
-		boolean after;
-		try (SailWorkflow engine = SailLoad.users(1).engine(stopping)) {
-			before = engine.stopping();
-			stopping.set(true);
-			after = engine.stopping();
-		}
+		SailWorkflow engine = SailLoad.users(1).engine(stopping);
 
-		assertAll(() -> assertFalse(before), () -> assertTrue(after));
+		boolean before = engine.stopping();
+		stopping.set(true);
+
+		assertAll(() -> assertFalse(before), () -> assertTrue(engine.stopping()));
 	}
 
 	private static List<String> messages(MultipleFailuresError e) {

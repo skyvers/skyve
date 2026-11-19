@@ -11,6 +11,7 @@ import static org.mockito.Mockito.withSettings;
 import static util.sail.call.AbstractSailCallTest.context;
 import static util.sail.call.AbstractSailCallTest.run;
 
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -41,18 +42,36 @@ class BrowserCallsTest {
 	void checkDialogChecksTheDialogsSeenAndForgetsThem() throws Exception {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withDialogs(new Dialog(Dialog.Type.BEFOREUNLOAD, "", "http://h/"));
 		AbstractSailCall.Context context = context(browser);
-		run(new CheckDialog(), context);
-		AssertionError gone = assertThrows(AssertionError.class, () -> run(new CheckDialog(), context));
+		CheckDialog check = new CheckDialog();
+		run(check, context);
+		AssertionError gone = assertThrows(AssertionError.class, () -> run(check, context));
 		browser.withDialogs(new Dialog(Dialog.Type.CONFIRM, "Sure?", "http://h/"));
-		run(new CheckDialog(), context, "type", "alert", "expected", "false");
+		run(check, context, "type", "alert", "expected", "false");
 		browser.withDialogs(new Dialog(Dialog.Type.ALERT, "Hi", "http://h/"));
-		AssertionError unexpected = assertThrows(AssertionError.class, () -> run(new CheckDialog(), context, "type", "Alert", "expected", "false"));
+		AssertionError unexpected = assertThrows(AssertionError.class, () -> run(check, context, "type", "Alert", "expected", "false"));
 		assertAll(() -> assertEquals("Expected a beforeunload dialog, but the dialogs were []", gone.getMessage(), "forgotten after the first check"),
 					() -> assertEquals("Expected no alert dialog, but the dialogs were [Dialog[type=ALERT, message=Hi, url=http://h/]]", unexpected.getMessage()),
 					() -> assertEquals(List.of("dialogs", "clearDialogs", "dialogs", "clearDialogs", "dialogs", "clearDialogs", "dialogs", "clearDialogs"),
 										browser.calls()),
 					() -> assertTrue(message(IllegalArgumentException.class, () -> run(new CheckDialog(), context, "type", "toast"))
 										.startsWith("CheckDialog's type must be one of [ALERT, CONFIRM, PROMPT, BEFOREUNLOAD]"), "a bad type"));
+	}
+
+	/**
+	 * A check of a record of dialogs that began in its own step fails, as the record knows nothing of the steps before
+	 * and would pass a check that no dialog opened; it says to start watching with an earlier call.
+	 */
+	@Test
+	void checkDialogFailsWhenTheRecordBeganInItsStep() {
+		FakeBrowserControl browser = FakeBrowserControl.supportingAll();
+		AbstractSailCall.Context step = context(browser);
+		browser.withWatchingSince(Instant.now()); // the control began watching as this step asked for it
+		CheckDialog check = new CheckDialog();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> run(check, step, "expected", "false"));
+		assertEquals("CheckDialog reads the record of dialogs, which only began in this step, as the browser's control began watching then:"
+						+ " it holds nothing from the steps before. Put a call before the steps to watch, such as RequestLog with clear=true,"
+						+ " so watching begins there",
+						e.getMessage());
 	}
 
 	@Test
@@ -78,7 +97,8 @@ class BrowserCallsTest {
 		AbstractSailCall.Context context = context(driver, browser);
 		String quota = run(new LowerQuota(), context, "headroomKb", "2");
 		String restored = run(new LowerQuota(), context, "restore", "true");
-		IllegalStateException unknown = assertThrows(IllegalStateException.class, () -> run(new LowerQuota(), context, "headroomKb", "2"));
+		LowerQuota lower = new LowerQuota();
+		IllegalStateException unknown = assertThrows(IllegalStateException.class, () -> run(lower, context, "headroomKb", "2"));
 		assertAll(() -> assertEquals("3048", quota, "1000 bytes used and 2 KB more"),
 					() -> assertEquals("restored", restored),
 					() -> assertEquals(List.of("overrideQuota http://h:8080 3048", "clearQuotaOverride http://h:8080"), browser.calls()),
@@ -93,11 +113,13 @@ class BrowserCallsTest {
 		run(new BlockIndexedDb(), context);
 		run(new ShiftClock(), context, "days", "2");
 		run(new ShiftClock(), context, "days", "-3650");
+		run(new ShiftClock(), context, "days", "2");
 		List<String> scripts = browser.initScripts();
-		assertAll(() -> assertEquals(3, scripts.size()),
+		assertAll(() -> assertEquals(4, scripts.size(), "a repeated shift is a script of its own, as the control adds a script once, so it adds"),
 					() -> assertEquals("Object.defineProperty(window, 'indexedDB', { value: undefined, configurable: true });", scripts.get(0)),
 					() -> assertTrue(scripts.get(1).contains("const offset = 172800000;"), scripts.get(1)),
 					() -> assertTrue(scripts.get(2).contains("const offset = -315360000000;"), scripts.get(2)),
+					() -> assertTrue(scripts.get(3).contains("const offset = 172800000;"), scripts.get(3)),
 					() -> assertEquals("ShiftClock's days must be -3650 or more, not -3651",
 										message(IllegalArgumentException.class, () -> run(new ShiftClock(), context, "days", "-3651"))));
 	}
@@ -117,7 +139,7 @@ class BrowserCallsTest {
 	}
 
 	@Test
-	void resizeWindowGivesTheSizeAfterwards() throws Exception {
+	void resizeWindowGivesTheSizeAfterwards() {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll();
 		AbstractSailCall.Context context = context(browser);
 		assertAll(() -> assertEquals("1023x700", run(new ResizeWindow(), context, "width", "1023", "height", "700")),
@@ -139,7 +161,7 @@ class BrowserCallsTest {
 		assertAll(() -> assertEquals(List.of("freeze second", "resume second"), browser.calls()),
 					() -> assertEquals("FreezeTab can't freeze tab 2 (0 being the first): 2 tab(s) are open",
 										message(IllegalStateException.class, () -> run(new FreezeTab(), context, "action", "freeze", "index", "2"))),
-					() -> assertEquals("FreezeTab's action must be freeze or resume, not thaw",
+					() -> assertEquals("FreezeTab's action must be one of [FREEZE, RESUME], not thaw",
 										message(IllegalArgumentException.class, () -> run(new FreezeTab(), context, "action", "thaw", "index", "1"))),
 					() -> assertEquals("FreezeTab needs the parameter index",
 										message(IllegalArgumentException.class, () -> run(new FreezeTab(), context, "action", "freeze"))));

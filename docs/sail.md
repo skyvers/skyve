@@ -2021,6 +2021,9 @@ key after `sail.`.
 | `sail.suite.only` | `SAIL_SUITE_ONLY` | all members | Comma-separated prefixes of the suite members to run, by their file or file name, for example `pf/,03`; see [Suites](#suites) |
 | `sail.run` | `SAIL_RUN` | none | Comma-separated suites and scripts for `SailRunIT`: test classpath resources or file paths |
 | `sail.var.<name>` | `SAIL_VAR_<NAME>` | none | The value of `{var:name}`, such as a password. Shown as `********`. |
+| `sail.profiles` | `SAIL_PROFILES` | `target/sail-profiles` | The folder [device profiles](#device-profiles) go in, under the working directory unless absolute |
+| `sail.profiles.keep` | `SAIL_PROFILES_KEEP` | `failed` | Which runs keep their device profile folders when they end: `failed`, `all` or `none` |
+| `sail.profiles.keepHours` | `SAIL_PROFILES_KEEP_HOURS` | `12` | Whole hours above 0: how old a run's device profile folder must be before a later run's sweep deletes it |
 | `sail.properties` | `SAIL_PROPERTIES` | `~/.skyve/sail.properties` if it exists | The properties file to read. Settable by `-D`, the environment or code, not in the file itself. |
 | `sail.load.users` | `SAIL_LOAD_USERS` | none | The number of virtual users of a [load run](#load-testing), a whole number above 0. Set, it makes `SailRunIT` a load run. |
 | `sail.load.rampUp` | `SAIL_LOAD_RAMP_UP` | `0`: all at once | How long the load run takes to start all its users, evenly spread; a duration of 0 or more |
@@ -2361,6 +2364,15 @@ network.offline();
 `supports(Capability)` answers without stopping the test, for code that has a
 fallback.
 
+**When watching begins.** A browser's control is made, and the Chromium control
+starts watching the browser (its request log and its record of dialogs), the first
+time a step asks for it: the first `<call>` of the leg that uses it, or Java code
+calling `SailBrowserControl.of`. Nothing from before then is recorded, not even a
+request the page sent as it loaded. So `CheckRequests` and `CheckDialog` fail when
+watching only began in their own step, saying so, rather than pass on an empty record:
+put an earlier call, such as `RequestLog` with `clear=true`, before the steps to watch.
+A browser started again (`RestartDevice`) gets a new control, and watching begins again.
+
 ### Unsupported means skipped
 
 A call that needs a capability the browser lacks stops the test as **skipped**,
@@ -2444,9 +2456,11 @@ Notes on the less obvious ones:
   committed. `RewriteRequestHeaders`' `set` and `remove` are applied before the
   request is sent.
 - **`CheckRequests`** counts what the log holds from when the browser's control began
-  watching, or the last `clear`. When a service worker answers a request for the page,
+  watching ([When watching begins](#capabilities)), or the last `clear`. When a service worker answers a request for the page,
   the log has the page's copy (marked) and, if the worker went to the network, the
   worker's own; by default the marked copy is not counted, so a request counts once.
+  The exception: a request the worker forwards that fails in the network counts twice, as
+  Chrome reports no answer for the page's copy, so nothing marks it as the worker's.
   `waitMillis` keeps looking until the count holds, for requests the page sends a little later.
 - **`RequestLog`**'s variable is a JSON array of `{method, url, status, failure,
   fromServiceWorker}` in the order the requests started; a script reads it with
@@ -2556,26 +2570,30 @@ Chromium-only until BiDi settles.
 [Devices and browser profiles](#devices-and-browser-profiles) for what survives a
 restart). `util.sail.SailProfiles` owns where those profiles live and when they go.
 
-**Where.** Every profile is the folder `<root>/<run token>/<profile>`. The root is the
-setting `sail.profiles` (`-Dsail.profiles=...`, `SAIL_PROFILES`, `sail.properties`, as any
-[setting](#settings)), `target/sail-profiles` under the working directory by default. Each
-run starts with new devices, because the run token ([The run token and variables](#the-run-token-and-variables))
-is in the path. Code that builds its own `BrowserConfiguration.profile(Path)` still owns and
-deletes its folder.
+**Where.** Every profile is the folder `<root>/<run token>-<pid>/<profile>`, the pid being
+the JVM's. The root is the setting `sail.profiles` (`-Dsail.profiles=...`, `SAIL_PROFILES`,
+`sail.properties`, as any [setting](#settings)), `target/sail-profiles` under the working
+directory by default. Each run starts with new devices, because the run token
+([The run token and variables](#the-run-token-and-variables)) is in the path, and the pid
+keeps apart two JVMs (lanes) that start a run in the same millisecond. `SailProfiles` makes
+the run folder with a marker file in it, `.sail-run`, which the sweep looks for. Code that
+builds its own `BrowserConfiguration.profile(Path)` still owns and deletes its folder.
 
 **When they are deleted.** When a run ends, after its browsers have quit:
 
-- A run that **passed** has its folder `<root>/<run>` deleted.
+- A run that **passed** has its folder `<root>/<run>-<pid>` deleted.
 - A run that **failed** keeps it, and prints
   `SAIL device profiles kept for the failed run <run>: <folder>`. A run that was skipped counts as not
-  passed, so its folder is kept too, and the message says "failed run".
+  passed, so its folder is kept too, and the message says "failed run". A run folder that holds only its
+  marker (no browser started on a profile in it) is deleted either way.
 - A run of its own ends when its `runResources`, `runFiles` or `runStrings` call returns,
   or its suite member does. A run shared with `shareRunAcrossCalls()` ends when the
-  workflow is closed: `SailWorkflow` is `AutoCloseable`, and `close()` stops a kept browser, then ends the
-  shared run's profiles. That run failed if any of its calls threw.
-  `AbstractInterpretedSailWorkflow` closes its workflows in its `@AfterAll`
-  (`closeWorkflowsAndReleaseServer()`); a test that builds its own shared workflow closes it itself,
-  for example with try-with-resources.
+  workflow is closed: `SailWorkflow.close()` (a plain method; `SailWorkflow` is not `AutoCloseable`)
+  stops a kept browser, then ends the shared run's profiles. That run failed if any of its calls threw.
+  Calling `shareRunAcrossCalls()` again ends the run shared so far in the same way, and after `close()` no
+  run is shared. `AbstractInterpretedSailWorkflow` closes its workflows in its `@AfterAll`
+  (`closeWorkflowsAndReleaseServer()`), each even if closing another fails; a test that builds its own
+  shared workflow closes it itself, in a `finally`.
 - The single-renderer bases, `AbstractPrimeFacesInterpretedSail` and `AbstractSmartClientInterpretedSail`, don't run
   through `SailWorkflow`, so a `StartDevice` in one of their tests leaves its folder to the sweep.
 
@@ -2594,14 +2612,21 @@ deletes the run folders under the root that are old enough and not in use. This 
 were killed, stopped with Ctrl-C or ended in a JVM that never closed its workflow, and the
 failed runs that were kept. A folder is deleted only if it:
 
-- is a real folder (a link is never followed) named like a run token (`[0-9a-z]{8,13}`, the run's start time in base 36).
-  Anything else under the root is left alone;
+- is a real folder (a link is never followed) named like a run folder, `<run token>-<pid>` (`[0-9a-z]{8,13}`, the
+  run's start time in base 36, a hyphen and digits);
+- holds the marker `.sail-run`, so it is a folder `SailProfiles` made. Anything else under the root, whatever its
+  name, is left alone;
 - is not one of this JVM's runs;
 - is older than `sail.profiles.keepHours` by both its token's start time and the newest last-modified
   time of any file inside it;
 - is not in use: no profile in it has a Chrome `SingletonLock` that names a live process. On macOS and Linux the
-  lock is a symbolic link to `host-pid`, and the pid is checked with `ProcessHandle.of(pid)`. On Windows the lock is a file,
-  so a profile in use cannot be deleted, and a folder that fails to delete is skipped.
+  lock is a symbolic link to `host-pid`, and the pid is checked with `ProcessHandle.of(pid)`.
+
+Before it deletes a run folder (a passed run's, or one the sweep found), `SailProfiles` renames it under the root,
+to `<run token>-<pid>.deleting-<pid>` (the second pid the deleting JVM's), and deletes its marker last. On Windows,
+where Chrome's lock is a file, a folder with a profile in use can't be renamed, so it is skipped whole rather than
+partly deleted (not verified on Windows); and two JVMs sweeping at once can't both delete one folder. A delete that
+stops halfway leaves the renamed folder, with its marker, and a later sweep deletes it.
 
 Several JVMs (parallel lanes) can share a root. Housekeeping never fails or skips
 a test: a folder that cannot be deleted or checked gets a one-line warning,
@@ -2618,12 +2643,14 @@ data. Chrome and Edge now start with:
 Both are needed. Measured on Chrome 158, headless, after loading a page with a service worker and keeping the
 browser open for 240 s, a profile was **151 MB** without them (`optimization_guide_model_store` 47 MB,
 `component_crx_cache` 47 MB, `WasmTtsEngine` 25 MB, `CertificateRevocation` 9 MB, `OnDeviceHeadSuggestModel` 8 MB) and
-**12 MB** with both. The device profiles of a `StandardCallsSailIT` run were about 8.5 MB each, against 35 to 70 MB before the
-flags. A restart on the same folder still kept IndexedDB, CacheStorage, the service worker
+**12 MB** with both: a saving of about 139 MB per profile. (The device profiles of a `StandardCallsSailIT` run, whose
+fixture page stores almost nothing, were about 8.5 MB each; an application's profile adds its own data, such as its
+cache and IndexedDB.) A restart on the same folder still kept IndexedDB, CacheStorage, the service worker
 registration and a persistent cookie. Chrome honours only the last `--disable-features`, so the features of any
 `--disable-features` in a configuration's `arguments(...)` are merged with the built-in list into the one argument
-(each once, in order). The flags apply to every SAIL Chrome and Edge, with or without a profile. Not measured:
-headed Chrome, Edge, and runs longer than 240 s.
+(each once, in order). The flags apply to every SAIL Chrome and Edge, with or without a profile. Edge gets the same
+flags, but nothing was measured on Edge, so what they save there isn't known. Not measured either: headed Chrome and
+runs longer than 240 s.
 
 ## The Suites
 
@@ -4033,17 +4060,18 @@ SAIL XML is unchanged. Four behaviours change for existing tests:
   `run()` when no member failed. Under Verify, failures recorded before the skip win: the test fails with them and
   its message names the skip. A call that threw `TestAbortedException` to stop a test must now expect a skip where it
   reported a failure.
-- A passed run's device profile folders (`<sail.profiles>/<run token>`) are deleted when the run ends, and
-  run folders older than `sail.profiles.keepHours` (12) are swept. Set `sail.profiles.keep=all` to keep them. A failed
-  (or skipped) run's folders are kept and named in the output.
+- Device profiles go in `<sail.profiles>/<run token>-<pid>/<profile>` (the pid is the JVM's), and each run folder holds
+  a marker file, `.sail-run`. A passed run's folder is deleted when the run ends, and marked run folders older than
+  `sail.profiles.keepHours` (12) are swept; nothing without the marker is ever swept. Set `sail.profiles.keep=all` to
+  keep them. A failed (or skipped) run's folders are kept and named in the output.
 - Chrome and Edge start with `--disable-component-update` and
-  `--disable-features=OptimizationGuideModelDownloading,...`, so they download no components or models: a SAIL profile
-  is about 8.5 MB, not 35 to 70 MB. Tests don't depend on those downloads. A configuration's own `--disable-features`
-  argument is merged with the built-in one.
-- `SailWorkflow` is `AutoCloseable`. A test that builds its own workflow and calls `shareRunAcrossCalls()` must close it
-  (for example with try-with-resources), or its profile folders wait for the sweep. Tests that extend
-  `AbstractInterpretedSailWorkflow` change nothing: its `@AfterAll`, now `closeWorkflowsAndReleaseServer()` (it was
-  `releaseServer()`), closes their workflows.
+  `--disable-features=OptimizationGuideModelDownloading,...`, so Chrome downloads no components or models: measured on
+  Chrome 158 (W0), a profile fell from 151 MB to 12 MB. Edge gets the same flags but wasn't measured. Tests don't
+  depend on those downloads. A configuration's own `--disable-features` argument is merged with the built-in one.
+- `SailWorkflow` has a plain `close()` (it is not `AutoCloseable`). A test that builds its own workflow and calls
+  `shareRunAcrossCalls()` must close it (in a `finally`), or its profile folders wait for the sweep. Calling
+  `shareRunAcrossCalls()` again ends the run shared so far. Tests that extend `AbstractInterpretedSailWorkflow` change
+  nothing: its `@AfterAll`, now `closeWorkflowsAndReleaseServer()` (it was `releaseServer()`), closes their workflows.
 - New `SailSettings` keys: `sail.profiles`, `sail.profiles.keep` and `sail.profiles.keepHours`.
 
 ## Troubleshooting

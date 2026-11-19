@@ -1,6 +1,7 @@
 package util.sail.call;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -118,6 +119,24 @@ public abstract class AbstractSailCall implements SailCall {
 	}
 
 	/**
+	 * Fails a check of what the browser's control records (the request log, the dialogs) when the record only began in
+	 * this step: the control began watching as this step asked for it, so the record holds nothing from the steps
+	 * before, and an empty record would pass a check that nothing happened.
+	 *
+	 * @param context	the leg, which knows when this step started
+	 * @param since	when the record began
+	 * @param what	what the record is, for the message, such as {@code request log}
+	 * @throws IllegalStateException	if the record began in this step, telling the author to start watching earlier
+	 */
+	protected final void requireWatchingBefore(@Nonnull Context context, @Nonnull Instant since, @Nonnull String what) {
+		if (! since.isBefore(context.started)) {
+			throw new IllegalStateException(name() + " reads the " + what + ", which only began in this step, as the browser's control" +
+												" began watching then: it holds nothing from the steps before. Put a call before the steps" +
+												" to watch, such as RequestLog with clear=true, so watching begins there");
+		}
+	}
+
+	/**
 	 * The leg a call runs in: the browser and how it was started. The driver and the control are those of the browser
 	 * running now, so they follow a call that starts the browser again.
 	 * <p>
@@ -128,6 +147,8 @@ public abstract class AbstractSailCall implements SailCall {
 		private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
 		private final Function<WebDriver, SailBrowserControl> controls;
 		private final Supplier<String> runToken;
+		/** When the step started, as a check compares when what it reads began. */
+		private final Instant started = Instant.now();
 
 		/**
 		 * Makes the leg of an executor.

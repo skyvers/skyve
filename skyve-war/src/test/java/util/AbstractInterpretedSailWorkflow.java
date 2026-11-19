@@ -39,13 +39,12 @@ import util.sail.SailWorkflow;
  * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
  * {@code settings().headless(false).timeoutSeconds(60)}, before the workflow runs.
  */
-@SuppressWarnings("resource") // closeWorkflowsAndReleaseServer() closes the tests' workflows; their setters return the same workflow
 public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	/**
-	 * The workflows of the tests that have run, closed when the class has finished: each test has its own instance, and
-	 * so its own workflow, unless the class has one instance for all its tests.
+	 * Closes the workflow of each test that has run ({@link SailWorkflow#close()}), when the class has finished: each
+	 * test has its own instance, and so its own workflow, unless the class has one instance for all its tests.
 	 */
-	private static final Queue<SailWorkflow> WORKFLOWS = new ConcurrentLinkedQueue<>();
+	static final Queue<Runnable> WORKFLOWS = new ConcurrentLinkedQueue<>();
 
 	/** The roles the views are built with for the users the scripts sign in as. */
 	private final SailViewRoles viewRoles = new SailViewRoles();
@@ -53,7 +52,7 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 
 	/** Creates the test, whose workflow is closed when the class has finished. */
 	protected AbstractInterpretedSailWorkflow() {
-		WORKFLOWS.add(workflow);
+		WORKFLOWS.add(workflow::close);
 	}
 
 	/**
@@ -168,17 +167,35 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 
 	/**
 	 * Closes the workflows of the class's tests, which stops a browser a suite left open and ends a shared run's device
-	 * profiles, then releases the server lock.
+	 * profiles, then releases the server lock. Each workflow is closed even if closing another fails, and the lock is
+	 * released either way.
+	 *
+	 * @throws RuntimeException	what the first workflow that failed to close threw, with what the others threw
+	 * 								suppressed
 	 */
 	@AfterAll
 	static void closeWorkflowsAndReleaseServer() {
+		RuntimeException failure = null;
 		try {
-			for (SailWorkflow closing = WORKFLOWS.poll(); closing != null; closing = WORKFLOWS.poll()) {
-				closing.close();
+			for (Runnable close = WORKFLOWS.poll(); close != null; close = WORKFLOWS.poll()) {
+				try {
+					close.run();
+				}
+				catch (RuntimeException e) {
+					if (failure == null) {
+						failure = e;
+					}
+					else {
+						failure.addSuppressed(e);
+					}
+				}
 			}
 		}
 		finally {
 			SailServerLock.releaseAll();
+		}
+		if (failure != null) {
+			throw failure;
 		}
 	}
 }

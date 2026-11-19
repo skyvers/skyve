@@ -154,7 +154,7 @@ public final class SailCallParameters {
 	 * <p>Complexity: O(n) in the value's length.
 	 *
 	 * @param name	the parameter's name
-	 * @return the items, trimmed, without empty ones; empty if it is left out (unmodifiable)
+	 * @return the items, trimmed, without empty ones; empty if it is left out
 	 */
 	public @Nonnull List<String> list(@Nonnull String name) {
 		String value = optional(name);
@@ -169,7 +169,7 @@ public final class SailCallParameters {
 				result.add(trimmed);
 			}
 		}
-		return Collections.unmodifiableList(result);
+		return result;
 	}
 
 	/**

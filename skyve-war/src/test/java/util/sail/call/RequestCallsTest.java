@@ -8,6 +8,7 @@ import static util.sail.call.AbstractSailCallTest.context;
 import static util.sail.call.AbstractSailCallTest.run;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,8 @@ class RequestCallsTest {
 										message(IllegalArgumentException.class, () -> run(new HoldRequests(), context, "url", "*", "times", "-1"))),
 					() -> assertEquals("RespondToRequests's status must be 100 or more, not 99",
 										message(IllegalArgumentException.class, () -> run(new RespondToRequests(), context, "url", "*", "status", "99"))),
+					() -> assertEquals("RespondToRequests's status must be 599 or less, not 600",
+										message(IllegalArgumentException.class, () -> run(new RespondToRequests(), context, "url", "*", "status", "600"))),
 					() -> assertEquals("RespondToRequests needs the parameter status",
 										message(IllegalArgumentException.class, () -> run(new RespondToRequests(), context, "url", "*"))),
 					() -> assertEquals("RewriteRequestHeaders's set must be Name=value pairs separated by ;, not A=1;B",
@@ -93,7 +96,13 @@ class RequestCallsTest {
 					() -> assertEquals("RewriteRequestHeaders's set must be Name=value pairs separated by ;, not =1",
 										message(IllegalArgumentException.class, () -> run(new RewriteRequestHeaders(), context, "url", "*", "set", "=1"))),
 					() -> assertEquals("RewriteRequestHeaders needs headers to set or remove",
-										message(IllegalArgumentException.class, () -> run(new RewriteRequestHeaders(), context, "url", "*"))));
+										message(IllegalArgumentException.class, () -> run(new RewriteRequestHeaders(), context, "url", "*"))),
+					() -> assertEquals("RewriteRequestHeaders's header names must be HTTP tokens (letters, digits and !#$%&'*+-.^_`|~), not X Bad",
+										message(IllegalArgumentException.class, () -> run(new RewriteRequestHeaders(), context, "url", "*", "set", "X Bad=1")),
+										"a name to set with a space"),
+					() -> assertEquals("RewriteRequestHeaders's header names must be HTTP tokens (letters, digits and !#$%&'*+-.^_`|~), not X:Bad",
+										message(IllegalArgumentException.class, () -> run(new RewriteRequestHeaders(), context, "url", "*", "remove", "Ok, X:Bad")),
+										"a name to remove with a colon"));
 	}
 
 	@Test
@@ -106,7 +115,8 @@ class RequestCallsTest {
 		browser.withHeld(1);
 		run(new ReleaseRequests(), context, "fail", "ConnectionReset");
 		run(new ClearRequestRules(), context);
-		AssertionError none = assertThrows(AssertionError.class, () -> run(new AwaitHeldRequests(), context));
+		AwaitHeldRequests awaitNone = new AwaitHeldRequests();
+		AssertionError none = assertThrows(AssertionError.class, () -> run(awaitNone, context));
 		assertAll(() -> assertEquals("2", held, "the number held"),
 					() -> assertEquals("2", two),
 					() -> assertEquals(List.of("awaitHeld 1 PT7S", "heldCount", "awaitHeld 2 PT0.5S", "heldCount", "releaseHeld",
@@ -120,7 +130,7 @@ class RequestCallsTest {
 	// ---- request checks
 
 	@Test
-	void checkRequestsCountsTheMatchingRequestsOnce() throws Exception {
+	void checkRequestsCountsTheMatchingRequestsOnce() {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withRequests(PAGE_COPY, WORKER, FAILED, PLAIN);
 		AbstractSailCall.Context context = context(browser);
 		assertAll(() -> assertEquals("1", run(new CheckRequests(), context, "matching", "GET .*/sw/a"), "the service worker's copy left out"),
@@ -136,8 +146,9 @@ class RequestCallsTest {
 	void checkRequestsFailsListingWhatMatchedAndCanClear() throws Exception {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withRequests(WORKER, FAILED);
 		AbstractSailCall.Context context = context(browser);
-		AssertionError none = assertThrows(AssertionError.class, () -> run(new CheckRequests(), context, "matching", "/nothing"));
-		AssertionError many = assertThrows(AssertionError.class, () -> run(new CheckRequests(), context, "matching", "http", "atMost", "1", "clear", "true"));
+		CheckRequests check = new CheckRequests();
+		AssertionError none = assertThrows(AssertionError.class, () -> run(check, context, "matching", "/nothing"));
+		AssertionError many = assertThrows(AssertionError.class, () -> run(check, context, "matching", "http", "atMost", "1", "clear", "true"));
 		String cleared = run(new CheckRequests(), context, "matching", "http", "exactly", "0");
 		assertAll(() -> assertEquals("Expected requests matching //nothing/ (at least 1), but 0 matched: [] (the log holds 2 requests; the last: "
 										+ List.of(WORKER, FAILED) + ')',
@@ -179,7 +190,9 @@ class RequestCallsTest {
 		long start = System.nanoTime();
 		String found = run(new CheckRequests(), context(waited), "matching", "/plain", "waitMillis", "5000");
 		Duration took = Duration.ofNanos(System.nanoTime() - start);
-		AssertionError once = assertThrows(AssertionError.class, () -> run(new CheckRequests(), context(new LatePage()), "matching", "/plain"));
+		CheckRequests check = new CheckRequests();
+		AbstractSailCall.Context late = context(new LatePage());
+		AssertionError once = assertThrows(AssertionError.class, () -> run(check, late, "matching", "/plain"));
 		assertAll(() -> assertEquals("1", found),
 					() -> assertTrue(took.compareTo(Duration.ofSeconds(4)) < 0, "it stops waiting once found, after " + took),
 					() -> assertTrue(once.getMessage().contains("but 0 matched"), "without waitMillis it looks once: " + once.getMessage()));
@@ -188,10 +201,33 @@ class RequestCallsTest {
 	@Test
 	void checkRequestsStopsWaitingAtTheTime() {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll();
-		AssertionError e = assertThrows(AssertionError.class, () -> run(new CheckRequests(), context(browser), "matching", "/plain", "waitMillis", "300"));
+		CheckRequests check = new CheckRequests();
+		AbstractSailCall.Context context = context(browser);
+		AssertionError e = assertThrows(AssertionError.class, () -> run(check, context, "matching", "/plain", "waitMillis", "300"));
 		long reads = browser.calls().stream().filter("requests"::equals).count();
 		assertAll(() -> assertTrue(e.getMessage().contains("but 0 matched"), e.getMessage()),
 					() -> assertTrue(reads > 1, "the log was read again while waiting: " + reads));
+	}
+
+	/**
+	 * A check of a log that began in its own step fails, as the log holds nothing from the steps before and would pass
+	 * a check that nothing was sent; it says to start watching with an earlier call. A log that began before the step is
+	 * checked.
+	 */
+	@Test
+	void checkRequestsFailsWhenTheLogBeganInItsStep() throws Exception {
+		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withWatchingSince(Instant.now().minusSeconds(1));
+		AbstractSailCall.Context before = context(browser);
+		String counted = run(new CheckRequests(), before, "matching", "nothing", "exactly", "0");
+		AbstractSailCall.Context step = context(browser);
+		browser.withWatchingSince(Instant.now()); // the control began watching as this step asked for it
+		CheckRequests check = new CheckRequests();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> run(check, step, "matching", "nothing", "exactly", "0"));
+		assertAll(() -> assertEquals("0", counted, "a log that began before the step"),
+					() -> assertEquals("CheckRequests reads the request log, which only began in this step, as the browser's control began watching then:"
+										+ " it holds nothing from the steps before. Put a call before the steps to watch, such as RequestLog with"
+										+ " clear=true, so watching begins there",
+										e.getMessage()));
 	}
 
 	@Test

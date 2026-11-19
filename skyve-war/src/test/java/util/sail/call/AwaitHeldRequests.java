@@ -16,16 +16,18 @@ import util.sail.browser.RequestInterception;
  * Its variable, if the step names one, is the number held. Needs {@code REQUEST_INTERCEPTION}.
  */
 public final class AwaitHeldRequests extends AbstractSailCall {
+	private static final String TIMEOUT_MILLIS = "timeoutMillis";
+
 	/** Takes count and timeoutMillis. */
 	public AwaitHeldRequests() {
-		super("count", "timeoutMillis");
+		super("count", TIMEOUT_MILLIS);
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
 		int count = parameters.integer("count", 1, 1);
-		String timeoutMillis = parameters.optional("timeoutMillis");
-		Duration timeout = (timeoutMillis == null) ? context.timeout() : Duration.ofMillis(parameters.integer("timeoutMillis", 1, 1));
+		String timeoutMillis = parameters.optional(TIMEOUT_MILLIS);
+		Duration timeout = (timeoutMillis == null) ? context.timeout() : Duration.ofMillis(parameters.integer(TIMEOUT_MILLIS, 1, 1));
 		RequestInterception interception = require(context, RequestInterception.class);
 		interception.awaitHeld(count, timeout);
 		return String.valueOf(interception.heldCount());

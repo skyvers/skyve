@@ -2,6 +2,7 @@ package util.sail.call;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -19,27 +20,31 @@ import util.sail.browser.PageLifecycle;
  * No variable. Needs {@code PAGE_LIFECYCLE}.
  */
 public final class FreezeTab extends AbstractSailCall {
+	/** What the step does to the tab. */
+	private enum Action {
+		FREEZE, RESUME
+	}
+
+	private static final String ACTION = "action";
+
 	/** Takes action and index. */
 	public FreezeTab() {
-		super("action", "index");
+		super(ACTION, "index");
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
-		String action = parameters.required("action").trim();
-		boolean freeze = "freeze".equals(action);
-		if ((! freeze) && (! "resume".equals(action))) {
-			throw new IllegalArgumentException(name() + "'s action must be freeze or resume, not " + action);
-		}
+		parameters.required(ACTION);
+		Action action = parameters.choice(ACTION, Action.class, Action.FREEZE);
 		int index = parameters.requiredInteger("index", 0);
 		PageLifecycle lifecycle = require(context, PageLifecycle.class);
 		List<String> handles = new ArrayList<>(context.driver().getWindowHandles());
 		if (index >= handles.size()) {
 			throw new IllegalStateException(String.format("%s can't %s tab %d (0 being the first): %d tab(s) are open",
-															name(), action, Integer.valueOf(index), Integer.valueOf(handles.size())));
+															name(), action.name().toLowerCase(Locale.ROOT), Integer.valueOf(index), Integer.valueOf(handles.size())));
 		}
 		String handle = handles.get(index);
-		if (freeze) {
+		if (action == Action.FREEZE) {
 			lifecycle.freeze(handle);
 		}
 		else {

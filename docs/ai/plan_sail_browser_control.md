@@ -138,7 +138,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
    | `Window` | resize | `WINDOW` |
 
    Method names and signatures are the implementer's, within these operations. No CDP type, JSON or method name may appear in an interface.
-3. **Entry point.** `SailBrowserControl.of(WebDriver)` returns one control per driver (cached, released when the driver quits), chosen by browser: Chromium (Chrome, Edge) gets `ChromiumBrowserControl`, anything else `WebDriverBrowserControl`. `supports(Capability)` answers. `require(Capability)` returns the interface, or throws decision 4's exception.
+3. **Entry point.** `SailBrowserControl.of(WebDriver)` returns one control per driver (cached, and released once the driver has quit, at the next `of` call), chosen by browser: Chromium (Chrome, Edge) gets `ChromiumBrowserControl`, anything else `WebDriverBrowserControl`. `supports(Capability)` answers. `require(Capability)` returns the interface, or throws decision 4's exception.
 4. **Unsupported means skipped.** `SailCapabilityUnavailableException extends org.opentest4j.TestAbortedException`, with the message "`<call>` needs `<capability>`, which `<browser>` doesn't support".
    - W0 checks it surfaces as skipped through `SailWorkflow`, `SailSuite` and `runStrings`. If it doesn't, make the smallest change in `SailWorkflow`/`SailSuite` to keep it as aborted (approved below).
    - A step after a skip doesn't run.
@@ -152,6 +152,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
    - `CheckRequests`: `matching` (a regex over `METHOD url`), `failed`, `exactly`/`atLeast`/`atMost`, `waitMillis`, `clear`, `ignoreServiceWorkerCopies` (default true). Its variable is the count.
    - `RequestLog`: `matching`, `clear`. Its variable is the log as JSON.
    - basix's `CountRequests` (URL substring) is not ported: `CheckRequests` covers it.
+   - **Log start (Mike, review round 1):** the control begins watching the first time a step asks for it, not when the browser starts. `CheckRequests` and `CheckDialog` (any check that reads the request log or the record of dialogs) fail with a clear message when watching only began in their own step, telling the author to put an earlier call (such as `RequestLog clear=true`) before the steps to watch.
 9. **Test files** live in `SailTestFiles` (`util.sail`), not `SailMedia`. Each file is reused if it's already there with the right size. The playable video needs a browser (the leg's driver); the rest don't.
 10. **No op-codes, and no `sail.xsd` change.** `docs/sail.md` records the promotion rule: a capability can become an op-code once it has Chromium and Firefox implementations. Scripts using op-codes then declare capabilities so unsupported browsers skip.
 11. **`SailMedia` is unchanged.**
@@ -161,16 +162,17 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
     - Both use `BrowserConfiguration.profile` and `InterpretedWebDriverExecutor.getSelenide()`.
     - Read basix's `DeviceStart`, `RestartBrowser` and `RestartDevice`, and generalise away the basix-only property `bhm.sail.profiles`.
     - Both get their folder from `SailProfiles` (decision 13), not by building the path themselves.
-13. **Profile housekeeping.** `SailProfiles` owns the root (`sail.profiles`). Every profile folder is `<root>/<run token>/<profile>`.
+13. **Profile housekeeping.** `SailProfiles` owns the root (`sail.profiles`). Every profile folder is `<root>/<run token>-<pid>/<profile>`, the pid being the JVM's (Mike, review round 1: two JVMs can start a run in the same millisecond). `SailProfiles` writes a marker file (`.sail-run`) in each run folder it creates (Mike, review round 1).
     - **When a run ends, after its browsers have quit:** delete `<root>/<run>` if the run passed. If it failed, keep it and print `SAIL device profiles kept for the failed run <run>: <folder>`.
       - A run of its own ends when its `runResources`, `runFiles` or `runStrings` call returns, or when its suite member does.
-      - A run shared with `shareRunAcrossCalls()` ends when the workflow is closed. `SailWorkflow` implements `AutoCloseable`. `close()` stops any kept browser, then ends the shared run's profiles. The run failed if any of its calls threw.
-      - `AbstractInterpretedSailWorkflow`'s `@AfterAll` closes its workflow. A test that builds its own shared workflow closes it itself, e.g. with try-with-resources.
+      - A run shared with `shareRunAcrossCalls()` ends when the workflow is closed. `SailWorkflow` has a plain `close()`; it does not implement `AutoCloseable` (Mike, review round 1, amending the W5 design). `close()` stops any kept browser, then ends the shared run's profiles. The run failed if any of its calls threw.
+      - `AbstractInterpretedSailWorkflow`'s `@AfterAll` closes its workflow. A test that builds its own shared workflow closes it itself, in a `finally`.
     - **`sail.profiles.keep`**: `failed` (the default) keeps a failed run's folder, `all` keeps every run's, `none` deletes every run's.
     - **Sweep**, once per JVM, before the first profile folder is given out. It deletes each run folder under the root that is:
-      - named like a run token (base-36 letters and digits only; anything else under the root is left alone and never followed through a link);
+      - named like a run folder, `<run token>-<pid>` (base-36 letters and digits, a hyphen and digits), and holding the marker; anything else under the root is left alone and never followed through a link (Mike, review round 1: the marker too);
       - older than `sail.profiles.keepHours` (default 12) by both its token's start time and the newest last-modified time of any file inside it;
       - not in use: no profile in it has a Chrome `SingletonLock` naming a live process. On macOS and Linux the lock is a symbolic link to `host-pid`; check the pid with `ProcessHandle.of(pid)`. On Windows, a profile in use can't be deleted: a folder that fails to delete is skipped.
+      - Before a run folder is deleted, it is renamed under the root to `<run token>-<pid>.deleting-<pid>` (the second pid the deleting JVM's), and its marker is deleted last. A folder that can't be renamed (on Windows, one in use) is left whole; a delete that stopped halfway is swept later.
       - This catches runs that were killed, stopped with Ctrl-C or ended in a JVM that never reached `close()`, and the failed runs that were kept.
     - Housekeeping never fails or skips a test. A folder that can't be deleted gets a one-line warning naming it and the reason.
     - Several JVMs (parallel lanes) may share a root. A sweep only deletes runs past the keep time, never the current JVM's runs, and skips profiles in use, so it is safe beside another lane's run.
@@ -184,7 +186,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
 
 - the packages `util.sail.browser` and `util.sail.call`, and the classes and interfaces named in Scope and in decisions 2–12;
 - `SailSettings` keys `sail.profiles`, `sail.profiles.keep` and `sail.profiles.keepHours`;
-- `SailProfiles`, `SailWorkflow implements AutoCloseable` with `close()`, the `@AfterAll` close in `AbstractInterpretedSailWorkflow`, and the extra Chrome and Edge arguments (decisions 13 and 14);
+- `SailProfiles`, `SailWorkflow.close()` (a plain method, not `AutoCloseable`: amended by Mike in review round 1), the `@AfterAll` close in `AbstractInterpretedSailWorkflow`, and the extra Chrome and Edge arguments (decisions 13 and 14);
 - the smallest `SailWorkflow`/`SailSuite` change for decision 4, if W0 shows it's needed;
 - the decision-4 change in `InterpretedWebDriverExecutor` (approved by Mike on 2026-11-19): `executeCall` and `runSteps` rethrow a `TestAbortedException` as it is, under every strategy, so no later step runs; under Verify, `executeAutomation` lets failures recorded before the skip win, naming the skip in the message;
 - test fixtures under `src/test/resources/util/sail/browser/**`.
@@ -215,7 +217,7 @@ Anything else needs Mike's approval: ask, with the reason and the smallest alter
 - **W4, `SailTestFiles`:** port basix's `Media` and `PlayableVideo`, with tests: sizes, dimensions, reuse, and a playable video, checked by loading it into a `<video>` and reading its duration.
 - **W5, profile housekeeping and launch flags** (decisions 13 and 14):
   - `SailProfiles` and its settings; `StartDevice` and `RestartDevice` use it;
-  - `SailWorkflow`: end each run's profiles; `AutoCloseable`; `AbstractInterpretedSailWorkflow` closes it in `@AfterAll`;
+  - `SailWorkflow`: end each run's profiles; `close()` (`AutoCloseable` until review round 1); `AbstractInterpretedSailWorkflow` closes it in `@AfterAll`;
   - the Chrome and Edge arguments, with the `--disable-features` merge;
   - `SailProfilesTest`, on a temporary root with no browser: a passed run is deleted, a failed one is kept, `keep` all and none; the sweep deletes an old run, keeps a recent one (old token but a fresh file), keeps one with a `SingletonLock` naming this JVM's pid, deletes one whose lock names a dead pid, and leaves a non-token folder and a symbolic link alone;
   - `CrossBrowserSeleniumTest`: the new arguments are present, and an extra `--disable-features` is merged, not duplicated;
@@ -472,6 +474,84 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
   - `SailTestFiles`' four methods, their reuse rules and `FOLDER`; `SailSettings` (`sail.profiles`, `sail.profiles.keep` = `failed`, `all`, `none`, `sail.profiles.keepHours` = 12); `SailProfiles` (the kept-run message, the sweep's checks, the warning line); `CrossBrowserSelenium` (flags for Chrome and Edge, the `--disable-features` merge); `SailWorkflow implements AutoCloseable`; `AbstractInterpretedSailWorkflow.closeWorkflowsAndReleaseServer()`;
   - the example XML is the request-rules case of `StandardCallsSailIT`, shortened, in the attribute style of `sail.md`'s examples.
 - Not run: no tests (docs only). Anchors in the new text point at headings that exist.
+
+### Review round 1
+
+Sources: three reviews of `d5e7d995c4` (PR, rubric, slop) and the final gates, listed in `~/skyve-sail-work/browser-control/fix-list.md` (items 1 to 28). Mike decided four points (below). Fixed in one commit, "SAIL browser control: review and gate fixes (round 1)".
+
+**Mike's decisions (2026-11-19), which amend the plan above:**
+- **Log start** (decision 8): `CheckRequests` and `CheckDialog` fail when the control began watching in their own step, telling the author to start watching with an earlier call. The control's Javadoc no longer claims it connects before a step asks.
+- **Plain `close()`** (decision 13, "Approved new constructs"): `SailWorkflow` is not `AutoCloseable`. The `@SuppressWarnings("resource")` and try-with-resources fallout is gone; `SailLoad` and `SailLoadTest` are back to their base form.
+- **Pid in the run folder** (decision 13): `<root>/<run token>-<pid>/<profile>`.
+- **Marker** (decision 13): each run folder gets `.sail-run`; the sweep deletes only marked folders.
+
+**Fixed:**
+- `ChromiumBrowserControl`:
+  - Selenium 4.38's `Connection` does hand each event to a cached thread pool (`Connection.java` lines 66 and 236), so events can be handled out of order. Now a session whose detach comes before its attach isn't added; a setting sent to a session Chrome says has gone ("Session with given id not found") drops that session instead of failing the step; and the threading comment says so.
+  - Held requests: `clearRules()` lets them go and clears the rules in one turn of the DevTools thread. A held request is dropped when its frame navigates (`Page.frameNavigated`) or its page detaches, but only if it was held before that event: each event's Selenium sequence number is kept, so pool reordering can't drop a newer one. CDP reports nothing else: after a reload, no `Network.loadingFailed` came for the paused request, and its interception id was invalid in every session (checked with a throwaway probe and the IT). The `release()` Javadoc is corrected.
+  - `toOwner`: Chrome's errors were checked with a throwaway probe. A request that isn't the session's gives "Invalid InterceptionId." (or "Fetch domain is not enabled", or "Session with given id not found"); a bad status gives "Invalid http status code or phrase"; a bad header gives "Invalid header: X Bad". Any error other than the first three now fails the paused request (`Fetch.failRequest`) and prints why, rather than leaving it paused.
+  - `watchingSince()` was added to `RequestLog` and `Dialogs` (the time the record began) for the log-start rule, plus constants for the repeated CDP strings, and the unneeded `@SuppressWarnings("resource")`.
+- `SailBrowserControl`: `of` makes a control outside the lock, then `putIfAbsent`, releasing the loser. Its Javadoc says a quit driver's control is released at the next `of` call. A shared `POLLING` (100 ms) constant replaces the four copies.
+- Calls:
+  - `RespondToRequests` takes a `status` of 100 to 599, and `RewriteRequestHeaders` takes only header names that are RFC 7230 tokens.
+  - Each `ShiftClock` script is numbered, so a repeated shift adds.
+  - `SwitchTab` and `FreezeTab` read `action` as private enums through `choice`, so the message is now "must be one of [OPEN, SWITCH, CLOSE]". `SwitchTab` calls `require` once.
+  - `CheckRequests.pattern` uses `required`. `SailCallParameters.list` no longer wraps its result. The repeated parameter names are constants.
+- `CheckRequests` (PR11): a request a service worker forwards that fails in the network is counted twice. The page's copy gets only `loadingFailed`, with no `fromServiceWorker` mark, and CDP has no other marker. This is documented in the call's Javadoc and `sail.md`, and pinned in `ChromiumBrowserControlIT` (two unmarked failed entries).
+- `SailProfiles`:
+  - pid and marker;
+  - a rename before deleting, to `<token>-<pid>.deleting-<pid>`, with the marker deleted last, and a renamed half-deleted folder still swept;
+  - a run folder holding only its marker is deleted quietly even when the run failed;
+  - `runFolder(settings, run)` is a query that registers nothing, and `RestartDevice` uses it.
+- `SailWorkflow`: calling `shareRunAcrossCalls()` again ends the run shared so far, and `close()` clears `sharedRun`. `AbstractInterpretedSailWorkflow`'s `@AfterAll` closes each workflow in its own try, rethrows the first failure with the rest suppressed, and releases the lock in `finally`. Its queue now holds `Runnable` closers, package-private for its test.
+- Tests:
+  - `SailProfilesTest` disables the link, `touch -h` and `true` cases on Windows, and its permission tests assume the folder isn't writable (not root). The 26-assert sweep test is split in two.
+  - `StandardCallsSailIT` checks only its own run's folder: the script reports `StartDevice`'s folder to the test server. It asserts on server hits in the three tests Sonar flagged, and checks the folder name ends in `-<pid>`.
+  - Sonar's test-code issues are fixed: S5778 setup moved out of `assertThrows`, S1130, S6213 (`record` became `note` in the fake, and `record` became `seen` in `CheckDialog`), S7158 and S2147.
+- Stricter scan: no raw tab in the `ShiftClock` script. `RequestRule.globMatches` uses a helper, `matchedWidth`, with no `continue`.
+- Docs (`sail.md`, `skyve-10-changes.md`):
+  - when watching begins;
+  - the measured saving (151 MB to 12 MB, Chrome 158, W0), with Edge described as not measured and 8.5 MB as the fixture page's profile;
+  - the three profile keys in the "Keys" table;
+  - the new folder layout, the marker, the rename and plain `close()`.
+- New and changed tests:
+  - `RequestCallsTest.checkRequestsFailsWhenTheLogBeganInItsStep` and `BrowserCallsTest.checkDialogFailsWhenTheRecordBeganInItsStep`;
+  - status and header checks;
+  - two `ShiftClock`s give two scripts, and in `StandardCallsSailIT` two one-day shifts give two days;
+  - `SailProfilesTest`: `runsOfTwoJvmsWithOneTokenHaveFoldersOfTheirOwn`, `theSweepLeavesAloneWhatIsNotARunFolder` (unmarked, token-only and half-deleted folders), `aRunFolderThatCannotBeRenamedIsLeftWhole`, `theRunFolderQueryMakesNothing` and `aRunWithoutAProfileEndsQuietly`;
+  - `SailWorkflowTest.sharingARunAgainEndsTheRunSharedSoFar`;
+  - `util.AbstractInterpretedSailWorkflowTest` (new);
+  - `ChromiumBrowserControlIT.awaitingHeldRequestsWakesForOneHeldLater` (the page holds its fetch 500 ms after the wait begins, plus the timeout message) and `heldRequestsAreForgottenWhenThePageGivesUpOrTheRulesAreCleared`.
+
+**Not done:**
+- Item 27, a skip with a media recorder attached (`InterpretedWebDriverExecutor` lines about 430): `InterpretedWebDriverExecutorTest` doesn't mock `SailMedia`, which the fix list made the condition.
+- Item 28, Javadoc leads: `javadoc-standards.md` asks for a verb lead on "the element", with only method examples. It says nothing different for types or constants, and the neighbouring harness types and `SailSettings` keys use noun leads. So, as the fix list asked, they are unchanged.
+
+**Waived (from the fix list):**
+- R2, test seams: package-private constructors and helpers are the repo's usual test access, not public API.
+- R12, test class naming: the call tests are grouped by family, as the W3 brief allowed.
+- S1, `answerDialog` unused by a call: decision 2's `Dialogs` row includes "answer", and the IT proves it.
+- The kept-folder message says "failed run" for a skipped run: decision 13 fixes the text, and the docs say a skipped run's folder is kept.
+- Stricter scan only:
+  - S106 (`System.out`): the harness prints its run messages that way.
+  - S1845 (`profiles()` and `PROFILES`): the `SailSettings` convention.
+  - S1452 (wildcards in `Selenide<?, …>`): the existing types use them.
+  - S6539 (21 dependencies): one class over one CDP connection, as decisions 2 and 3 lay out.
+
+No finding was shown to be wrong. PR2 was confirmed in the Selenium source. PR3's reload case was confirmed by the IT: the old code kept the stale id.
+
+**Re-gate (JDK 21, Chrome 158.0.8127.37, `-DforkCount=1 -Dsurefire.rerunFailingTestsCount=0`):**
+- Unit: `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest,util.AbstractInterpretedSailWorkflowTest'` ran 331 tests, with 0 failures, errors or skips and no flakes. The extra class is the new `util` test, outside `util.sail.**`.
+- ITs: `ChromiumBrowserControlIT` (20), `StandardCallsSailIT` (6) and `SailTestFilesIT` (1), in one JVM, headless, three runs in a row: 27/27 each. `skyve-war/target/sail-profiles` was empty after every run.
+- Red/green, each restored byte for byte:
+  - Log start (`requireWatchingBefore` never throwing): `checkRequestsFailsWhenTheLogBeganInItsStep` and `checkDialogFailsWhenTheRecordBeganInItsStep` failed.
+  - Unmarked folder (the marker check removed): `theSweepLeavesAloneWhatIsNotARunFolder` failed.
+  - Pid (the name without it): 7 of 10 in `SailProfilesTest` failed, including `runsOfTwoJvmsWithOneTokenHaveFoldersOfTheirOwn` ("each JVM's own folder ==> expected: not equal").
+  - Rename (no rename): `aRunFolderThatCannotBeRenamedIsLeftWhole` ("nothing in it is deleted") and `aFolderThatCannotBeDeletedGetsAWarningNotAFailure` failed.
+- ECJ 3.46 (`--release 17`, skyve-war prefs, core, ext, web and war compiled together): 0 warnings on changed lines, and 0 on unchanged lines of changed files.
+- Sonar (`skyve-local-browser-control`, test-code rules): the first re-scan found 2 new issues on changed lines (S6213, a parameter named `record`, and S5778 in the new IT case), both fixed. The second found 0 issues on changed lines against base `8e9d436801`, and the gate's 2 issues on unchanged lines of changed files remain.
+- After the Sonar fixes (a parameter rename and a hoisted `Duration`), the unit set plus `ChromiumBrowserControlIT` ran 351 tests, all passing, and ECJ again found 0 warnings on changed lines. `StandardCallsSailIT` and `SailTestFilesIT` weren't rerun, as those fixes don't touch them.
+- Not verified: Windows (the rename-before-delete and the `@DisabledOnOs` guards), Edge, a headed run and Firefox in this round.
 
 ## User validation suggestions
 

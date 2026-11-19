@@ -167,7 +167,8 @@ class AbstractSailCallTest {
 		assertAll(cases().stream().map(c -> (Executable) () -> {
 			Map<String, String> given = parameters(c.valid());
 			given.put("bogus", "1");
-			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> c.call().call(given, context), c.name());
+			AbstractSailCall call = c.call();
+			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> call.call(given, context), c.name());
 			assertEquals(c.name() + " doesn't take the parameter [bogus]: it takes " + c.takes(), e.getMessage(), c.name());
 		}));
 		assertEquals(List.of(), browser.calls(), "nothing was done in the browser");
@@ -184,7 +185,9 @@ class AbstractSailCallTest {
 		PrimeFacesSelenide selenide = mockSelenide();
 		AbstractSailCall.Context context = context(() -> driver, selenide, d -> firefox);
 		assertAll(Stream.concat(cases().stream().map(c -> (Executable) () -> {
-									TestAbortedException e = assertThrows(TestAbortedException.class, () -> run(c.call(), context, c.valid()), c.name());
+									AbstractSailCall call = c.call();
+									String[] valid = c.valid();
+									TestAbortedException e = assertThrows(TestAbortedException.class, () -> run(call, context, valid), c.name());
 									assertEquals(c.name() + " needs " + c.needs() + ", which firefox doesn't support", e.getMessage(), c.name());
 									if (! c.needs().startsWith("a ")) {
 										assertSame(SailCapabilityUnavailableException.class, e.getClass(), c.name());
@@ -199,8 +202,11 @@ class AbstractSailCallTest {
 	@Test
 	void aCallNeedsABrowser() {
 		Executor executor = mock(Executor.class);
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> new Offline().call(Map.of(), executor));
-		IllegalArgumentException unknown = assertThrows(IllegalArgumentException.class, () -> new Offline().call(Map.of("x", "1"), executor));
+		Offline offline = new Offline();
+		Map<String, String> none = Map.of();
+		Map<String, String> unknownParameter = Map.of("x", "1");
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> offline.call(none, executor));
+		IllegalArgumentException unknown = assertThrows(IllegalArgumentException.class, () -> offline.call(unknownParameter, executor));
 		assertAll(() -> assertTrue(e.getMessage().startsWith("Offline needs a browser, but runs under Executor"), e.getMessage()),
 					() -> assertEquals("Offline doesn't take the parameter [x]: it takes none", unknown.getMessage(), "the parameters first"));
 	}

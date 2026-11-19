@@ -3,6 +3,7 @@ package util.sail.call;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -14,15 +15,21 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import util.sail.browser.LoggedRequest;
 import util.sail.browser.RequestLog;
+import util.sail.browser.SailBrowserControl;
 
 /**
  * Checks the browser's request log (every request any page or worker of the leg's browser made since the browser's
  * control began watching, or the last {@code clear}): how many requests match, for a test of what the page did or
- * didn't send.
+ * didn't send. The control begins watching the first time a step asks for it, so a check in the step where watching
+ * began fails, as the log would hold nothing from the steps before: put a call before the steps to watch, such as
+ * {@code RequestLog} with {@code clear=true}.
  * <p>
  * A request that a service worker answers for the page is logged as the page made it, marked as answered by the
  * worker, and, when the worker fetched it from the network, again as the worker made it. By default the page's marked
- * copy is left out, so such a request is counted once (and one the worker answered from its cache isn't counted).
+ * copy is left out, so such a request is counted once (and one the worker answered from its cache isn't counted). But
+ * a request the worker forwards that fails in the network is counted twice: Chrome reports no answer for the page's
+ * copy, so nothing marks it as the worker's (narrow {@code matching}, or count {@code failed} requests with that in
+ * mind).
  * <ul>
  * <li>{@code matching}: a regular expression searched for in {@code <METHOD> <url>} (required), such as
  * 		{@code POST .*}{@code /media\?.*offset=0&}</li>
@@ -39,20 +46,19 @@ import util.sail.browser.RequestLog;
  * the last few in the log. Needs {@code REQUEST_LOG}.
  */
 public final class CheckRequests extends AbstractSailCall {
-	/** How often the log is checked while waiting: as often as {@code Selenide.waitFor} checks a page. */
-	private static final Duration POLLING = Duration.ofMillis(100);
 	/** How many of the last requests in the log a failure lists. */
 	private static final int LAST = 8;
+	private static final String FAILED = "failed";
 
 	/** Takes matching, failed, exactly, atLeast, atMost, waitMillis, clear and ignoreServiceWorkerCopies. */
 	public CheckRequests() {
-		super("matching", "failed", "exactly", "atLeast", "atMost", "waitMillis", "clear", "ignoreServiceWorkerCopies");
+		super("matching", FAILED, "exactly", "atLeast", "atMost", "waitMillis", "clear", "ignoreServiceWorkerCopies");
 	}
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
 		Pattern pattern = pattern(parameters, "matching");
-		Boolean failed = (parameters.optional("failed") == null) ? null : Boolean.valueOf(parameters.bool("failed", false));
+		Boolean failed = (parameters.optional(FAILED) == null) ? null : Boolean.valueOf(parameters.bool(FAILED, false));
 		int exactly = parameters.integer("exactly", -1, 0);
 		int atLeast = parameters.integer("atLeast", -1, 0);
 		int atMost = parameters.integer("atMost", -1, 0);
@@ -66,13 +72,14 @@ public final class CheckRequests extends AbstractSailCall {
 
 		RequestLog log = require(context, RequestLog.class);
 		AtomicReference<List<LoggedRequest>> all = new AtomicReference<>(log.requests());
+		requireWatchingBefore(context, log.watchingSince(), "request log");
 		List<LoggedRequest> counted = matching(all.get(), pattern, failed, ignoreCopies);
 		if ((! wanted.holds(counted.size())) && (waitMillis > 0)) {
 			// the event: the page sends the requests a little later. The log raises no event to wait on, so it is
 			// checked every 100 ms, as Selenide.waitFor checks a page, until the count holds or the time is up
 			try {
 				new FluentWait<>(log).withTimeout(Duration.ofMillis(waitMillis))
-										.pollingEvery(POLLING)
+										.pollingEvery(SailBrowserControl.POLLING)
 										.until(l -> {
 											List<LoggedRequest> now = l.requests();
 											all.set(now);
@@ -153,11 +160,8 @@ public final class CheckRequests extends AbstractSailCall {
 
 	/** Returns a required parameter that is a regular expression; see {@link #optionalPattern}. */
 	private static @Nonnull Pattern pattern(@Nonnull SailCallParameters parameters, @Nonnull String name) {
-		Pattern result = optionalPattern(parameters, name);
-		if (result == null) {
-			throw new IllegalArgumentException(parameters.call() + " needs the parameter " + name);
-		}
-		return result;
+		parameters.required(name);
+		return Objects.requireNonNull(optionalPattern(parameters, name));
 	}
 
 	/**
