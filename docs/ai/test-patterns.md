@@ -385,6 +385,12 @@ Builders that create real JSF/PrimeFaces components (e.g. `TabularLayoutBuilder`
 - Tooling: H2 test base + `@Mock` for persistence wrappers/reporting APIs.
 - Guidance: Use when pure unit tests are too synthetic and full integration is too heavy.
 
+## Capturing Mail
+
+- Use `org.skyve.impl.mail.CaptureMailService` (in `skyve-ext` main, so every module and assembled app can see it); do not write another nested fake.
+- Either `MailServiceStaticSingleton.set(capture)` and restore in `@AfterEach`, or `capture.install()` / `capture.uninstall()`, which also switch off `SMTP_TEST_BOGUS_SEND` and `SMTP_TEST_RECIPIENT` so the real recipients are recorded, and put everything back afterwards.
+- Assert on `getSent()` / `getLastSent()`, `getBulkSent()` / `getLastBulkSent()` and `getWritten()` / `getLastWritten()`; the `getLast...` methods throw when nothing was recorded.
+
 ## skyve-war as a Full-Stack Test Harness
 
 `skyve-war` is the assembled reference application and the only module that runs with the full Skyve metadata context: real customer metadata, the complete test module domain, a real `SessionFactory`, and a `SuperUser` with access to all documents. Tests that need any of those things belong here.

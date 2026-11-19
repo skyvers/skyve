@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,10 +20,10 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.DataBuilder;
-import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -182,7 +181,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 	void anUnknownEmailAddressGetsNoMailAndNoError() throws Exception {
 		WebUtil.requestPasswordReset(CUSTOMER, "nobody-" + System.nanoTime() + "@skyve.org");
 
-		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.getSent().size());
 	}
 
 	@Test
@@ -197,7 +196,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 
 		assertNotNull(tokenOf(a.name));
 		assertEquals(tokenOf(a.name), tokenOf(b.name));
-		assertEquals(1, capture.sendCount);
+		assertEquals(1, capture.getSent().size());
 	}
 
 	private record Fixture(String name, String token) {
@@ -287,25 +286,6 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 		try (Connection c = EXT.getDataStoreConnection(); Statement s = c.createStatement()) {
 			c.setAutoCommit(true);
 			return s.executeUpdate("update ADM_Configuration set passwordResetTokenExpiryMinutes = " + minutes);
-		}
-	}
-
-	private static class CaptureMailService implements MailService {
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// not needed
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// not needed
 		}
 	}
 }

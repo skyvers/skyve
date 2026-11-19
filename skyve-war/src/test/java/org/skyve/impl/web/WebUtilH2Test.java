@@ -18,7 +18,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -37,6 +36,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -135,8 +135,8 @@ class WebUtilH2Test extends AbstractH2Test {
 
 		WebUtil.requestPasswordReset(CUSTOMER, email);
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains(email));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains(email));
 
 		applyTestUser();
 		List<PersistentBean> logs = CORE.getPersistence()
@@ -516,7 +516,7 @@ class WebUtilH2Test extends AbstractH2Test {
 			ProvidedRepositoryFactory.set(originalRepository);
 		}
 
-		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.getSent().size());
 	}
 
 	private void applyTestUser() {
@@ -560,27 +560,6 @@ class WebUtilH2Test extends AbstractH2Test {
 		try (Connection connection = EXT.getDataStoreConnection();
 				Statement statement = connection.createStatement()) {
 			return statement.executeUpdate("update ADM_Configuration set passwordResetTokenExpiryMinutes = " + minutes);
-		}
-	}
-
-	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// no-op
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// no-op
 		}
 	}
 }
