@@ -2552,6 +2552,120 @@ In Firefox it is skipped at the first call that needs interception.
 </automation>
 ```
 
+### Writing your own call
+
+An application's own call can use the browser control the same way the standard
+calls do, by extending `util.sail.call.AbstractSailCall` instead of implementing
+[`SailCall`](#scripts-and-calls) directly. The base:
+
+- checks the step's parameters against the names the call takes, so an unknown
+  name fails with a message naming the call and the names it takes;
+- gives the call its leg as an `AbstractSailCall.Context`: `driver()` and `control()` for the
+  browser running now (they follow a restart), `selenide()`, `baseUrl()`, `runToken()` (what
+  `{run}` gives) and `timeout()` (`sail.timeoutSeconds`, for a wait that takes no `timeoutMillis`);
+- fails with an `IllegalStateException` if the automation runs without a browser.
+
+Put the class in the application's own test package, not under `util`:
+`skyve:assemble` deletes every file under the application's `src/test/java/util`
+before it copies Skyve's in.
+
+```java
+package sail.calls;
+
+import java.time.Duration;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import util.sail.browser.NetworkConditions;
+import util.sail.call.AbstractSailCall;
+import util.sail.call.SailCallParameters;
+
+/**
+ * Slows the leg's browser to a mobile network, until {@code util.sail.call.Online}.
+ * <ul>
+ * <li>{@code speed}: {@code slow3g} (the default) or {@code fast3g}</li>
+ * </ul>
+ * Its variable, if the step names one, is the speed. Needs {@code NETWORK_CONDITIONS}.
+ */
+public final class MobileNetwork extends AbstractSailCall {
+	enum Speed {
+		SLOW_3G(400, 400, 400),
+		FAST_3G(150, 1600, 750);
+
+		final int latencyMillis;
+		final int downKbps;
+		final int upKbps;
+
+		Speed(int latencyMillis, int downKbps, int upKbps) {
+			this.latencyMillis = latencyMillis;
+			this.downKbps = downKbps;
+			this.upKbps = upKbps;
+		}
+	}
+
+	/** Takes speed. */
+	public MobileNetwork() {
+		super("speed");
+	}
+
+	@Override
+	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
+		Speed speed = parameters.choice("speed", Speed.class, Speed.SLOW_3G);
+		slow(require(context, NetworkConditions.class), speed);
+		return speed.name();
+	}
+
+	static void slow(@Nonnull NetworkConditions network, @Nonnull Speed speed) {
+		network.throttle(Duration.ofMillis(speed.latencyMillis), speed.downKbps * 1000L / 8L, speed.upKbps * 1000L / 8L);
+	}
+}
+```
+
+A script runs it as `<call className="sail.calls.MobileNetwork"><parameter name="speed" value="fast3g" /></call>`.
+
+The standard calls follow these rules, and an application's calls should too:
+
+- **Read every parameter before the first `require`.** Then a mistake in the
+  script (a missing or bad value) fails on every browser, and only a valid step skips.
+- **Get capabilities only through `require(context, Interface.class)`.** It names
+  the call in the skip message. Use `context.control().supports(...)` only where the
+  call has a fallback.
+- **Read parameters with `SailCallParameters`**, so the messages match the standard calls':
+  - `required` and `optional`, where a blank value counts as left out;
+  - `bool`, `integer` and `requiredInteger`, each with a minimum;
+  - `list`, comma separated;
+  - `choice` and `requiredChoice`, which take an enum constant's name in any case, with or
+    without underscores (`fast3g` is `FAST_3G`).
+- **Throw the right exception.** Throw an `AssertionError` for what the call checks and
+  finds wrong, and an `IllegalArgumentException` for a parameter it can't use. See
+  [Scripts and calls](#scripts-and-calls) for what each exception does to the run.
+- **Check that a record began before the call's own step.** A call that reads the
+  request log or the dialogs calls `requireWatchingBefore(context, log.watchingSince(),
+  "request log")` first, as `CheckRequests` does
+  ([When watching begins](#capabilities)).
+- **Document it the way the standard calls are.** The class Javadoc lists each
+  parameter with its default, the variable, and what the call needs.
+
+**Testing a call without a browser.** `util.sail.browser.FakeBrowserControl`
+implements every capability's interface and records each operation called, in order,
+as text. `FakeBrowserControl.supportingAll()` has every capability;
+`new FakeBrowserControl("firefox")` has none. The `with...` methods give it the
+requests, dialogs, cookies, held requests and tabs a call should find.
+`AbstractSailCall.Context` can only be made by the harness, so test what the call
+does with the interface, as `MobileNetwork.slow` takes it:
+
+```java
+@Test
+void fast3gThrottles() {
+	FakeBrowserControl browser = FakeBrowserControl.supportingAll();
+	MobileNetwork.slow(browser, MobileNetwork.Speed.FAST_3G);
+	assertEquals(List.of("throttle PT0.15S 200000 93750"), browser.calls());
+}
+```
+
+Test what is in `run` itself, reading the parameters and the skip, in a SAIL IT, as
+`StandardCallsSailIT` does.
+
 ### Test files
 
 `util.sail.SailTestFiles` makes files for upload steps, so a test does not need
