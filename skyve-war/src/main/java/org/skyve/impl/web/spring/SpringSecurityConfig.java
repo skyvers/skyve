@@ -39,7 +39,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 	private static final String LOGIN_ERROR_QUERY = "?error";
-	private static final String REMEMBER_ME_PARAMETER = "remember";
+	/** The remember-me cookie and sign in parameter name. */
+	public static final String REMEMBER_ME_PARAMETER = "remember";
 
 	/**
 	 * Security adapter that provides concrete Spring Security collaborators.

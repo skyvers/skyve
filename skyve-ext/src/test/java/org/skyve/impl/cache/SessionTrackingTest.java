@@ -137,6 +137,43 @@ class SessionTrackingTest {
 	}
 
 	@Test
+	void removeOtherSessionsKeepsOnlyTheGivenSessionAndCountsTheOthers() {
+		HttpSession sessionA = session("A");
+		StateUtil.addSession(USER_ID, sessionA);
+		StateUtil.addSession(USER_ID, session("B"));
+		StateUtil.addSession(USER_ID, session("C"));
+		StateUtil.addSession("other-user", session("D"));
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, sessionA), is(2));
+
+		assertThat(StateUtil.getSessions(USER_ID), is(Set.of("A")));
+		assertTrue(StateUtil.checkSession(USER_ID, sessionA));
+		assertFalse(StateUtil.checkSession(USER_ID, session("B")));
+		// another user's sessions are untouched
+		assertThat(StateUtil.getSessions("other-user"), is(Set.of("D")));
+		StateUtil.removeSessions("other-user");
+	}
+
+	@Test
+	void removeOtherSessionsWithNothingElseRemovesNothing() {
+		HttpSession sessionA = session("A");
+		StateUtil.addSession(USER_ID, sessionA);
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, sessionA), is(0));
+		assertThat(StateUtil.getSessions(USER_ID), is(Set.of("A")));
+		assertThat(StateUtil.removeOtherSessions("nobody", sessionA), is(0));
+	}
+
+	@Test
+	void removeOtherSessionsDoesNotRegisterAnUnregisteredSession() {
+		StateUtil.addSession(USER_ID, session("B"));
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, session("A")), is(1));
+
+		assertThat(StateUtil.getSessionCount(USER_ID), is(0));
+	}
+
+	@Test
 	void removeSessionRemovesEntryWhenLastSession() {
 		HttpSession sessionA = session("A");
 		StateUtil.addSession(USER_ID, sessionA);

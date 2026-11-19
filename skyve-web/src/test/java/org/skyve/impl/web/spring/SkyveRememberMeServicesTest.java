@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -138,5 +139,49 @@ class SkyveRememberMeServicesTest {
 		otherServices.logout(request, response, authentication);
 
 		verify(other).removeUserTokens(USER);
+	}
+
+	@Test
+	void extractSeriesReadsTheSeriesOfThisBrowsersCookie() {
+		hasCookie(cookieValue("pcSeries", "token"));
+
+		assertEquals("pcSeries", SkyveRememberMeServices.extractSeries(request, "remember"));
+	}
+
+	/** Spring URL-encodes the Base64 series ("+", "/" and "=") into the cookie, and stores the decoded series. */
+	@Test
+	void extractSeriesDecodesTheUrlEncodedSeriesAsTheTokenStoreHoldsIt() {
+		hasCookie(cookieValue("0PjFbQ0J05e%2BYG2CIMTo7A%3D%3D", "rvuoMYXOalndH3e9VZSUgA%3D%3D"));
+
+		assertEquals("0PjFbQ0J05e+YG2CIMTo7A==", SkyveRememberMeServices.extractSeries(request, "remember"));
+	}
+
+	@Test
+	void extractSeriesToleratesAMissingPadding() {
+		String unpadded = cookieValue("pcSeries1", "t").replace("=", "");
+		hasCookie(unpadded);
+
+		assertEquals("pcSeries1", SkyveRememberMeServices.extractSeries(request, "remember"));
+	}
+
+	@Test
+	void extractSeriesIsNullWithoutAUsableCookie() {
+		when(request.getCookies()).thenReturn(null);
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
+
+		when(request.getCookies()).thenReturn(new Cookie[] {new Cookie("JSESSIONID", "x")});
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
+
+		hasCookie("not base 64 !");
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
+
+		hasCookie("");
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
+
+		hasCookie(Base64.getEncoder().encodeToString("one:two:three".getBytes(StandardCharsets.UTF_8)));
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
+
+		hasCookie(Base64.getEncoder().encodeToString(":token".getBytes(StandardCharsets.UTF_8)));
+		assertNull(SkyveRememberMeServices.extractSeries(request, "remember"));
 	}
 }

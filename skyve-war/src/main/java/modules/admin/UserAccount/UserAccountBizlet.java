@@ -22,14 +22,22 @@ public class UserAccountBizlet extends Bizlet<UserAccount> {
 	 */
 	@Override
 	public UserAccount newInstance(UserAccount bean) throws Exception {
-		// Populate the users current sessions
+		populateSessions(bean);
+		return bean;
+	}
+
+	/**
+	 * Replaces an account's sessions with the current user's currently registered session ids.
+	 *
+	 * @param bean The account to populate.
+	 */
+	public static void populateSessions(UserAccount bean) {
 		final List<Generic> sessions = bean.getSessions();
+		sessions.clear();
 		StateUtil.getSessions(CORE.getUser().getId()).forEach(s -> {
 			Generic g = Generic.newInstance();
 			g.setMemo1(s);
 			sessions.add(g);
 		});
-		
-		return bean;
 	}
 }

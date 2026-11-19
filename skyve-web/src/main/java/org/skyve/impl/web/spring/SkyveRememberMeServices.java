@@ -1,5 +1,9 @@
 package org.skyve.impl.web.spring;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
@@ -10,6 +14,8 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -68,5 +74,39 @@ public class SkyveRememberMeServices extends PersistentTokenBasedRememberMeServi
 		catch (@SuppressWarnings("unused") InvalidCookieException e) {
 			LOGGER.warn("Sign out found an invalid remember-me cookie; no token series removed");
 		}
+	}
+
+	/**
+	 * Reads the token series from a request's remember-me cookie, to identify this browser's row in the token store.
+	 * The cookie value is Base64 of {@code series:token}, as Spring writes it.
+	 *
+	 * @param request The request, whose cookies are read.
+	 * @param cookieName The remember-me cookie's name.
+	 * @return The series, or {@code null} if the request has no such cookie or it is not of the form {@code series:token}.
+	 */
+	public static @Nullable String extractSeries(@Nonnull HttpServletRequest request, @Nonnull String cookieName) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies == null) {
+			return null;
+		}
+		for (Cookie cookie : cookies) {
+			if (cookieName.equals(cookie.getName())) {
+				try {
+					// as AbstractRememberMeServices.decodeCookie: the value may have lost its padding
+					StringBuilder value = new StringBuilder(cookie.getValue());
+					while ((value.length() % 4) != 0) {
+						value.append('=');
+					}
+					String[] tokens = new String(Base64.getDecoder().decode(value.toString()), StandardCharsets.UTF_8).split(":", -1);
+					// NB Spring URL-encodes each part when it writes the cookie ("+" and "=" of the Base64 series), and the
+					// series in the token store is the decoded one
+					return ((tokens.length == 2) && (! tokens[0].isEmpty())) ? URLDecoder.decode(tokens[0], StandardCharsets.UTF_8) : null;
+				}
+				catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+					return null; // not Base64, or not URL encoded
+				}
+			}
+		}
+		return null;
 	}
 }
