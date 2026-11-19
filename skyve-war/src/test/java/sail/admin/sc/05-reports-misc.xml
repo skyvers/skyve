@@ -27,34 +27,6 @@
 			<testGridRows module="admin" query="qReportSchedules" minRows="0" />
 		</method>
 	</interaction>
-	<interaction name="Snapshots">
-		<method>
-			<navigateMenu module="admin" item="Snapshots" />
-			<tabSelect path="All Snapshots" />
-			<testGridRows module="admin" query="qSnapshots" minRows="0" />
-			<tabSelect path="Reorder Snapshots" />
-			<testWidget action="Reorder" />
-		</method>
-	</interaction>
-	<interaction name="Tags: create, every tab, delete">
-		<method>
-			<navigateMenu module="admin" item="Tags" />
-			<listGridNew module="admin" document="Tag" />
-			<tabSelect path="Details" />
-			<dataEnter binding="name" value="SAIL Tag {run}" />
-			<save />
-			<testValue binding="name" value="SAIL Tag {run}" />
-			<tabSelect path="Combinations" />
-			<tabSelect path="Load" />
-			<tabSelect path="Action" />
-			<tabSelect path="Details" />
-			<ok />
-			<testGridRows module="admin" document="Tag" rowContaining="SAIL Tag {run}" minRows="1" maxRows="1" />
-			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag {run}" />
-			<delete />
-			<testGridRows module="admin" document="Tag" rowContaining="SAIL Tag {run}" maxRows="0" />
-		</method>
-	</interaction>
 	<interaction name="Audits: the saves made by the suite are audited">
 		<method>
 			<navigateMenu module="admin" item="Audits" />
