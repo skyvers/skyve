@@ -1,0 +1,21 @@
+{
+	"bizModule": "admin",
+	"bizDocument": "ReportTemplate",
+	"name": "SAILImported",
+	"templateName": "SAILImported.ftlh",
+	"description": "A report specification imported by the SAIL admin suite",
+	"enabled": true,
+	"reportType": "freemarker",
+	"outputFormat": "CSV",
+	"template": "Imported ${title}",
+	"scheduled": false,
+	"datasets": [
+		{
+			"bizModule": "admin",
+			"bizDocument": "ReportDataset",
+			"datasetName": "title",
+			"datasetType": "constant",
+			"query": "SAIL imported"
+		}
+	]
+}

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), SmartClient: Reports, as a report administrator (DevOps) works with them. Design a Freemarker
+	report with the wizard: a constant dataset, a BizQL dataset whose :uname makes a parameter that the wizard refuses until it has a
+	type; run Test Query (and have a class dataset that is not there refused), Test Report, Download Template and Export Report
+	Specification; a name already in use is refused; the Report Schedules list shows only enabled reports; Report Manager exports,
+	and validates, refuses and imports report specifications (sail/files/sail-report-spec.json); then the report is deleted.
+	Scheduling, the Reports list and running a report are PrimeFaces-only views: see pf/07-reports.xml, a workflow that
+	designs here, runs and schedules there, and checks Report Schedules here. The Jasper report type (Test Jasper Report, Download
+	Jasper Report) needs a .jrxml made in the Jasper desktop tooling and is not driven (see findings).
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Reports menu: the SmartClient tools, not the Reports list">
+		<method>
+			<testMenu module="admin" item="Reports/Reports" present="false" />
+			<testMenu module="admin" item="Reports/Report Manager" />
+			<testMenu module="admin" item="Reports/Report Designer" />
+			<testMenu module="admin" item="Reports/Report Schedules" />
+		</method>
+	</interaction>
+	<interaction name="Report Designer: design a report with the wizard">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridNew module="admin" document="ReportTemplate" createView="true" />
+			<dataEnter binding="name" value="SAIL{run}" />
+			<dataEnter binding="description" value="A SAIL report" />
+			<dataEnter binding="generateExisting" value="Existing" match="label" />
+			<action name="Next" />
+			<dataEnter binding="template" value="Report ${title}" />
+			<dataEnter binding="outputFormat" value="CSV" match="label" />
+			<dataGridNew binding="datasets" />
+			<dataEnter binding="datasetName" value="title" />
+			<dataEnter binding="datasetType" value="Constant" match="label" />
+			<dataEnter binding="query" value="SAIL title" />
+			<zoomOut />
+			<dataGridNew binding="datasets" />
+			<dataEnter binding="datasetName" value="users" />
+			<dataEnter binding="datasetType" value="BizQL" match="label" />
+			<dataEnter binding="query" value="select a from {admin.User} a where a.userName = :uname" />
+			<testGridRows binding="parent.parameters" minRows="1" maxRows="1" />
+			<zoomOut testSuccess="false" />
+			<testFailure message="Parameter Type is required" />
+			<dataGridZoom binding="parent.parameters" row="0" />
+			<testValue binding="name" value="uname" />
+			<dataEnter binding="description" value="The user name" />
+			<dataEnter binding="type" value="Text" match="label" />
+			<dataEnter binding="textDefaultValue" value="admin" />
+			<dataEnter binding="textTestValue" value="admin" />
+			<zoomOut />
+			<zoomOut />
+			<save createView="false" />
+			<testSuccess />
+			<testValue binding="name" value="SAIL{run}" />
+			<ok />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Report Designer: a report name already in use is refused">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridNew module="admin" document="ReportTemplate" createView="true" />
+			<dataEnter binding="name" value="SAIL{run}" />
+			<dataEnter binding="generateExisting" value="Existing" match="label" />
+			<action name="Next" />
+			<dataEnter binding="template" value="Duplicate" />
+			<save testSuccess="false" />
+			<testFailure message="has already been defined" />
+			<cancel />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Datasets: TestQuery runs a query and refuses a class that is not there">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+			<testGridRows binding="datasets" minRows="2" maxRows="2" />
+			<dataGridZoom binding="datasets" rowContaining="users" />
+			<action name="TestQuery" />
+			<testValue binding="results" value="admin - admin (person)" />
+			<zoomOut />
+			<dataGridNew binding="datasets" />
+			<dataEnter binding="datasetName" value="missing" />
+			<dataEnter binding="datasetType" value="Class" match="label" />
+			<dataEnter binding="query" value="sail.NoSuchDataset" />
+			<action name="TestQuery" testSuccess="false" />
+			<comment>A DomainException: the user sees only the generic error and its reference, the server log has "Unable to create an instance of sail.NoSuchDataset"</comment>
+			<testFailure message="An error occurred while processing your request" />
+			<remove />
+			<testGridRows binding="datasets" minRows="2" maxRows="2" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Test Report, Download Template and Export Report Specification, and a Test Report refused with unsaved changes">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+			<action name="TestReport" />
+			<action name="DownloadTemplate" />
+			<action name="ExportReportSpecification" />
+			<dataEnter binding="description" value="A changed SAIL report" />
+			<action name="TestReport" testSuccess="false" />
+			<comment>A DomainException: the user sees only the generic error, the server log has "This report template has unsaved changes"</comment>
+			<testFailure message="An error occurred while processing your request" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Report Schedules: only enabled reports are listed">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Schedules" />
+			<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+			<dataEnter binding="enabled" value="false" />
+			<save />
+			<testValue binding="enabled" value="false" />
+			<ok />
+			<navigateMenu module="admin" item="Reports/Report Schedules" />
+			<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" maxRows="0" />
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+			<dataEnter binding="enabled" value="true" />
+			<save />
+			<ok />
+			<navigateMenu module="admin" item="Reports/Report Schedules" />
+			<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Report Manager: export, and import validated and imported">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Manager" />
+			<action name="ExportReportSpecifications" testSuccess="false" />
+			<testFailure message="Please select at least one report to export" />
+			<dataEnter binding="currentReports" value="Report - SAIL{run}" />
+			<action name="ExportReportSpecifications" />
+			<upload action="ImportReportSpecifications" file="sail/files/sail-report-spec.json" />
+			<testMessage contains="Report validated ok" />
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAILImported" maxRows="0" />
+			<navigateMenu module="admin" item="Reports/Report Manager" />
+			<upload action="ImportReportSpecifications" file="sail/files/sail-report-invalid.json" testSuccess="false" />
+			<testFailure message="The file was not recognised as a valid report" />
+			<comment>PRODUCT GAP: a file that is neither .json nor .zip (sail/files/sail-invalid.txt) should be refused with "File type ... is not recognised as either json or zip", but ImportReportSpecifications.upload(ImportReportSpecifications.java:160) calls upload.getMimeType().toString() on a null mime type and throws a NullPointerException, so the user sees only the generic error. Not asserted here: see findings.md</comment>
+			<dataEnter binding="importActionType" value="Validate then import report configurations and templates" match="label" />
+			<upload action="ImportReportSpecifications" file="sail/files/sail-report-spec.json" />
+			<testMessage contains="Reports uploaded successfully" />
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAILImported" minRows="1" maxRows="1" />
+			<navigateMenu module="admin" item="Reports/Report Manager" />
+			<comment>Importing the same specification again replaces the report of that name</comment>
+			<dataEnter binding="importActionType" value="Validate then import report configurations and templates" match="label" />
+			<upload action="ImportReportSpecifications" file="sail/files/sail-report-spec.json" />
+			<testMessage contains="Reports uploaded successfully" />
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAILImported" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAILImported" />
+			<testValue binding="description" value="A report specification imported by the SAIL admin suite" />
+			<testGridRows binding="datasets" minRows="1" maxRows="1" />
+			<delete />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAILImported" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Report Designer: delete the report">
+		<method>
+			<navigateMenu module="admin" item="Reports/Report Designer" />
+			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+			<delete />
+			<testGridRows module="admin" document="ReportTemplate" rowContaining="SAIL{run}" maxRows="0" />
+			<navigateMenu module="admin" item="Reports/Report Schedules" />
+			<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
