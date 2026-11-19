@@ -62,7 +62,15 @@
 
 ## AI validation results
 
-RESULTS
+- **Unit and H2 tests.** `SessionTrackingTest` (39, 3 new), `SkyveRememberMeTokenRepositoryTest` (25, 3 new), `SkyveRememberMeServicesTest` (13, 4 new), `UserBizletH2Test` (25, 7 new), `SignOutH2Test` (7), `SignOutOtherSessionsH2Test` (2), `SignOutEverywhereH2Test` (4): all pass.
+- **Red/green.** Each behaviour was broken in turn and a test failed: this browser's series ignored (4 tests fail in `SignOutH2Test` and `SignOutOtherSessionsH2Test`); `removeOtherSessions` dropping the kept session (2 `SessionTrackingTest` fail); disabled users not purged (3 `UserBizletH2Test` fail, including the re-enable test); `postDelete` doing nothing (1); rename ignored (1); no privilege check in the admin action (the non-administrator test fails: nothing thrown); the admin action leaving sessions (2); the series not URL-decoded (a `SkyveRememberMeServicesTest` fails). The browser test's real red: its first run failed because the cookie's series is URL-encoded and the first `extractSeries` did not decode it, so "all but this series" removed this browser's token too (the PC was signed out after a restart). That is what the cookie-shape unit and H2 tests now pin.
+- **Browser (disposable server: private WildFly 35 base in the scratchpad, exploded war built from this branch, H2, port 9080, content directory and database new; stopped afterwards).** `SignOutOtherSessionsSailIT` (2 tests) and `SignOutOtherSessionsSmartClientSailIT` (2 tests) pass. In the first: the phone restarted after the PC pressed Sign out of all other sessions is signed out and the PC's own session carries on and survives a restart; the same for the administrator's Sign out everywhere on their own user (it keeps this browser). SmartClient needed the SmartClient 13.0 runtime copied into the exploded war as `isomorphic130` (the repo does not ship it).
+- **Gate 1.** `mvn -o -B package` in `skyve-ext`, `skyve-web` and `skyve-war`: BUILD SUCCESS (3483, 3426 and 5132 tests, 0 failures; the war's ITs are not part of `package`). Run on JDK 21.
+- **Eclipse JDT (IDE compiler 3.48, repo prefs, `skyve-core/target/classes` first on the classpath)** over every changed file: fourteen problems on changed lines at first (null-safety on `getCustomerName()`, `getBizCustomer()`, `Util.i18n`; `UserProxy.userNamePropertyName` accessed through `User`; an unnecessary `static-method` suppression; a field hiding `InternalBaseH2Test.CUSTOMER`), all fixed; none remain on changed lines.
+- **Spotless check** (the war only; in a scratch git copy with `origin/master` set to the base commit, `-DspotlessFiles` for the changed war files): `SignOut`, `SignOutEverywhere`, `SignOutOtherSessions`, `RememberMeTokens` and `SignOutEverywhereH2Test` needed formatting, applied to those files only; now clean.
+- **Local Sonar** (`skyve-sonar`, project `skyve-local-sign-out`): four issues on changed lines (`java:S1130`, `java:S5778` in `SignOutEverywhereH2Test`; `java:S2699` twice in the SmartClient IT), all fixed; none remain. The container was already running when this work reached it, so it was used and not stopped.
+- **JaCoCo** (`-Pcoverage`, focused tests) over changed lines: `StateUtil`, `SkyveRememberMeTokenRepository`, `SkyveRememberMeServices`, `SignOut`, `SignOutOtherSessions` and `UserAccountBizlet` fully covered; `UserBizlet` and `SignOutEverywhere` covered but for a few branches (the rename stash when `originalValues` holds a non-String, the persisted-or-not test in `preSave`); two lines were uncovered at first (the rename stash in `preSave`, the unsaved-user message) and got tests.
+- **Not run:** the full SAIL IT suites; the SAIL ITs in a browser on SQL Server, MySQL or PostgreSQL (the new SQL is standard `delete ... where userName = ? and series <> ?`); a second live session of the same user at once in a browser (one browser runs at a time, so the other-sessions part is unit and H2 tested, and the browser tests prove the other device's Remember me is gone); the Sign out everywhere button on a user other than the administrator in a browser (H2 only, there is one user on a disposable server); a cluster with a shared session cache.
 
 ## Acceptance
 
@@ -72,4 +80,4 @@ RESULTS
 - [x] Both renderers; the user menu's Sign out is unchanged.
 - [x] Every path is listed with what it did and does now.
 - [x] No schema change.
-- [ ] Gates (see the results).
+- [x] Gates pass (see the results).
