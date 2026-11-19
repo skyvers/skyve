@@ -13,6 +13,17 @@
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
+	<interaction name="Leftover guard: no SAIL Import contacts or Contact definitions from an earlier run">
+		<method>
+			<comment>The names in sail-import-contacts.xlsx are fixed, and so is the definition (module and document only): leftovers from a failed run (pf or sc) would make this member fail or zoom the wrong definition. Reset or clean the data by hand if this fails.</comment>
+			<navigateList module="admin" document="Contact" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAIL Import" />
+			<testGridRows module="admin" document="Contact" maxRows="0" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<testGridRows module="admin" query="qImportExport" rowContaining="Contact" maxRows="0" />
+		</method>
+	</interaction>
 	<interaction name="Import definition: choose the document, get the template, upload the spreadsheet">
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
@@ -87,11 +98,16 @@
 			<dataEnter binding="documentName" value="Contact" match="code" />
 			<testWidget action="RunExport" enabled="true" />
 			<comment>Changing the document generates a column for each persistent scalar attribute of Contact</comment>
-			<testGridRows binding="importExportColumns" minRows="4" />
+			<testGridRows binding="importExportColumns" minRows="4" maxRows="4" />
 			<testGridRows binding="importExportColumns" rowContaining="Contact Type" minRows="1" />
 			<testGridRows binding="importExportColumns" rowContaining="Mobile" minRows="1" />
+			<comment>ResetColumns regenerates the columns from the document: remove one, then reset and the original four are back</comment>
+			<dataGridRemove binding="importExportColumns" rowContaining="Mobile" />
+			<testGridRows binding="importExportColumns" minRows="3" maxRows="3" />
+			<testGridRows binding="importExportColumns" rowContaining="Mobile" maxRows="0" />
 			<action name="ResetColumns" />
-			<testGridRows binding="importExportColumns" minRows="4" />
+			<testGridRows binding="importExportColumns" minRows="4" maxRows="4" />
+			<testGridRows binding="importExportColumns" rowContaining="Mobile" minRows="1" maxRows="1" />
 			<comment>LANGUAGE NEED: RunExport is a download too: pressed and checked for errors only</comment>
 			<action name="RunExport" />
 			<save />

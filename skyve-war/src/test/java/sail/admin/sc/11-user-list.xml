@@ -111,11 +111,11 @@
 	</interaction>
 	<interaction name="Mail is only logged: turn on bogus send">
 		<method>
-			<comment>Invitations send email. With mailBogusSend on the mail is written to the Mail Log and not sent (98-destructive.xml saves the same values). The setting is left on.</comment>
+			<comment>Invitations send email. With mailBogusSend on the mail is written to the Mail Log and not sent (98-destructive.xml saves the same values). The test recipient is run-unique so the Mail Log rows are this run's; it is set back to sail.test@example.com after the check, with bogus send left on (as 98 leaves it).</comment>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
 			<tabSelect path="Startup Configuration" />
 			<dataEnter binding="startup.mailBogusSend" value="true" />
-			<dataEnter binding="startup.mailTestRecipient" value="sail.test@example.com" />
+			<dataEnter binding="startup.mailTestRecipient" value="mailrcpt{run}@example.com" />
 			<save />
 			<testSuccess />
 			<testValue binding="startup.mailBogusSend" value="true" />
@@ -150,9 +150,16 @@
 			<testGridRows module="admin" query="qUsers" rowContaining="invite{run}" minRows="2" maxRows="2" />
 			<navigateMenu module="admin" item="Security Admin/Mail Log" />
 			<tabSelect path="Database Mail Logs" />
-			<comment>Bogus send redirects each mail to the test recipient, so the log names that address, not the invited one: a row for each invitation (at least: another run's may be listed)</comment>
+			<comment>Bogus send redirects each mail to the test recipient, so the log names that run-unique address, not the invited one: exactly one row for each invitation</comment>
+			<testGridRows module="admin" query="qMailLogs" rowContaining="mailrcpt{run}@example.com" minRows="2" maxRows="2" />
 			<testGridRows module="admin" query="qMailLogs" rowContaining="Invitation to join" minRows="2" />
-			<testGridRows module="admin" query="qMailLogs" rowContaining="sail.test@example.com" minRows="2" />
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<dataEnter binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailTestRecipient" value="sail.test@example.com" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailTestRecipient" value="sail.test@example.com" />
 		</method>
 	</interaction>
 	<interaction name="User wizard: Back, refusals, a generated user name and a generated password">
