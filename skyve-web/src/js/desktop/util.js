@@ -554,7 +554,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	createContentUploadUrl: function (contentFormItem, image) {
-		const instance = contentFormItem.form._view.gather(false, true);
+		const instance = contentFormItem.form._view.gather(false);
 		const display = contentFormItem.display || (image ? "image" : "link");
 		const capture = contentFormItem.capture || "none";
 		let url = `upload.xhtml?_u=boundContent&_n=${SKYVE.Util.unsanitiseBinding(
@@ -710,7 +710,7 @@ isc.BizUtil.addClassMethods({
 						return;
 					}
 					isc.BizUtil._registerContentFormItem(contentFormItem);
-					const instance = contentFormItem.form._view.gather(false, true);
+					const instance = contentFormItem.form._view.gather(false);
 					let url = `imageMarkup.xhtml?_n=${SKYVE.Util.unsanitiseBinding(
 						contentFormItem.name,
 					)}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;

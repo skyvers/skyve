@@ -3628,15 +3628,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Starts an on-change handler body for the current widget context.
 	 *
-	 * <p>A form item the user types into (a text field without completion, a password, a text area, a spinner or a
-	 * colour picker) whose change handler calls the server fires it when the value is committed, as PrimeFaces' change
-	 * event and Skyve's own date and number items do, not on every keypress: SmartClient's default
-	 * {@code changeOnKeypress: true} sent a request on each key, and the request's prompt took the focus, so the keys
-	 * typed meanwhile were lost. The value is committed when the user leaves the item, often by
-	 * clicking a button, so the handler's server events run as a blur handler's do: deferred, with the view's
-	 * {@code _blurry} marker set, so that the button's click is run after them rather than lost under their request.
-	 * A handler with only client-side actions is left firing on every keypress, as it sends no request.
-	 *
 	 * @param changeable The changeable.
 	 * @param parentVisible The parent visible.
 	 * @param parentEnabled The parent enabled.
@@ -3646,23 +3637,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (getCurrentForm() == null) {
 			code.append("changed:function(){var view=this._view;");
 		}
-		else if ((((changeable instanceof TextField text) && (text.getComplete() == null)) ||
-						(changeable instanceof Password) ||
-						(changeable instanceof TextArea) ||
-						(changeable instanceof ColourPicker)) &&
-					changeable.getChangedActions().stream().anyMatch(a -> (a instanceof RerenderEventAction) || (a instanceof ServerSideActionEventAction))) {
-			visitingAsync = true;
-			// As the blur handler: no _blurry marker while requests are pending, to stop loops with multiple fields
-			code.append("changeOnKeypress:false,");
-			code.append("changed:function(form,item,value){var view=form._view;view._blurry=isc.RPCManager.requestsArePending()?null:item;");
-		}
 		else {
 			code.append("changed:function(form,item,value){var view=form._view;");
 		}
 	}
 
 	/**
-	 * Closes the on-change handler body and ends any async sequencing that it started.
+	 * Closes the on-change handler body.
 	 *
 	 * @param changeable The changeable.
 	 * @param parentVisible The parent visible.
@@ -3671,7 +3652,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
-		visitingAsync = false;
 	}
 
 	/**
