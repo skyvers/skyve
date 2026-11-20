@@ -2039,7 +2039,7 @@ ITs where you meant to run unit tests.
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC | `sail` |
 | `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept | SC | `sail` |
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC | `sail` |
-| `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Week Ending Date, which mirrors the Biz Hub Apps weekly timesheet's week ending date (a date in a text field whose change and blur handlers both rerender): a date entered and left with Tab sends its two rerenders one after the other, as before 16 November 2026, never two at once on one conversation as the fast-typing change did (the W6b race). It counts the view's requests in flight in the browser, without holding answers, and checks the most at once is 1, and that the server, counting outside the conversation, saw both rerenders | SC | `sail` |
+| `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Week Ending Date, which mirrors the Biz Hub Apps weekly timesheet's week ending date (a date in a text field whose change and blur handlers both rerender): a date entered and left with Tab sends its two rerenders one after the other, as before 16 November 2026, never two at once on one conversation as the fast-typing change did (see SC-8 under [Runtime Bugs Found](#runtime-bugs-found)). It counts the view's requests in flight in the browser, without holding answers, and checks the most at once is 1, and that the server, counting outside the conversation, saw both rerenders | SC | `sail` |
 | `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC | `sail` |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC | `sail` `admin` `recording` |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), `sc-recorder-round-trip-converters.xml` (dates, times and numbers on other converters than the defaults, and a decimal with no converter), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC | `sail` `recording` |
@@ -3962,15 +3962,21 @@ human speed works. It was fixed in `c42551e257` (with follow-ups in
 server changed on commit and deferred its server events as a blur handler's
 do. Mike reverted that fix for this release: the deferred change handler raced
 the field's blur rerender, so a field with a rerender in both its change and
-blur handlers sent its two rerenders at once on one conversation (the Biz Hub
-Apps timesheets' W6b failure); before it, and again now, they go one after the
-other. The revert also takes out the follow-ups' commit of a field's typed
-text before a gather, so a save, action or zoom made while a date's text is
-still being typed gathers the value from before the typing, as before
-16 Nov (SmartClient never commits a date item's text until it is left). The
-change and blur handling is to be redone as a whole after the release; `SmartClientRerenderOnceSailIT` checks that the
-Rerender Fixture, which mirrors the Apps week ending date, sends its change and
-blur rerenders one after the other, never at once.
+blur handlers sent its two rerenders at once on one conversation. That broke
+the Biz Hub Apps weekly timesheet's W6b workflow: its week ending date has a
+rerender in both handlers, the rerender rebuilds the timesheet's lines, and the
+view then showed lines the conversation did not hold. Before it, and again now,
+typing a value and leaving with Tab sends the change's rerender at once and the
+blur's after its 100 ms deferral, when the first has been answered; nothing
+makes the deferred rerender wait, so a server slower than that could still
+overlap them. The revert also takes out the follow-ups' commit of a field's
+typed text before a gather, so a save, action or zoom made while a date, time
+or number item's text is still being typed gathers the value from before the
+typing, as before 16 Nov (SmartClient commits those items' text only when they
+are left). The change and blur handling is to be redone as a whole after the
+release; `SmartClientRerenderOnceSailIT` checks that the Rerender Fixture,
+which mirrors the Apps week ending date, sends its change and blur rerenders
+one after the other, never at once.
 
 *Workaround in the suites.* The SmartClient executor types a field with a
 change handler one key at a time, waiting for what each key starts before it

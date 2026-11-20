@@ -16,11 +16,16 @@ import util.sail.BrowserConfiguration.Browsers;
  * <p>
  * The Rerender Fixture's Week Ending Date mirrors the Biz Hub Apps weekly timesheet's week ending date, which no other
  * kitchen sink fixture does: a date shown by a text field, with a rerender in both its change and its blur handlers.
- * Leaving it after a change sends both rerenders, and, as before 16 November 2026, the second is sent only once the
- * first has been answered. The fast-typing change (c42551e257) deferred the change handler's rerender as the blur
- * handler's is, so both were sent at once on one conversation: the server kept whichever finished last, the view showed
- * whichever response arrived last, and a rerender that rebuilds a collection could leave the view showing rows the
- * conversation did not hold (the Apps timesheets' W6b failure).
+ * Entering a date and leaving with Tab sends both rerenders, and, as before 16 November 2026, the blur's rerender is
+ * sent after the change's has been answered: the change handler sends its rerender at once, and the blur handler's is
+ * deferred (100 ms) and sent later. That holds for this sequence; nothing in SmartClient's code makes the deferred
+ * rerender wait for an answer, so a server slower than the deferral could still overlap them (to be covered when the
+ * change and blur handling is redone). The fast-typing change (c42551e257) deferred the change handler's rerender as
+ * the blur handler's is, so both were sent at once on one conversation: the server kept whichever finished last, the
+ * view showed whichever response arrived last, and a rerender that rebuilds a collection could leave the view showing
+ * rows the conversation did not hold. That is how the Biz Hub Apps weekly timesheet's W6b workflow failed (a staff
+ * timesheet resubmitted, then zoomed into). The fixture has no collection, so the test measures the overlap, not
+ * that symptom.
  * <p>
  * The test counts the view's requests in flight in the browser, as they are sent and answered, and checks that there
  * was never more than one. It does not hold answers back: it measures the overlap there is. The fixture counts the
@@ -34,8 +39,11 @@ class SmartClientRerenderOnceSailIT extends AbstractSmartClientInterpretedSail {
 
 	/**
 	 * Counts the view's requests in flight in window._sailInFlight, and the most at once in window._sailMostInFlight.
-	 * Every server event of an edit view is sent through its values manager's saveData and answered through the callback
-	 * given to it. The answers are not held: each goes to the view as it arrives.
+	 * Every server event of an edit view is sent through its values manager's saveData, so the count goes up as each is
+	 * sent: an overlap is counted before anything can lose it. The answers are not held: each goes to the view as it
+	 * arrives. The values manager keeps one callback, so when two requests overlap the first's callback is replaced and
+	 * its decrement never runs; the count can then stay high, which only matters for a measurement after this one, and
+	 * this test reads the most at once a single time.
 	 */
 	private static final String COUNT_IN_FLIGHT = "var vm = isc.BizUtil.getCurrentView()._vm;" +
 													"var save = vm.saveData;" +
