@@ -156,6 +156,24 @@ class SailMediaPagesSailIT {
 	}
 
 	@Test
+	void playingAfterAJumpGoesOnFromTheJumpedToStep() throws IOException {
+		openThePlayer();
+		new Select(driver.findElement(By.id("speed"))).selectByValue("8");
+		steps().get(0).click();
+		assertShown(1, "f2.png", "the first step as it finished");
+		// note each frame shown from now on, to tell going on from the step apart from starting again
+		((JavascriptExecutor) driver).executeScript("var img = document.getElementById('frame'); window.sailShown = [];" +
+														"new MutationObserver(function () { window.sailShown.push(img.getAttribute('src')); })" +
+														".observe(img, {attributes: true, attributeFilter: ['src']});");
+		WebElement play = driver.findElement(By.id("play"));
+		play.click();
+		new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> Boolean.valueOf("Play".equals(play.getText()) && "f4.png".equals(frame())));
+		Object shown = ((JavascriptExecutor) driver).executeScript("return window.sailShown.join(',');");
+		assertAll(() -> assertShown(3, "f4.png", "played to the end"),
+					() -> assertEquals("f3.png,f4.png", shown, "on from the step's frame, not from the start"));
+	}
+
+	@Test
 	void playingRunsToTheEndAndStops() throws IOException {
 		openThePlayer();
 		new Select(driver.findElement(By.id("speed"))).selectByValue("8");

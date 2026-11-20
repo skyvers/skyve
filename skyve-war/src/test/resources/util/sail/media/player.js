@@ -46,7 +46,7 @@ function show() {
 }
 function go(k) { i = Math.max(0, Math.min(F.length - 1, k)); show(); if (playing) schedule(); }
 /* shows a step as it finished: the last frame drawn by its end (the screen as it was during it when nothing was
-   drawn then), as the film strip's screenshot shows it; Play goes on from there */
+   drawn then), as the film strip's screenshot shows it; Play goes on from there (from the start, at the video's end) */
 function jump(k) {
 	pin = k; go(frameAt(S[k].e));
 }
@@ -57,8 +57,9 @@ function schedule() {
 }
 function pause() { playing = false; clearTimeout(timer); play.textContent = 'Play'; }
 play.onclick = function () { if (playing) { pause(); } else { if (i + 1 >= F.length) { i = 0; pin = -1; } playing = true; play.textContent = 'Pause'; schedule(); } };
+/* from before the first step (shown -1), or with no frames (-2), Step goes to the first step */
 $('prev').onclick = function () { if (S.length) jump(Math.max(0, shown - 1)); };
-$('next').onclick = function () { if (S.length) jump(Math.min(S.length - 1, shown + 1)); };
+$('next').onclick = function () { if (S.length) jump(Math.min(S.length - 1, Math.max(0, shown + 1))); };
 speed.onchange = function () { if (playing) schedule(); };
 seek.oninput = function () { pin = -1; go(parseInt(seek.value, 10)); };
 document.addEventListener('keydown', function (e) {

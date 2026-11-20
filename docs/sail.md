@@ -2340,7 +2340,8 @@ strip and the player into the same folder.
   pause, previous and next step, a speed of 0.5x to 8x and a slider. Beside
   the frames, the steps are listed in words under their interactions; clicking
   one, or moving a step, shows it as it finished (its last frame, as the film
-  strip's screenshot shows it), and Play goes on from there. Space plays and pauses, and the arrow keys move a
+  strip's screenshot shows it), and Play goes on from there (from the start
+  when that is the video's end). Space plays and pauses, and the arrow keys move a
   step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
   Selenium was built for. Frames are written and acknowledged on a thread of
