@@ -491,60 +491,16 @@ isc.EditView.addMethods({
 	},
 
 	/**
-	 * Re-renders the edit view following a blur event, after a slight delay (see _delayBlurryCall).
-	 * @param {boolean} validate - whether to validate before the request.
-	 * @param {string} source - the binding of the widget whose event this is.
+	 * Re-renders the edit view following a blur event.
 	 */
 	rerenderBlurryAction: function (validate, source) {
-		this._delayBlurryCall("_rerenderBlurryAction", validate, source);
-	},
-
-	/**
-	 * Schedules a blurry rerender or action, unless the same call is already waiting to run.
-	 * Leaving a field runs its change handler and its exit handler together. When both call the server (a field with a
-	 * rerender in both its onChangedHandlers and onBlurHandlers, say), each schedules its call, as neither sees a
-	 * request pending yet. Two calls would send two requests at once on one conversation; the server keeps the
-	 * conversation of whichever finished last, and the view shows the response that arrived last, which need not be
-	 * the same one. A rerender that rebuilds a collection then leaves the view showing rows that the conversation
-	 * does not hold (zooming into one fails). So a call with the same method, validate and target as one waiting is
-	 * dropped: the waiting call gathers the view's values when it runs, so it sends what the second would have sent,
-	 * and it handles the view's _blurry marker once for both. A different call (another source or action, or the other
-	 * validate) is still scheduled, as before.
-	 * @param {string} method - _rerenderBlurryAction or _doBlurryAction.
-	 * @param {boolean} validate - whether to validate before the request.
-	 * @param {string} target - the rerender's source, or the action's name.
-	 */
-	_delayBlurryCall: function (method, validate, target) {
-		const key = `${method}|${validate}|${target}`;
-		if (!this._blurryCalls) {
-			this._blurryCalls = {};
-		}
-		if (this._blurryCalls[key] != null) {
-			return;
-		}
-		const args = method === "_rerenderBlurryAction" ? [validate, target] : [target, validate];
-		this._blurryCalls[key] = this.delayCall(method, args, 100);
-	},
-
-	/**
-	 * Notes that a blurry call scheduled by _delayBlurryCall is running, so that the same call can be scheduled again.
-	 * @param {string} method - _rerenderBlurryAction or _doBlurryAction.
-	 * @param {boolean} validate - whether to validate before the request.
-	 * @param {string} target - the rerender's source, or the action's name.
-	 */
-	_blurryCallRunning: function (method, validate, target) {
-		if (this._blurryCalls) {
-			delete this._blurryCalls[`${method}|${validate}|${target}`];
-		}
+		this.delayCall("_rerenderBlurryAction", [validate, source], 100);
 	},
 
 	/**
 	 * Re-renders the edit view following a blur action.
-	 * @param {boolean} validate - whether to validate before the request.
-	 * @param {string} source - the binding of the widget whose event this is.
 	 */
 	_rerenderBlurryAction: function (validate, source) {
-		this._blurryCallRunning("_rerenderBlurryAction", validate, source);
 		this._source = source;
 		this.saveInstance(validate, null, (data, success) => {
 			if (this._blurry) {
@@ -919,13 +875,12 @@ isc.EditView.addMethods({
 	/**
 	 * Schedules a blurry action with a slight delay to prevent lost click events during blur.
 	 * Typically triggered from a blur event to handle server-side rerender actions.
-	 * The same action already waiting to run is not scheduled again (see _delayBlurryCall).
 	 *
 	 * @param {string} action - the name of the action to execute.
 	 * @param {boolean} validate - whether validation should occur before executing the action.
 	 */
 	doBlurryAction: function (action, validate) {
-		this._delayBlurryCall("_doBlurryAction", validate, action);
+		this.delayCall("_doBlurryAction", [action, validate], 100);
 	},
 
 	/**
@@ -935,7 +890,6 @@ isc.EditView.addMethods({
 	 * @param {boolean} validate - whether to validate before executing the action.
 	 */
 	_doBlurryAction: function (action, validate) {
-		this._blurryCallRunning("_doBlurryAction", validate, action);
 		this.doAction(action, validate, null, null, null, null, (data, success) => {
 			if (this._blurry) {
 				const blurryElement = this._blurry;
