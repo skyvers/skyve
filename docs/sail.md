@@ -2037,7 +2037,6 @@ ITs where you meant to run unit tests.
 | `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close icons hidden so that the upload step cannot close the page itself; a growl pushed just before the messages and one pushed after them all stay showing. One inline script per UX/UI | PF, tablet, phone and external | `sail` |
 | `AdminSuiteSailIT` | `sail/admin/admin.suite.xml`: the admin module in both renderers, PF tablet and phone and SC, in a backup and restore bracket; see [Admin: application suite](#admin-application-suite) | both | `sail` `admin` `destructive` |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC | `sail` |
-| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once | SC | `sail` `admin` |
 | `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept | SC | `sail` |
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC | `sail` |
 | `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Typed Text, whose change and blur handlers both rerender: typed and left with Tab, and typed with Show Rerender Count clicked at once (through Selenium), each sends one rerender, counted on the server outside the conversation; the click runs after the rerender | SC | `sail` |
@@ -3942,9 +3941,30 @@ Java through `SailRunIT`, alone or as a member of a suite file
 
 ## Runtime Bugs Found
 
-The suites found Skyve runtime bugs that are outside SAIL's scope. All are now
-fixed, or were found to be by design. Their reproductions, causes and fixes were
-in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git history.
+The suites found Skyve runtime bugs that are outside SAIL's scope. All but one
+are now fixed, or were found to be by design. Their reproductions, causes and
+fixes were in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git
+history.
+
+**SC-8 (open): the User wizard's password field loses fast typing.** In
+SmartClient, a burst of keys typed into the User wizard's new password, whose
+change handler rerenders, keeps only the first key. The first key's change
+handler sends the rerender, and SmartClient's prompt for the request puts up a
+click mask that takes the focus, so the keys after it are dropped. Typing at
+human speed works. It was fixed in `c42551e257` (with follow-ups in
+`4e518f6c2e` and `8bac256689`): a typed item whose change handler called the
+server changed on commit and deferred its server events as a blur handler's
+do. Mike reverted that fix for this release: the deferred change handler raced
+the field's blur rerender, so a field with a rerender in both its change and
+blur handlers sent two rerenders on one conversation (the Biz Hub Apps
+timesheets' W6b failure). The change and blur handling is to be redone as a
+whole after the release.
+
+*Workaround in the suites.* The SmartClient executor types a field with a
+change handler one key at a time, waiting for what each key starts before it
+types the next, then leaves the field with Tab (see `SmartClientSelenide.text`).
+A script that types into such a field keeps every key; only a real user, or a
+test that sends a burst of keys itself, sees the bug.
 
 ## Java Tests from the Control Panel
 
