@@ -18,6 +18,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
 - [Mail Log Body Excerpts and Attachments](#mail-log-body-excerpts-and-attachments)
+- [Known Issues](#known-issues)
 - [Known Security Notes](#known-security-notes)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 - [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
@@ -281,6 +282,18 @@ load, while the response renders, from `postRender`, list grids, jobs or backgro
 
 Try
 **Kitchen Sink → Dialogs Fixture**.
+
+## Known Issues
+
+- **SmartClient: fast typing into a field whose change handler calls the server loses keys.** A text field without
+  completion, a password, a text area, a spinner or a colour picker with a `rerender` or `server` action in its
+  `onChangedHandlers` keeps only the first key of a fast burst of keys (a barcode scanner, or a test that sends keys
+  itself): the first key's request puts up SmartClient's click mask, which takes the focus. Typing at human speed
+  works, and a field with its handlers in `onBlurHandlers` is not affected. A fix in the Skyve 10 snapshots deferred
+  those change handlers, but it made a field's change and blur rerenders race on one conversation, so it was taken
+  out before the Skyve 10 release; the change and blur handling will be reworked as a whole in
+  a later release. Prefer `onBlurHandlers` for a rerender on a field people type into quickly. See SC-8 in
+  [SAIL](sail.md).
 
 ## Known Security Notes
 

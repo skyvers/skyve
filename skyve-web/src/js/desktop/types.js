@@ -4198,7 +4198,7 @@ isc.BizLookupDescriptionItem.addMethods({
 					this.setRequired(false);
 				}
 
-				const instance = this._view.gather(true, true);
+				const instance = this._view.gather(true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
@@ -4220,7 +4220,7 @@ isc.BizLookupDescriptionItem.addMethods({
 				}
 			} else {
 				// Handle case for zooming into an existing record
-				const instance = this._view.gather(true, true);
+				const instance = this._view.gather(true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {

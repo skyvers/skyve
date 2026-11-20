@@ -8,11 +8,11 @@ import modules.kitchensink.RerenderFixture.RerenderFixtureBizlet;
 import modules.kitchensink.domain.RerenderFixture;
 
 /**
- * Shows how many rerenders of Typed Text the server was sent for the fixture.
+ * Shows how many rerenders of Week Ending Date the server was sent for the fixture.
  */
 public class ShowRerenderCount implements ServerSideAction<RerenderFixture> {
 	/**
-	 * Copies the server's count of Typed Text's rerenders into Rerender Count.
+	 * Copies the server's count of Week Ending Date's rerenders into Rerender Count.
 	 *
 	 * @param bean	The fixture.
 	 * @param webContext	The current web context.

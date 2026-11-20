@@ -55,7 +55,7 @@ isc.BizGrid.addMethods({
 						};
 
 						if (this._view) {
-							const instance = this._view.gather(false, true);
+							const instance = this._view.gather(false);
 							requestProperties.params._c = instance._c;
 						}
 
@@ -457,7 +457,7 @@ isc.BizDataGrid.addMethods({
 			const viewBinding = this._view._b ? `${this._view._b}.${this._b}` : this._b;
 			const zoomToBizId = zoomToNew ? null : this._eventRecord.bizId;
 
-			const instance = this._view.gather(true, true);
+			const instance = this._view.gather(true);
 			if (instance) {
 				const gridRect = this.grid.body.getPageRect();
 				const rowTop = this.grid.body.getRowPageTop(this._eventRowNum);

@@ -1,6 +1,5 @@
 package org.skyve.impl.web.service.smartclient;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,10 +58,6 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
-import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
-import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
-import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
-import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
@@ -1224,8 +1219,7 @@ class SmartClientViewRendererCoverageTest {
 
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("changed:function(){var view=this._view;},"));
-		assertTrue(code.contains("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&" +
-									"(!form._view._blurryCallsWaiting(true))&&item.validate()){var view=form._view;}},"), code);
+		assertTrue(code.contains("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;}},"));
 		assertTrue(code.contains("blur:function(form,item){if(isc.RPCManager.requestsArePending())"), code);
 		assertTrue(code.contains("view.doBlurryAction('serverAction',false);"), code);
 		assertTrue(code.contains("view.rerenderBlurryAction(false,'contact.name');"), code);
@@ -1233,131 +1227,6 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("view.setInvisible('contact_secret','secretHidden');"), code);
 		assertTrue(code.contains("view.toggleDisabled('contact_active');"), code);
 		assertTrue(code.contains("view.toggleVisibility('contact_notes');"), code);
-	}
-
-	/**
-	 * A form item the user types into, whose change handler calls the server, fires it when the value is committed, not
-	 * on every keypress, and runs the handler's server events as a blur handler's.
-	 */
-	@Test
-	void aTypedItemWithAServerChangeHandlerChangesOnCommitAndDefersItsEvents() {
-		for (ChangeableInputWidget widget : List.of(new TextField(), new Password(), new TextArea(), new Spinner(), new ColourPicker())) {
-			RerenderEventAction rerender = new RerenderEventAction();
-			rerender.setClientValidation(Boolean.FALSE);
-			widget.getChangedActions().add(rerender);
-
-			String code = changedHandlerCode(widget, rerender);
-
-			assertTrue(code.startsWith("changeOnKeypress:false,changed:function(form,item,value){var view=form._view;" +
-										"view._blurry=isc.RPCManager.requestsArePending()?null:item;" +
-										"view.rerenderBlurryAction(false,'newPassword',true);},"),
-						widget.getClass().getSimpleName() + ": " + code);
-		}
-	}
-
-	/**
-	 * The guards that stop a field's handlers overlapping the requests of the handlers before them. A blur and exit
-	 * handler skips its server events while a request is pending (clearing the view's {@code _blurry} marker) or while
-	 * a deferred server event waits (keeping the marker, which the waiting call runs once it is answered). A focus
-	 * handler skips its server events while a request is pending or while a change handler's deferred event waits. A
-	 * typed field's change handler marks its deferred calls as a change handler's; a blur handler's calls are not
-	 * marked, even straight after a change handler.
-	 */
-	@Test
-	void eventHandlerGuardsSkipServerEventsWhileADeferredCallWaits() {
-		TextField text = new TextField();
-		RerenderEventAction changedRerender = new RerenderEventAction();
-		text.getChangedActions().add(changedRerender);
-		ActionImpl serverAction = action("serverAction");
-		ServerSideActionEventAction changedServer = new ServerSideActionEventAction();
-		text.getChangedActions().add(changedServer);
-		EventSource source = mock(EventSource.class);
-		when(source.getSource()).thenReturn("weekEndingDate");
-		SmartClientViewRenderer renderer = rendererInAForm();
-		int start = renderer.getCode().length();
-
-		renderer.visitOnChangedEventHandler(text, true, true);
-		renderer.visitRerenderEventAction(changedRerender, source, true, true);
-		renderer.visitServerSideActionEventAction(serverAction, changedServer);
-		renderer.visitedOnChangedEventHandler(text, true, true);
-		renderer.visitOnBlurEventHandler(text, true, true);
-		renderer.visitRerenderEventAction(new RerenderEventAction(), source, true, true);
-		renderer.visitServerSideActionEventAction(serverAction, new ServerSideActionEventAction());
-		renderer.visitedOnBlurEventHandler(text, true, true);
-		renderer.visitOnFocusEventHandler(text, true, true);
-		renderer.visitRerenderEventAction(new RerenderEventAction(), source, true, true);
-		renderer.visitedOnFocusEventHandler(text, true, true);
-
-		assertEquals("changeOnKeypress:false,changed:function(form,item,value){var view=form._view;" +
-						"view._blurry=isc.RPCManager.requestsArePending()?null:item;" +
-						"view.rerenderBlurryAction(true,'weekEndingDate',true);view.doBlurryAction('serverAction',true,true);}," +
-					"blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}" +
-						"else if(!form._view._blurryCallsWaiting()){form._view._blurry=item;}}," +
-					"editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}" +
-						"else if(!form._view._blurryCallsWaiting()){var view=form._view;" +
-						"view.rerenderBlurryAction(true,'weekEndingDate');view.doBlurryAction('serverAction',true);}}," +
-					"editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&" +
-						"(!form._view._blurryCallsWaiting(true))&&item.validate()){var view=form._view;" +
-						"view.rerenderAction(true,'weekEndingDate');}},",
-					renderer.getCode().substring(start));
-	}
-
-	/**
-	 * Other change handlers fire as SmartClient fires them: an item with completion or no typing, or a handler that
-	 * makes no request.
-	 */
-	@Test
-	void otherChangeHandlersAreUnchanged() {
-		TextField complete = new TextField();
-		complete.setComplete(CompleteType.previous);
-		List<ChangeableInputWidget> widgets = List.of(complete, new CheckBox(), new Combo(), new Radio(), new Slider());
-		for (ChangeableInputWidget widget : widgets) {
-			RerenderEventAction rerender = new RerenderEventAction();
-			rerender.setClientValidation(Boolean.FALSE);
-			widget.getChangedActions().add(rerender);
-
-			assertEquals("changed:function(form,item,value){var view=form._view;view.rerenderAction(false,'newPassword');},",
-							changedHandlerCode(widget, rerender),
-							widget.getClass().getSimpleName());
-		}
-
-		Password clientOnly = new Password();
-		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
-		setDisabled.setBinding("confirmPassword");
-		setDisabled.setXmlDisabledCondition("noPassword");
-		clientOnly.getChangedActions().add(setDisabled);
-		SmartClientViewRenderer renderer = rendererInAForm();
-		int start = renderer.getCode().length();
-		renderer.visitOnChangedEventHandler(clientOnly, true, true);
-		renderer.visitSetDisabledEventAction(setDisabled, true, true);
-		renderer.visitedOnChangedEventHandler(clientOnly, true, true);
-		assertEquals("changed:function(form,item,value){var view=form._view;view.setDisabled('confirmPassword','noPassword');},",
-						renderer.getCode().substring(start));
-	}
-
-	/**
-	 * Renders a form item's change handler of one rerender, returning its code.
-	 */
-	private String changedHandlerCode(ChangeableInputWidget widget, RerenderEventAction rerender) {
-		SmartClientViewRenderer renderer = rendererInAForm();
-		EventSource source = mock(EventSource.class);
-		when(source.getSource()).thenReturn("newPassword");
-		int start = renderer.getCode().length();
-		renderer.visitOnChangedEventHandler(widget, true, true);
-		renderer.visitRerenderEventAction(rerender, source, true, true);
-		renderer.visitedOnChangedEventHandler(widget, true, true);
-		return renderer.getCode().substring(start);
-	}
-
-	/**
-	 * A renderer visiting a form, so that it renders form items (its current form is set).
-	 */
-	private SmartClientViewRenderer rendererInAForm() {
-		SmartClientViewRenderer renderer = rendererWithViewContainer();
-		Form form = new Form();
-		form.getColumns().add(new FormColumn());
-		renderer.visitForm(form, true, true);
-		return renderer;
 	}
 
 	private SmartClientViewRenderer rendererWithOpenForm() {

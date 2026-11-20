@@ -2037,10 +2037,9 @@ ITs where you meant to run unit tests.
 | `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close icons hidden so that the upload step cannot close the page itself; a growl pushed just before the messages and one pushed after them all stay showing. One inline script per UX/UI | PF, tablet, phone and external | `sail` |
 | `AdminSuiteSailIT` | `sail/admin/admin.suite.xml`: the admin module in both renderers, PF tablet and phone and SC, in a backup and restore bracket; see [Admin: application suite](#admin-application-suite) | both | `sail` `admin` `destructive` |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC | `sail` |
-| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once | SC | `sail` `admin` |
 | `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept | SC | `sail` |
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC | `sail` |
-| `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Typed Text, whose change and blur handlers both rerender: typed and left with Tab, and typed with Show Rerender Count clicked at once (through Selenium), each sends one rerender, counted on the server outside the conversation; the click runs after the rerender | SC | `sail` |
+| `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Week Ending Date, which mirrors the Biz Hub Apps weekly timesheet's week ending date (a date in a text field whose change and blur handlers both rerender): a date entered and left with Tab sends its two rerenders one after the other, as before 16 November 2026, never two at once on one conversation as the fast-typing change did (see SC-8 under [Runtime Bugs Found](#runtime-bugs-found)). It counts the view's requests in flight in the browser, without holding answers, and checks the most at once is 1, and that the server, counting outside the conversation, saw both rerenders | SC | `sail` |
 | `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC | `sail` |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC | `sail` `admin` `recording` |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), `sc-recorder-round-trip-converters.xml` (dates, times and numbers on other converters than the defaults, and a decimal with no converter), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC | `sail` `recording` |
@@ -3054,6 +3053,12 @@ Kitchen sink fixtures for the newer steps:
   would match if day and month were swapped, and `dateTimeAsDate` by day with
   each operator; both recorder round trips record and replay such filters
   unedited.
+- `RerenderFixture`, which has no menu item, mirrors the Biz Hub Apps weekly
+  timesheet's week ending date: Week Ending Date is a date shown by a text
+  field whose change handler and blur handler both rerender the view. Its
+  Bizlet counts the rerenders the server is sent for Week Ending Date outside
+  the conversation, so two sent at once count as two, and Show Rerender Count
+  shows the count, for `SmartClientRerenderOnceSailIT`.
 
 `KitchenSinkWorkflowSailIT` and the suite's workflow member are the
 conformance for [workflows](#workflows): in the three files, PrimeFaces makes a
@@ -3948,9 +3953,42 @@ Java through `SailRunIT`, alone or as a member of a suite file
 
 ## Runtime Bugs Found
 
-The suites found Skyve runtime bugs that are outside SAIL's scope. All are now
-fixed, or were found to be by design. Their reproductions, causes and fixes were
-in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git history.
+The suites found Skyve runtime bugs that are outside SAIL's scope. All but one
+are now fixed, or were found to be by design. Their reproductions, causes and
+fixes were in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git
+history.
+
+**SC-8 (open): the User wizard's password field loses fast typing.** In
+SmartClient, a burst of keys typed into the User wizard's new password, whose
+change handler rerenders, keeps only the first key. The first key's change
+handler sends the rerender, and SmartClient's prompt for the request puts up a
+click mask that takes the focus, so the keys after it are dropped. Typing at
+human speed works. It was fixed in `c42551e257` (with follow-ups in
+`4e518f6c2e` and `8bac256689`): a typed item whose change handler called the
+server changed on commit and deferred its server events as a blur handler's
+do. Mike reverted that fix for this release: the deferred change handler raced
+the field's blur rerender, so a field with a rerender in both its change and
+blur handlers sent its two rerenders at once on one conversation. That broke
+the Biz Hub Apps weekly timesheet's W6b workflow: its week ending date has a
+rerender in both handlers, the rerender rebuilds the timesheet's lines, and the
+view then showed lines the conversation did not hold. Before it, and again now,
+typing a value and leaving with Tab sends the change's rerender at once and the
+blur's after its 100 ms deferral, when the first has been answered; nothing
+makes the deferred rerender wait, so a server slower than that could still
+overlap them. The revert also takes out the follow-ups' commit of a field's
+typed text before a gather, so a save, action or zoom made while a date, time
+or number item's text is still being typed gathers the value from before the
+typing, as before 16 Nov (SmartClient commits those items' text only when they
+are left). The change and blur handling is to be redone as a whole after the
+release; `SmartClientRerenderOnceSailIT` checks that the Rerender Fixture,
+which mirrors the Apps week ending date, sends its change and blur rerenders
+one after the other, never at once.
+
+*Workaround in the suites.* The SmartClient executor types a field with a
+change handler one key at a time, waiting for what each key starts before it
+types the next, then leaves the field with Tab (see `SmartClientSelenide.text`).
+A script that types into such a field keeps every key; only a real user, or a
+test that sends a burst of keys itself, sees the bug.
 
 ## Java Tests from the Control Panel
 
