@@ -33,6 +33,7 @@
 		<document ref="ConvertersFixture" defaultQueryName="qConvertersFixtures" />
 		<document ref="ConvertersFixtureRow" />
 		<document ref="ConvertersDataTables" />
+		<document ref="RerenderFixture" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -136,6 +137,9 @@
 				<document name="ConvertersFixture" permission="CRUDD" />
 				<document name="ConvertersFixtureRow" permission="CRUDD" />
 				<document name="ConvertersDataTables" permission="CRUDD" />
+				<document name="RerenderFixture" permission="CRUDD">
+					<action name="ShowRerenderCount" />
+				</document>
 			</privileges>
 		</role>
 	</roles>

@@ -882,7 +882,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Executes a data grid gesture (new, select, zoom, edit or remove) on the UI element identified by the binding.
+	 * Executes a data grid gesture (new, select, zoom, edit or remove) on the UI element identified by the binding,
+	 * then checks that no error message shows (unless the test strategy is None), as the PrimeFaces executor does.
 	 *
 	 * @param step the Step object representing the data grid action to perform
 	 * @param binding the binding string used to identify the data grid UI elements
@@ -949,6 +950,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new DomainException(String.format("<%s /> on data grid [%s] failed: the grid's button is disabled",
 														step.getClass().getSimpleName(), binding));
 		}
+		// as PrimeFaces does: a zoom, new or remove that the server refused shows its problem now, not dismissed by
+		// the next step (see prepareForDataEntry) and reported steps later as the failure it caused
+		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 
 		if ((step instanceof DataGridEdit) || (inline && (step instanceof DataGridNew))) {
 			// the row is now being edited inline
@@ -986,7 +990,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Performs a list grid gesture (new, select, or zoom) on UI elements identified by the step's binding.
+	 * Performs a list grid gesture (new, select, or zoom) on UI elements identified by the step's binding, then checks
+	 * that no error message shows (unless the test strategy is None), as the PrimeFaces executor does.
 	 *
 	 * @param step the Step object representing the list grid action to perform
 	 * @param requestedRow the row index for row-specific actions; may be required depending on the step type
@@ -1045,6 +1050,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new DomainException(String.format("<%s /> on list grid [%s] failed: the grid's button is disabled",
 														step.getClass().getSimpleName(), listGridIdentifier));
 		}
+		// as PrimeFaces does, and before waiting for the view a refused zoom or new never shows
+		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 	}
 
 	/**
