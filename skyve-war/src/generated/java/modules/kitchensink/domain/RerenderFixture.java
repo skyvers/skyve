@@ -3,21 +3,26 @@ package modules.kitchensink.domain;
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 
 /**
  * Rerender Fixture
  * <br/>
- * Non-persistent Kitchen Sink fixture for a field whose change and blur handlers both rerender the view.
+ * Non-persistent Kitchen Sink fixture for a field whose change and blur handlers both rerender the view, as
+			the Biz Hub Apps weekly timesheet's week ending date does: a date shown by a text field.
 
-			Leaving Typed Text runs both handlers. The server counts the rerenders it is sent for Typed Text, per fixture,
-			outside the conversation (RerenderFixtureBizlet), so that two requests sent at once are counted as two even
-			though the conversation keeps only the last one's changes. Show Rerender Count copies the count into
-			Rerender Count.
+			Leaving Week Ending Date after a change runs both handlers. The server counts the rerenders it is sent for
+			Week Ending Date, per fixture, outside the conversation (RerenderFixtureBizlet), so that two requests sent
+			at once are counted as two even though the conversation keeps only the last one's changes. Show Rerender
+			Count copies the count into Rerender Count.
  * 
  * @stereotype "transient"
  */
@@ -38,22 +43,22 @@ public class RerenderFixture extends AbstractTransientBean {
 	public static final String DOCUMENT_NAME = "RerenderFixture";
 
 	/** @hidden */
-	public static final String typedPropertyName = "typed";
+	public static final String weekEndingDatePropertyName = "weekEndingDate";
 
 	/** @hidden */
 	public static final String rerenderCountPropertyName = "rerenderCount";
 
 	/**
-	 * Typed Text
+	 * Week Ending Date
 	 * <br/>
 	 * Leaving it after a change runs its change handler and its blur handler, each of which rerenders the view.
 	 **/
-	private String typed;
+	private DateOnly weekEndingDate;
 
 	/**
 	 * Rerender Count
 	 * <br/>
-	 * The number of rerenders the server was sent for Typed Text, as Show Rerender Count last read it.
+	 * The number of rerenders the server was sent for Week Ending Date, as Show Rerender Count last read it.
 	 **/
 	private Integer rerenderCount;
 
@@ -93,21 +98,23 @@ public class RerenderFixture extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #typed} accessor.
+	 * {@link #weekEndingDate} accessor.
 	 * @return	The value.
 	 **/
-	public String getTyped() {
-		return typed;
+	public DateOnly getWeekEndingDate() {
+		return weekEndingDate;
 	}
 
 	/**
-	 * {@link #typed} mutator.
-	 * @param typed	The new value.
+	 * {@link #weekEndingDate} mutator.
+	 * @param weekEndingDate	The new value.
 	 **/
 	@XmlElement
-	public void setTyped(String typed) {
-		preset(typedPropertyName, typed);
-		this.typed = typed;
+	@XmlSchemaType(name = "date")
+	@XmlJavaTypeAdapter(DateOnlyMapper.class)
+	public void setWeekEndingDate(DateOnly weekEndingDate) {
+		preset(weekEndingDatePropertyName, weekEndingDate);
+		this.weekEndingDate = weekEndingDate;
 	}
 
 	/**

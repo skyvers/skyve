@@ -5,7 +5,8 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<blurb>
-		Typed Text rerenders the view from both its change handler and its blur handler.
+		Week Ending Date rerenders the view from both its change handler and its blur handler, as the Biz Hub Apps
+		weekly timesheet's week ending date does.
 		Show Rerender Count shows how many rerenders the server was sent for it.
 	</blurb>
 	<form border="true" borderTitle="Rerenders">
@@ -13,7 +14,7 @@
 		<column responsiveWidth="9" />
 		<row>
 			<item>
-				<textField binding="typed">
+				<textField binding="weekEndingDate">
 					<onBlurHandlers>
 						<rerender />
 					</onBlurHandlers>
