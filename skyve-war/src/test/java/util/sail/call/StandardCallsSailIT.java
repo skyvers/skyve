@@ -34,6 +34,9 @@ import util.AbstractInterpretedSailWorkflow;
  * Runs the standard calls from SAIL scripts, through {@code <call className="util.sail.call.…">}, against a small local
  * server with a service worker (the browser control fixtures {@code page.html} and {@code sw.js}), so it needs no
  * Skyve server, only a browser. The scripts have no sign-in: calls, script steps and navigations to the local server.
+ * Its base URL is set in code, which a run's {@code -Dsail.baseUrl} (or {@code SAIL_BASE_URL}) outranks, so every URL
+ * the scripts give is absolute ({@code {var:origin}}): it runs against its own server whatever the run's base URL.
+ * {@code TabCallsTest} covers a URL relative to the base URL.
  * <p>
  * The first test uses only what every browser has (cookies, the window, keys and tabs), so it passes in any browser.
  * Each other test starts with a call that needs a Chromium capability (or a device profile), so in another browser it
@@ -167,9 +170,9 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 
 				<call className="util.sail.call.SwitchTab" variable="tabs">
 					<parameter name="action" value="open" />
-					<parameter name="url" value="away" />
+					<parameter name="url" value="{var:origin}/away" />
 				</call>
-				<testScript message="SwitchTab opened a tab in front, relative to the base URL"><![CDATA[
+				<testScript message="SwitchTab opened a tab in front"><![CDATA[
 					return sail.vars.tabs === '2' && location.pathname === '/away';
 				]]></testScript>
 				<call className="util.sail.call.SwitchTab">
@@ -428,7 +431,7 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 
 				<call className="util.sail.call.SwitchTab">
 					<parameter name="action" value="open" />
-					<parameter name="url" value="away" />
+					<parameter name="url" value="{var:origin}/away" />
 				</call>
 				<call className="util.sail.call.SwitchTab">
 					<parameter name="action" value="switch" />
