@@ -179,7 +179,7 @@ class SailMediaPagesSailIT {
 		listedRun(runs, "20261106-120100-000-B.test", "HM2 phone: works offline", "10-home.xml", new Place(none.session(), 7, 1), true);
 		listedRun(runs, "20261106-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new Place(none.session(), 7, 2), false);
 		listedRun(runs, "20261106-120300-000-B.test", "CK1 checks out", "20-checkout.xml", none, true);
-		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(runs));
+		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(SailRunsList.listedRuns(runs)));
 		driver.get(url + "runs/index.html");
 	}
 
@@ -249,7 +249,7 @@ class SailMediaPagesSailIT {
 		listedRun(runs, "20261120-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new Place(none.session(), 7, 2), true,
 					new Story("insp.suite.xml", suite, "An inspector works offline and the office recalls it.", "Recalls it."));
 		listedRun(runs, "20261120-120300-000-B.test", "CK1 checks out", null, none, true);
-		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(runs));
+		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(SailRunsList.listedRuns(runs)));
 		driver.get(url + "stories/index.html");
 	}
 
@@ -284,16 +284,18 @@ class SailMediaPagesSailIT {
 	}
 
 	/**
-	 * A run page's previous and next run buttons follow the list's order, to the neighbour's page of the same kind
-	 * (else its other page), and show the run's place; the first run has no previous, the last no next.
+	 * A run page's previous and next run buttons follow the list's order, across sessions, to the neighbour's page of
+	 * the same kind (else its other page), and show the run's place in its session; the first run has no previous, the
+	 * last no next. The pages work opened from the file system too.
 	 */
 	@Test
 	void theRunButtonsGoToTheNeighboursPages() throws IOException {
 		Path runs = Files.createDirectories(root.resolve("nav"));
-		Place session = new Place("20261120-115900-000", 0, 0);
-		SailRunNavTest.run(runs, "20261120-120000-000-B.test", "R1 both", session, true, true, true);
-		SailRunNavTest.run(runs, "20261120-120100-000-B.test", "R2 both", session, true, true, false);
-		SailRunNavTest.run(runs, "20261120-120200-000-B.test", "R3 video only", session, false, true, true);
+		Place newer = new Place("20261120-115900-000", 0, 0);
+		SailRunNavTest.run(runs, "20261120-120000-000-B.test", "R1 both", newer, true, true, true);
+		SailRunNavTest.run(runs, "20261120-120100-000-B.test", "R2 both", newer, true, true, false);
+		SailRunNavTest.run(runs, "20261120-120200-000-B.test", "R3 video only", newer, false, true, true);
+		SailRunNavTest.run(runs, "20261120-090000-000-A.test", "R0 older, steps only", new Place("20261120-085900-000", 0, 0), true, false, true);
 		List<SailRunsList.ListedRun> listed = SailRunsList.listedRuns(runs);
 		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(listed));
 		Files.writeString(runs.resolve(SailMedia.RUNS_ORDER_JS), SailRunsList.runsOrderScript(listed));
@@ -305,17 +307,35 @@ class SailMediaPagesSailIT {
 					() -> assertTrue(previous.isDisplayed() && next.isDisplayed()),
 					() -> assertTrue(previous.getDomAttribute("href").endsWith("/20261120-120000-000-B.test/index.html"), previous.getDomAttribute("href")),
 					() -> assertTrue(next.getDomAttribute("href").endsWith("/20261120-120200-000-B.test/player.html"), "a neighbour with no film strip: its player"),
-					() -> assertEquals("Run 2 of 3", driver.findElement(By.id("runPos")).getText()),
+					() -> assertEquals("Run 2 of 3", driver.findElement(By.id("runPos")).getText(), "its place in its session"),
 					() -> assertTrue(previous.getDomAttribute("title").startsWith("Previous run: R1 both"), previous.getDomAttribute("title")));
 		next.click();
-		assertAll("the last run's player, by the button",
+		assertAll("the session's last run's player, by the button",
 					() -> assertTrue(driver.getCurrentUrl().endsWith("/20261120-120200-000-B.test/player.html"), driver.getCurrentUrl()),
-					() -> assertFalse(driver.findElement(By.id("nextRun")).isDisplayed(), "no next run"),
 					() -> assertTrue(driver.findElement(By.id("prevRun")).getDomAttribute("href").endsWith("/20261120-120100-000-B.test/player.html"),
 										"a video page goes to the neighbour's video"),
+					() -> assertTrue(driver.findElement(By.id("nextRun")).getDomAttribute("href").endsWith("/20261120-090000-000-A.test/index.html"),
+										"on into the older session, to its film strip as it has no video"),
 					() -> assertEquals("Run 3 of 3", driver.findElement(By.id("runPos")).getText()));
+		driver.get(runs.resolve("20261120-090000-000-A.test").resolve("index.html").toUri().toString());
+		assertAll("the older session's only run, opened from the file system",
+					() -> assertTrue(driver.findElement(By.id("prevRun")).getDomAttribute("href").endsWith("/20261120-120200-000-B.test/player.html")),
+					() -> assertFalse(driver.findElement(By.id("nextRun")).isDisplayed(), "the last run has no next run"),
+					() -> assertEquals("Run 1 of 1", driver.findElement(By.id("runPos")).getText(), "numbered in its own session"));
 		driver.get(url + "nav/20261120-120000-000-B.test/player.html");
 		assertFalse(driver.findElement(By.id("prevRun")).isDisplayed(), "the first run has no previous run");
+	}
+
+	/** A run page with no runs' order beside its list (written before the order existed) shows no buttons and no place. */
+	@Test
+	void aRunPageWithoutTheOrderShowsNoButtons() throws IOException {
+		Path runs = Files.createDirectories(root.resolve("unordered"));
+		SailRunNavTest.run(runs, "20261120-120000-000-B.test", "R1", new Place("20261120-115900-000", 0, 0), true, false, true);
+		driver.get(url + "unordered/20261120-120000-000-B.test/index.html");
+		assertAll(() -> assertFalse(driver.findElement(By.id("prevRun")).isDisplayed()),
+					() -> assertFalse(driver.findElement(By.id("nextRun")).isDisplayed()),
+					() -> assertFalse(driver.findElement(By.id("runPos")).isDisplayed()),
+					() -> assertTrue(driver.findElement(By.cssSelector("a[href='../index.html']")).isDisplayed(), "All runs still shows"));
 	}
 
 	/** The titles of the runs shown, in order. */

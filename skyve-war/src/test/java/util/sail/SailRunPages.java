@@ -59,7 +59,7 @@ final class SailRunPages {
 			.append("<span>").append(escape(info.test())).append((info.label() == null) ? "" : " &middot; " + escape(info.label())).append("</span>")
 			.append("<span>").append(escape(info.started())).append("</span>")
 			.append("<span>").append(steps.size()).append(" steps &middot; ").append(duration(SailMedia.runMillis(steps))).append("</span>")
-			.append("<span id=\"runPos\"></span>")
+			.append("<span id=\"runPos\" hidden></span>")
 			.append(extraSub).append("</div></div><nav class=\"nav\" data-run=\"").append(escape(info.name())).append("\" data-page=\"").append(page).append("\">")
 			.append(links)
 			.append("<a id=\"prevRun\" class=\"btn\" hidden>&lsaquo; Run</a>")

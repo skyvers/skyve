@@ -131,7 +131,7 @@ class SailMediaDescriptionTest {
 		listedRun(base, "20261120-120300-000-A.test-one.xml", new Place("20261120-110000-000", 3, 1),
 					new Story("admin.suite.xml", "The admin suite.", "A workflow of one.", null), "one.xml");
 		listedRun(base, "20261120-120400-000-B.test", new Place("20261120-110000-000", 0, 0), NO_STORY, null);
-		String html = SailRunsList.runsIndexHtml(base);
+		String html = SailRunsList.runsIndexHtml(SailRunsList.listedRuns(base));
 		assertAll(() -> assertEquals(1, html.split("<tr class=\"group suite\"", -1).length - 1, "one suite heading"),
 					() -> assertTrue(html.contains("<tr class=\"group suite\" data-header=\"g1\"><td colspan=\"7\">Suite admin.suite.xml" +
 													"<div class=\"desc\"><p>The admin suite.</p></div></td></tr>"), html),

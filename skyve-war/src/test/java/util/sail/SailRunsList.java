@@ -88,21 +88,6 @@ final class SailRunsList {
 	}
 
 	/**
-	 * Writes a directory's list of runs: by session (a JVM's run of tests), newest first, and in each session the runs
-	 * in the order they ran, as the suite ran them. A suite file's runs come under its name, and the legs of a unit (a
-	 * workflow) under the unit. Each run shows its title, test, outcome, steps and time (from its {@value SailMedia#RUN_JSON};
-	 * runs written before that file existed come last, by their folders' names), with its film strip and player. It can
-	 * show only the failed runs, or the runs with some text.
-	 *
-	 * @param base	the directory
-	 * @return the page
-	 * @throws IOException	if the directory cannot be read
-	 */
-	static @Nonnull String runsIndexHtml(@Nonnull Path base) throws IOException {
-		return runsIndexHtml(listedRuns(base));
-	}
-
-	/**
 	 * Lists a directory's runs in the list's order: sessions newest first (runs without one last), and each session's
 	 * runs in the order they started.
 	 *
@@ -127,7 +112,11 @@ final class SailRunsList {
 	}
 
 	/**
-	 * Writes the list of runs (see {@link #runsIndexHtml(Path)}) for runs already listed.
+	 * Writes a directory's list of runs, as {@link #listedRuns(Path)} orders them: by session (a JVM's run of tests),
+	 * newest first, and in each session the runs in the order they ran, as the suite ran them. A suite file's runs come
+	 * under its name, and the legs of a unit (a workflow) under the unit. Each run shows its title, test, outcome, steps
+	 * and time (from its {@value SailMedia#RUN_JSON}; runs written before that file existed come last, by their folders'
+	 * names), with its film strip and player. It can show only the failed runs, or the runs with some text.
 	 *
 	 * @param runs	the runs, in the list's order (see {@link #listedRuns(Path)})
 	 * @return the page
@@ -347,6 +336,7 @@ final class SailRunsList {
 			Map<String, Object> entry = new LinkedHashMap<>();
 			entry.put("n", run.name());
 			entry.put("t", run.title());
+			entry.put("e", run.session());
 			entry.put("s", Boolean.valueOf(Files.exists(run.folder().resolve("index.html"))));
 			entry.put("v", Boolean.valueOf(Files.exists(run.folder().resolve("player.html"))));
 			entry.put("f", Boolean.valueOf(run.failed()));

@@ -239,7 +239,7 @@ class SailMediaTest {
 		listedRun(base, "20261106-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new SailMedia.Place(none.session(), 7, 2), false);
 		listedRun(base, "20261106-120300-000-B.test", "CK1 checks out", "20-checkout.xml", none, true);
 		Files.createDirectories(base.resolve("not-a-run"));
-		String html = SailRunsList.runsIndexHtml(base);
+		String html = SailRunsList.runsIndexHtml(SailRunsList.listedRuns(base));
 		int newSession = html.indexOf("Session started 2026-11-06 11:59:00");
 		int oldSession = html.indexOf("Session started 2026-11-06 08:59:00");
 		int earlier = html.indexOf("Earlier runs");
