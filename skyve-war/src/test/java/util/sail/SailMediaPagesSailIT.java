@@ -2,6 +2,7 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -280,6 +281,41 @@ class SailMediaPagesSailIT {
 		assertAll("a run outside the suite: no suite heading",
 					() -> assertEquals(List.of("CK1 checks out"), shownRuns()),
 					() -> assertEquals(List.of(), shownHeadings()));
+	}
+
+	/**
+	 * A run page's previous and next run buttons follow the list's order, to the neighbour's page of the same kind
+	 * (else its other page), and show the run's place; the first run has no previous, the last no next.
+	 */
+	@Test
+	void theRunButtonsGoToTheNeighboursPages() throws IOException {
+		Path runs = Files.createDirectories(root.resolve("nav"));
+		Place session = new Place("20261120-115900-000", 0, 0);
+		SailRunNavTest.run(runs, "20261120-120000-000-B.test", "R1 both", session, true, true, true);
+		SailRunNavTest.run(runs, "20261120-120100-000-B.test", "R2 both", session, true, true, false);
+		SailRunNavTest.run(runs, "20261120-120200-000-B.test", "R3 video only", session, false, true, true);
+		List<SailRunsList.ListedRun> listed = SailRunsList.listedRuns(runs);
+		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(listed));
+		Files.writeString(runs.resolve(SailMedia.RUNS_ORDER_JS), SailRunsList.runsOrderScript(listed));
+
+		driver.get(url + "nav/20261120-120100-000-B.test/index.html");
+		WebElement previous = driver.findElement(By.id("prevRun"));
+		WebElement next = driver.findElement(By.id("nextRun"));
+		assertAll("the middle run's film strip",
+					() -> assertTrue(previous.isDisplayed() && next.isDisplayed()),
+					() -> assertTrue(previous.getDomAttribute("href").endsWith("/20261120-120000-000-B.test/index.html"), previous.getDomAttribute("href")),
+					() -> assertTrue(next.getDomAttribute("href").endsWith("/20261120-120200-000-B.test/player.html"), "a neighbour with no film strip: its player"),
+					() -> assertEquals("Run 2 of 3", driver.findElement(By.id("runPos")).getText()),
+					() -> assertTrue(previous.getDomAttribute("title").startsWith("Previous run: R1 both"), previous.getDomAttribute("title")));
+		next.click();
+		assertAll("the last run's player, by the button",
+					() -> assertTrue(driver.getCurrentUrl().endsWith("/20261120-120200-000-B.test/player.html"), driver.getCurrentUrl()),
+					() -> assertFalse(driver.findElement(By.id("nextRun")).isDisplayed(), "no next run"),
+					() -> assertTrue(driver.findElement(By.id("prevRun")).getDomAttribute("href").endsWith("/20261120-120100-000-B.test/player.html"),
+										"a video page goes to the neighbour's video"),
+					() -> assertEquals("Run 3 of 3", driver.findElement(By.id("runPos")).getText()));
+		driver.get(url + "nav/20261120-120000-000-B.test/player.html");
+		assertFalse(driver.findElement(By.id("prevRun")).isDisplayed(), "the first run has no previous run");
 	}
 
 	/** The titles of the runs shown, in order. */

@@ -23,6 +23,11 @@ final class SailMediaHtml {
 	static final String PLAYER_STYLE = "<style>\n" + resource("player.css") + "\n</style>\n";
 	/** The video player's script. */
 	static final String PLAYER_SCRIPT = "<script>" + resource("player.js") + "</script>\n";
+	/**
+	 * A run page's previous and next run buttons: the directory's runs in order ({@value SailMedia#RUNS_ORDER_JS}), then
+	 * the script that fills in the buttons from them.
+	 */
+	static final String RUN_NAV_SCRIPT = "<script src=\"../" + SailMedia.RUNS_ORDER_JS + "\"></script><script>" + resource("runnav.js") + "</script>\n";
 	/** The list of runs' filters. */
 	static final String RUNS_SCRIPT = "<script>" + resource("runs.js") + "</script>\n";
 

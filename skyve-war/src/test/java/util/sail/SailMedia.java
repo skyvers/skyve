@@ -56,7 +56,8 @@ import jakarta.annotation.Nullable;
  * Each automation run gets its own folder under each directory, named by its time, test and (for a suite file) the
  * script, so suites, workflows and ITs with several tests keep every run, with a {@value #RUN_JSON} summary of it.
  * Each directory gets an {@code index.html} listing its runs by what they do (their first interaction), with their
- * outcomes, and filters. Everything is static HTML that opens from the file system, light or dark as the system is.
+ * outcomes, and filters, and a {@value #RUNS_ORDER_JS} of the runs in that order, from which each run's pages make
+ * their previous and next run buttons. Everything is static HTML that opens from the file system, light or dark as the system is.
  * This class records the run; {@link SailRunPages} writes the film strip and player, {@link SailRunsList} the list of
  * runs, {@link SailStepWords} each step's words, and {@link SailMediaHtml} holds their shared parts and the CSS and
  * JavaScript (in {@code util/sail/media/}).
@@ -103,6 +104,8 @@ public final class SailMedia {
 	private static final Pattern METHOD_CONTENT = Pattern.compile("<(?:\\w+:)?method>(.*)</(?:\\w+:)?method>", Pattern.DOTALL);
 	/** Each run folder's summary of the run, which the list of runs reads (see {@link #runJson}). */
 	static final String RUN_JSON = "run.json";
+	/** Each directory's runs in the list's order, beside its list, for the run pages' previous and next run buttons. */
+	static final String RUNS_ORDER_JS = "runs-order.js";
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
 	/** The suite running on this thread, for its runs' pages; see {@link #suite(String, String)}. */
@@ -602,11 +605,14 @@ public final class SailMedia {
 	}
 
 	/**
-	 * Rewrites a directory's list of runs. Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one
-	 * directory at the same time, and two writers of one file would garble it.
+	 * Rewrites a directory's list of runs, and its runs' order for the run pages' previous and next run buttons
+	 * ({@value #RUNS_ORDER_JS}). Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one directory at
+	 * the same time, and two writers of one file would garble it.
 	 */
 	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
-		Files.writeString(directory.resolve("index.html"), SailRunsList.runsIndexHtml(directory), StandardCharsets.UTF_8);
+		List<SailRunsList.ListedRun> runs = SailRunsList.listedRuns(directory);
+		Files.writeString(directory.resolve("index.html"), SailRunsList.runsIndexHtml(runs), StandardCharsets.UTF_8);
+		Files.writeString(directory.resolve(RUNS_ORDER_JS), SailRunsList.runsOrderScript(runs), StandardCharsets.UTF_8);
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {

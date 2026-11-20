@@ -322,6 +322,7 @@ skyve-war/target/sail/
     recordings-contacts.xml-mwk2437ma-01-Contacts_create-step04.png
   media/
     index.html                      every run, newest first: open this in a browser
+    runs-order.js                   the runs in the list's order, for each run's previous and next run buttons
     20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
       player.html                   the video, captioned with the step that was running
@@ -335,6 +336,12 @@ skyve-war/target/sail/
   interaction, with its outcome, steps and time. "Failed only" and a filter
   box narrow it.
 - The film strip highlights failed steps, and a link jumps to the first one.
+- The film strip and the video player have ‹ Run and Run › buttons that open
+  the previous and next run in the list's order (its video from the video
+  player, its film strip from the film strip, or its other page when it has
+  only one), and show the run's place, such as "Run 3 of 21". They come from
+  `runs-order.js`, which the list rewrites with itself; a run page from before
+  it shows no buttons.
 - A script's [descriptions](#descriptions) tell the story of the run: the
   list of runs shows the suite's under the suite, the workflow's under the
   workflow and the automation's under each run; the film strip shows the

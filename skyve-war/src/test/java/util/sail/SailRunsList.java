@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,8 @@ import jakarta.annotation.Nullable;
  * A directory's list of runs ({@code index.html}), for {@link SailMedia}: by session (a JVM's run of tests), newest
  * first, and in each session the runs in the order they ran, under their suite and its member files, with a workflow's
  * legs under the workflow. The suite, the workflow and each run show their descriptions. It reads each run's
- * {@value SailMedia#RUN_JSON}, and filters by outcome and text.
+ * {@value SailMedia#RUN_JSON}, and filters by outcome and text. It also writes the runs in that order as a script
+ * ({@value SailMedia#RUNS_ORDER_JS}), from which each run page makes its previous and next run buttons.
  */
 final class SailRunsList {
 	/** The columns of a session's table, by heading; every row has one cell for each. */
@@ -97,6 +99,18 @@ final class SailRunsList {
 	 * @throws IOException	if the directory cannot be read
 	 */
 	static @Nonnull String runsIndexHtml(@Nonnull Path base) throws IOException {
+		return runsIndexHtml(listedRuns(base));
+	}
+
+	/**
+	 * Lists a directory's runs in the list's order: sessions newest first (runs without one last), and each session's
+	 * runs in the order they started.
+	 *
+	 * @param base	the directory
+	 * @return its runs, each a folder with a film strip or a player
+	 * @throws IOException	if the directory cannot be read
+	 */
+	static @Nonnull List<ListedRun> listedRuns(@Nonnull Path base) throws IOException {
 		List<ListedRun> runs = new ArrayList<>();
 		try (DirectoryStream<Path> children = Files.newDirectoryStream(base, Files::isDirectory)) {
 			for (Path child : children) {
@@ -109,6 +123,16 @@ final class SailRunsList {
 		runs.sort(Comparator.comparing((ListedRun r) -> r.session().isEmpty() ? "" : r.session(), Comparator.reverseOrder())
 							.thenComparing(r -> r.session().isEmpty() ? "" : r.name())
 							.thenComparing(ListedRun::name, Comparator.reverseOrder()));
+		return runs;
+	}
+
+	/**
+	 * Writes the list of runs (see {@link #runsIndexHtml(Path)}) for runs already listed.
+	 *
+	 * @param runs	the runs, in the list's order (see {@link #listedRuns(Path)})
+	 * @return the page
+	 */
+	static @Nonnull String runsIndexHtml(@Nonnull List<ListedRun> runs) {
 		long failedRuns = runs.stream().filter(ListedRun::failed).count();
 		StringBuilder result = new StringBuilder(4096 + (runs.size() * 768));
 		startPage(result, "SAIL runs", "", null);
@@ -307,6 +331,28 @@ final class SailRunsList {
 			out.append("<a class=\"btn\" href=\"").append(href).append("/player.html\">Video</a>");
 		}
 		out.append("</td></tr>");
+	}
+
+	/**
+	 * Writes {@value SailMedia#RUNS_ORDER_JS}: the runs in the list's order, for each run page's previous and next run
+	 * buttons ({@code runnav.js}). A script, not JSON, as a page opened from the file system cannot fetch a file; it
+	 * loads it with a {@code script} element.
+	 *
+	 * @param runs	the runs, in the list's order (see {@link #listedRuns(Path)})
+	 * @return the script
+	 */
+	static @Nonnull String runsOrderScript(@Nonnull List<ListedRun> runs) {
+		List<Map<String, Object>> order = new ArrayList<>(runs.size());
+		for (ListedRun run : runs) {
+			Map<String, Object> entry = new LinkedHashMap<>();
+			entry.put("n", run.name());
+			entry.put("t", run.title());
+			entry.put("s", Boolean.valueOf(Files.exists(run.folder().resolve("index.html"))));
+			entry.put("v", Boolean.valueOf(Files.exists(run.folder().resolve("player.html"))));
+			entry.put("f", Boolean.valueOf(run.failed()));
+			order.add(entry);
+		}
+		return "window.SAIL_RUNS = " + new Json().toJson(order) + ";\n";
 	}
 
 	/** Reads a run folder's {@value SailMedia#RUN_JSON}, or null when it has none or it cannot be read. */

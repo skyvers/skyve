@@ -39,16 +39,19 @@ final class SailRunPages {
 	}
 
 	/**
-	 * Writes a run page's header: its title, outcome, test and timing; links to its other pages; and a Settings button
-	 * that opens the run's details and settings in a pop-up.
+	 * Writes a run page's header: its title, outcome, test and timing, and its place in the list of runs; links to its
+	 * other pages, and to the previous and next runs' pages of the same kind; and a Settings button that opens the run's
+	 * details and settings in a pop-up. The previous and next run buttons and the place are filled in by
+	 * {@code runnav.js} from the directory's {@value SailMedia#RUNS_ORDER_JS}, and stay hidden without it.
 	 *
 	 * @param out	the page
 	 * @param info	the run
 	 * @param steps	its steps
+	 * @param page	{@code steps} for the film strip, {@code video} for the player
 	 * @param extraSub	more for the line under the title (HTML), or empty
 	 * @param links	the links, as HTML
 	 */
-	private static void runHeader(@Nonnull StringBuilder out, @Nonnull RunInfo info, @Nonnull List<StepRecord> steps,
+	private static void runHeader(@Nonnull StringBuilder out, @Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nonnull String page,
 									@Nonnull String extraSub, @Nonnull String links) {
 		int failed = (int) steps.stream().filter(StepRecord::failed).count();
 		out.append("<header class=\"top\"><div class=\"heading\"><h1>").append(escape(info.title())).append("</h1><div class=\"sub\">")
@@ -56,9 +59,14 @@ final class SailRunPages {
 			.append("<span>").append(escape(info.test())).append((info.label() == null) ? "" : " &middot; " + escape(info.label())).append("</span>")
 			.append("<span>").append(escape(info.started())).append("</span>")
 			.append("<span>").append(steps.size()).append(" steps &middot; ").append(duration(SailMedia.runMillis(steps))).append("</span>")
-			.append(extraSub).append("</div></div><nav class=\"nav\">").append(links)
+			.append("<span id=\"runPos\"></span>")
+			.append(extraSub).append("</div></div><nav class=\"nav\" data-run=\"").append(escape(info.name())).append("\" data-page=\"").append(page).append("\">")
+			.append(links)
+			.append("<a id=\"prevRun\" class=\"btn\" hidden>&lsaquo; Run</a>")
 			.append("<a class=\"btn\" href=\"../index.html\">All runs</a>")
-			.append("<button class=\"btn\" type=\"button\" popovertarget=\"settings\">Settings</button></nav></header>");
+			.append("<a id=\"nextRun\" class=\"btn\" hidden>Run &rsaquo;</a>")
+			.append("<button class=\"btn\" type=\"button\" popovertarget=\"settings\">Settings</button></nav></header>")
+			.append(SailMediaHtml.RUN_NAV_SCRIPT);
 		settingsPopup(out, info);
 	}
 
@@ -130,7 +138,7 @@ final class SailRunPages {
 		StepRecord firstFailure = steps.stream().filter(StepRecord::failed).findFirst().orElse(null);
 		StringBuilder result = new StringBuilder(8192 + (steps.size() * 768));
 		startPage(result, info.title() + " · steps", "", null);
-		runHeader(result, info, steps,
+		runHeader(result, info, steps, "steps",
 					(firstFailure == null) ? "" : "<a href=\"#step-" + firstFailure.sequence() + "\">Jump to the first failure</a>",
 					(playerLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(playerLink) + "\">Video</a>");
 		result.append("<main class=\"content\">").append(storyHtml(info.story(), "section", "story card"))
@@ -224,7 +232,7 @@ final class SailRunPages {
 	static @Nonnull String playerHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String filmStripLink) {
 		StringBuilder result = new StringBuilder(16384);
 		startPage(result, info.title() + " · video", SailMediaHtml.PLAYER_STYLE, "player-page");
-		runHeader(result, info, steps, "",
+		runHeader(result, info, steps, "video", "",
 					(filmStripLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(filmStripLink) + "\">Steps</a>");
 		String story = storyHtml(info.story(), "div", "story");
 		if (! story.isEmpty()) {
