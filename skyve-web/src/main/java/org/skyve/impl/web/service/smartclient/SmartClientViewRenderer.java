@@ -3622,9 +3622,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			name = implicitName.toString();
 		}
 		code.append(name).append("',");
-		code.append(! Boolean.FALSE.equals(action.getClientValidation()));
-		// a change handler's deferred call is noted as such, for the focus handlers' guard (see visitOnFocusEventHandler)
-		code.append(visitingChangeAsync ? ",true);" : ");");
+		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
 
 	/**
@@ -3654,7 +3652,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 						(changeable instanceof ColourPicker)) &&
 					changeable.getChangedActions().stream().anyMatch(a -> (a instanceof RerenderEventAction) || (a instanceof ServerSideActionEventAction))) {
 			visitingAsync = true;
-			visitingChangeAsync = true;
 			// As the blur handler: no _blurry marker while requests are pending, to stop loops with multiple fields
 			code.append("changeOnKeypress:false,");
 			code.append("changed:function(form,item,value){var view=form._view;view._blurry=isc.RPCManager.requestsArePending()?null:item;");
@@ -3675,15 +3672,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		visitingAsync = false;
-		visitingChangeAsync = false;
 	}
 
 	/**
-	 * Starts an on-focus handler that short-circuits while requests are pending, or while a server event that a change
-	 * handler deferred (see {@link #visitOnChangedEventHandler}) waits to be sent. Before change handlers' server
-	 * events were deferred, the change request of the field just left was pending when the next field's focus handler
-	 * ran, so its server events were skipped; the view's {@code _blurryCallsWaiting(true)} keeps that. A deferred blur
-	 * handler's server event does not count, as the focus handler's events ran while it waited before too.
+	 * Starts an on-focus handler that short-circuits while requests are pending.
 	 *
 	 * @param blurable The blurable.
 	 * @param parentVisible The parent visible.
@@ -3692,7 +3684,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void visitOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&(!form._view._blurryCallsWaiting(true))&&item.validate()){var view=form._view;");
+		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 	}
 
 	/**
@@ -3710,13 +3702,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	// indicates that we are blurring or selecting and we need to call special methods
 	// to potentially serialize calls to button actions after editorExit.
 	private boolean visitingAsync = false;
-	// indicates that the async event handler being visited is a change handler (see visitOnChangedEventHandler)
-	private boolean visitingChangeAsync = false;
 
 	/**
 	 * Starts blur/edit-exit handlers and enables async sequencing for blurry actions.
-	 * The handlers skip their server events while a request is pending (and clear the view's {@code _blurry} marker),
-	 * or while a deferred server event waits to be sent (keeping the marker, for the waiting call to run the click).
 	 *
 	 * @param blurable The blurable.
 	 * @param parentVisible The parent visible.
@@ -3728,14 +3716,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		// This fires before the BizButton action() method if a button was clicked
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		// A deferred server event waiting to be sent (the field's change handler's, which SmartClient runs first) stands
-		// for the request it will send, so the handlers skip their events then too, as they did while a change request
-		// was pending. They leave the _blurry marker alone, though: the waiting call runs the click it marks once it
-		// is answered, which a request already sent cannot do.
-		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else if(!form._view._blurryCallsWaiting()){form._view._blurry=item;}},");
+		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
 		// This is called before or after the BizButton action depending on the browser.
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else if(!form._view._blurryCallsWaiting()){var view=form._view;");
+		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{var view=form._view;");
 	}
 
 	/**
@@ -3967,9 +3951,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append(visitingAsync ? "view.rerenderBlurryAction(" : "view.rerenderAction(");
 		code.append(Boolean.FALSE.equals(rerender.getClientValidation()) ? "false,'" : "true,'");
-		code.append(source.getSource());
-		// a change handler's deferred call is noted as such, for the focus handlers' guard (see visitOnFocusEventHandler)
-		code.append(visitingChangeAsync ? "',true);" : "');");
+		code.append(source.getSource()).append("');");
 	}
 
 	/**

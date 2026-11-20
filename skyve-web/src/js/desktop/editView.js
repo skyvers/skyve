@@ -494,10 +494,9 @@ isc.EditView.addMethods({
 	 * Re-renders the edit view following a blur event, after a slight delay (see _delayBlurryCall).
 	 * @param {boolean} validate - whether to validate before the request.
 	 * @param {string} source - the binding of the widget whose event this is.
-	 * @param {boolean} [fromChange] - true when a change handler calls this (see _blurryCallsWaiting).
 	 */
-	rerenderBlurryAction: function (validate, source, fromChange) {
-		this._delayBlurryCall("_rerenderBlurryAction", validate, source, fromChange);
+	rerenderBlurryAction: function (validate, source) {
+		this._delayBlurryCall("_rerenderBlurryAction", validate, source);
 	},
 
 	/**
@@ -510,27 +509,21 @@ isc.EditView.addMethods({
 	 * does not hold (zooming into one fails). So a call with the same method, validate and target as one waiting is
 	 * dropped: the waiting call gathers the view's values when it runs, so it sends what the second would have sent,
 	 * and it handles the view's _blurry marker once for both. A different call (another source or action, or the other
-	 * validate) is still scheduled, as before. A waiting call scheduled by a change handler, or merged with one, is
-	 * noted as such (see _blurryCallsWaiting).
+	 * validate) is still scheduled, as before.
 	 * @param {string} method - _rerenderBlurryAction or _doBlurryAction.
 	 * @param {boolean} validate - whether to validate before the request.
 	 * @param {string} target - the rerender's source, or the action's name.
-	 * @param {boolean} [fromChange] - true when a change handler schedules the call.
 	 */
-	_delayBlurryCall: function (method, validate, target, fromChange) {
+	_delayBlurryCall: function (method, validate, target) {
 		const key = `${method}|${validate}|${target}`;
 		if (!this._blurryCalls) {
 			this._blurryCalls = {};
 		}
-		const waiting = this._blurryCalls[key];
-		if (waiting) {
-			if (fromChange) {
-				waiting.fromChange = true;
-			}
+		if (this._blurryCalls[key] != null) {
 			return;
 		}
 		const args = method === "_rerenderBlurryAction" ? [validate, target] : [target, validate];
-		this._blurryCalls[key] = { timer: this.delayCall(method, args, 100), fromChange: !!fromChange };
+		this._blurryCalls[key] = this.delayCall(method, args, 100);
 	},
 
 	/**
@@ -543,23 +536,6 @@ isc.EditView.addMethods({
 		if (this._blurryCalls) {
 			delete this._blurryCalls[`${method}|${validate}|${target}`];
 		}
-	},
-
-	/**
-	 * Reports whether a blurry call is waiting on its delay (see _delayBlurryCall), for the generated event handlers.
-	 * Before change handlers' server events were deferred (as blur handlers' are), a change handler's request was
-	 * already pending when the field's exit and the next field's focus handlers ran, and their guards on
-	 * isc.RPCManager.requestsArePending() skipped their server events. The guards now also ask this: the exit handlers
-	 * about any waiting call, the focus handlers only about one a change handler scheduled.
-	 * @param {boolean} [fromChangeOnly] - true to count only calls that a change handler scheduled.
-	 * @returns {boolean} whether such a call is waiting.
-	 */
-	_blurryCallsWaiting: function (fromChangeOnly) {
-		const calls = this._blurryCalls;
-		if (!calls) {
-			return false;
-		}
-		return Object.keys(calls).some((key) => !fromChangeOnly || calls[key].fromChange);
 	},
 
 	/**
@@ -947,10 +923,9 @@ isc.EditView.addMethods({
 	 *
 	 * @param {string} action - the name of the action to execute.
 	 * @param {boolean} validate - whether validation should occur before executing the action.
-	 * @param {boolean} [fromChange] - true when a change handler calls this (see _blurryCallsWaiting).
 	 */
-	doBlurryAction: function (action, validate, fromChange) {
-		this._delayBlurryCall("_doBlurryAction", validate, action, fromChange);
+	doBlurryAction: function (action, validate) {
+		this._delayBlurryCall("_doBlurryAction", validate, action);
 	},
 
 	/**
