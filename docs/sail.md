@@ -2242,6 +2242,12 @@ class ContactsSailIT extends AbstractPrimeFacesInterpretedSail {
   applies. It is for a browser that is not a SAIL run's, such as
   `org.skyve.util.deployed.DeployedBrowser`'s, so that no SAIL setting can send
   it, and its credentials, to another server.
+- An IT that serves its own pages (a `HttpServer` in the test, such as
+  `StandardCallsSailIT`) and sets the base URL in code is still outranked by a
+  run's `sail.baseUrl`, which every SAIL run gives: give its scripts' URLs
+  absolutely (`{var:origin}/page`), or use `fixed()` for a configuration of its
+  own. A relative URL, such as a `SwitchTab` call's, resolves against the run's
+  base URL, the Skyve server.
 
 ### Running safely
 
