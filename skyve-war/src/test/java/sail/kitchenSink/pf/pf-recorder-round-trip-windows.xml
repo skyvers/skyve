@@ -10,7 +10,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Used by the recorder round-trip test: in an already signed-in PrimeFaces (tablet UX/UI) session, a user opens links in new windows, closes them, goes back and reloads, while the recorder writes a script of what was done, which is then replayed.</description>
 	<interaction name="New windows, back and refresh">
+		<description>Opens a new lookup value in a new window, makes it, opens the List Grid Fixture in a window nested in it and checks the value is listed, closes both, reloads and opens a PDF in a new window, then checks Back and Reload throw away an unsaved edit and deletes the lookup value.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<comment>A lookup value made in a new window, and the List Grid Fixture opened by its URL in a window nested in it</comment>

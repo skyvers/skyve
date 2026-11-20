@@ -12,12 +12,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and works through Tags, bulk communications and Snapshots, which only SmartClient offers: makes four contacts, tags them from a spreadsheet, combines and clears tags, copies a tag, sends a communication to a tag, runs a bulk delete on tagged contacts, then manages snapshots.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Jobs: clear the completed jobs list, so this member's job rows are its own">
+		<description>Clears the completed jobs list so that this script's job rows can be told from earlier ones.</description>
 		<method>
 			<navigateMenu module="admin" item="Jobs" />
 			<action name="DeleteCompletedJobs" />
@@ -25,6 +27,7 @@
 		</method>
 	</interaction>
 	<interaction name="Contacts: four contacts for the tags, none left by an earlier run">
+		<description>Checks no SAILTAGS contacts are left from an earlier run, then creates four contacts named SAILTAGS Alpha to Delta and checks they are listed.</description>
 		<method>
 			<navigateMenu module="admin" item="Contacts" />
 			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
@@ -54,6 +57,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: tag A and tag B, loaded from a spreadsheet">
+		<description>Opens the Tags menu item and creates tag A and tag B, each loaded from a column of a spreadsheet, checking that three contacts are matched and tagged for each.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridNew module="admin" document="Tag" />
@@ -96,6 +100,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: combine tag A with tag B (intersect, except, union), untag, clear">
+		<description>Combines tag A with tag B by intersect, union and except, checking the tagged count after each (two, three, one, then four), then untags and clears, and checks tag B is untouched.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag A {run}" />
@@ -157,6 +162,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: TagAll tags every record of a document, Clear removes them">
+		<description>Creates a tag for every Contact with Tag All, checks at least the four contacts are tagged, clears it and deletes the tag.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridNew module="admin" document="Tag" />
@@ -181,6 +187,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: copy tag B to a user, then delete the original (the copy keeps its records)">
+		<description>Copies tag B to a user, checking the copy is refused until a user is chosen, then deletes the original and checks the copy keeps its three records.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag B {run}" />
@@ -220,6 +227,7 @@
 		</method>
 	</interaction>
 	<interaction name="Communications: a communication to tag B, count, results, batch files, zip and delete the batch">
+		<description>Creates a communication to tag B, checks the count and test results say three communications, creates the batch files, then zips the batch, declines and confirms deleting it, and deletes the communication.</description>
 		<method>
 			<navigateMenu module="admin" item="Communication/Communications" />
 			<listGridNew module="admin" document="Communication" />
@@ -272,6 +280,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: a bulk document action deletes the tagged contacts">
+		<description>Runs a bulk Delete Documents action on tag B and checks that only SAILTAGS Alpha, which was not in tag B, is left.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag B {run}" />
@@ -291,6 +300,7 @@
 		</method>
 	</interaction>
 	<interaction name="Clean up: delete tags A and B and the last contact">
+		<description>Deletes tags A and B and the last SAILTAGS contact, checking each has gone.</description>
 		<method>
 			<navigateMenu module="admin" item="Tags" />
 			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag A {run}" />
@@ -307,6 +317,7 @@
 		</method>
 	</interaction>
 	<interaction name="Snapshots: two snapshots, reorder them, copy one to a user, delete them">
+		<description>Creates two snapshots of the contacts list, reorders them and checks the order changes, copies one to a user, and deletes them all, checking none are left.</description>
 		<method>
 			<comment>A snapshot is normally saved from a list grid's Snap menu, which SAIL has no step for. The All Snapshots grid has New, which makes one from its fields.</comment>
 			<navigateMenu module="admin" item="Snapshots" />

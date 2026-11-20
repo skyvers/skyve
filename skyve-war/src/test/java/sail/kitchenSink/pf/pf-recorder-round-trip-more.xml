@@ -14,7 +14,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Used by the recorder round-trip test: in an already signed-in PrimeFaces (tablet UX/UI) session, a user works with lookups, data grids, uploads, list grid filters and sorts, selection, server questions and a map, while the recorder writes a script of what was done, which is then replayed.</description>
 	<interaction name="Lookup values: a generated number, list filters and sorting">
+		<description>Makes two lookup values, keeps the number of the first, filters the list by description and by that number, sorts by description, opens one row and clears the filters.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
@@ -37,6 +39,7 @@
 		</method>
 	</interaction>
 	<interaction name="Kitchen sink: lookups, data grids and a content upload">
+		<description>Fills the Kitchen Sink required text, picks one lookup value from the list and another by typing in the autocomplete, adds and removes data grid rows, and uploads a file into a content link.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<dataEnter binding="text" value="Required text" />
@@ -57,6 +60,7 @@
 		</method>
 	</interaction>
 	<interaction name="Actions fixture: uploads and a link in a row">
+		<description>Uploads a file that the Actions Fixture refuses and checks the error, uploads one it accepts, then adds a grid row, declines and confirms its Run From Row link and checks the row ran.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
@@ -72,6 +76,7 @@
 		</method>
 	</interaction>
 	<interaction name="Server-side questions">
+		<description>Answers a server-side Yes or No question both ways on the Dialogs Fixture and checks each outcome.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="DialogsFixture" />
 			<action name="AskYesNo" />
@@ -81,6 +86,7 @@
 		</method>
 	</interaction>
 	<interaction name="Ordered grid: drag a row">
+		<description>Makes an Ordered Grid Fixture with two rows, drags the second above the first, saves and deletes it.</description>
 		<method>
 			<navigateList module="kitchensink" document="OrderedGridFixture" />
 			<listGridNew module="kitchensink" document="OrderedGridFixture" />
@@ -97,6 +103,7 @@
 		</method>
 	</interaction>
 	<interaction name="Selection: a Vue list grid, a PrimeFaces data table and a data grid">
+		<description>Selects a row in a Vue list grid, a PrimeFaces data table and a data grid on the List Grid Fixture.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
@@ -108,6 +115,7 @@
 		</method>
 	</interaction>
 	<interaction name="A PrimeFaces data table list grid: filters of each kind, and sorts">
+		<description>Makes a List Attributes record and filters the PrimeFaces data table by text, a combo, a check box and a date, sorts it, clears the filters and deletes the record.</description>
 		<method>
 			<navigateList module="kitchensink" document="ListAttributes" />
 			<listGridNew module="kitchensink" document="ListAttributes" />
@@ -133,6 +141,7 @@
 		</method>
 	</interaction>
 	<interaction name="A Vue list grid: filters on dates and times, typed as the columns show them">
+		<description>Makes a List Attributes record and filters the Vue list grid by dates, times and a timestamp in their on-screen formats with equals and less-than, then clears the filters and deletes the record.</description>
 		<method>
 			<navigateList module="kitchensink" document="ListAttributes" />
 			<listGridNew module="kitchensink" document="ListAttributes" />
@@ -160,11 +169,13 @@
 		</method>
 	</interaction>
 	<interaction name="A map">
+		<description>Opens the List Attribute Map menu item.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="List Attribute Map" />
 		</method>
 	</interaction>
 	<interaction name="Delete the lookup values">
+		<description>Deletes the two lookup values made at the start.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} a" />

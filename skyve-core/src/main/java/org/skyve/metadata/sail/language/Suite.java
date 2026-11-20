@@ -37,6 +37,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * &lt;/suite&gt;
  * </pre>
  *
+ * <p>An optional {@code description}, before the view roles, says what the suite tests, in words, for its reports (see
+ * {@link Descriptions}).
+ *
  * <p>{@code browserPerMember="true"} on the suite starts each member in a browser of its own; without it the browser
  * is handed on from member to member.
  *
@@ -63,7 +66,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see OrdinarySuiteMember
  * @see ViewRoles
  */
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "evidence", "browserPerMember", "viewRoles", "setUps", "members", "restore"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "evidence", "browserPerMember", "description", "viewRoles", "setUps", "members", "restore"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Suite {
 	/**
@@ -92,6 +95,7 @@ public class Suite {
 	private TestStrategy testStrategy;
 	private Evidence evidence;
 	private Boolean browserPerMember;
+	private String description;
 	private final List<ViewRoles> viewRoles = new ArrayList<>();
 	private final List<SuiteMember> setUps = new ArrayList<>();
 	private final List<OrdinarySuiteMember> members = new ArrayList<>();
@@ -154,6 +158,26 @@ public class Suite {
 	@XmlAttribute(name = "browserPerMember")
 	public void setBrowserPerMember(@Nullable Boolean browserPerMember) {
 		this.browserPerMember = browserPerMember;
+	}
+
+	/**
+	 * Returns what the suite is for, in words for the people reading its results: its {@code <description>}, tidied by
+	 * {@link Descriptions#normalise(String)}.
+	 *
+	 * @return the description, or {@code null} when it has none
+	 */
+	public @Nullable String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Sets what the suite is for, in words. The text is tidied by {@link Descriptions#normalise(String)}.
+	 *
+	 * @param description	the description, or {@code null} for none
+	 */
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "description")
+	public void setDescription(@Nullable String description) {
+		this.description = Descriptions.normalise(description);
 	}
 
 	/**

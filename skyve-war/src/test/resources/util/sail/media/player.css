@@ -15,6 +15,10 @@ body.player-page{height:100vh;display:flex;flex-direction:column;overflow:hidden
 .cap-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:6px}
 .cap-group{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
 .cap-summary{font-size:15px;font-weight:600;margin:2px 0 4px;overflow-wrap:anywhere}
+.story-bar{flex:none;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;font-size:13px}
+.story-bar summary{cursor:pointer;color:var(--muted)}
+.story-bar .story{padding:10px 0 4px;margin:0;max-height:30vh;overflow:auto}
+#steps .desc{padding:0 14px 4px;font-size:12px;color:var(--muted)}
 .steps-panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .panel-head{padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;gap:8px}
 .panel-head .muted{font-weight:400;font-size:12px}
@@ -28,4 +32,4 @@ body.player-page{height:100vh;display:flex;flex-direction:column;overflow:hidden
 #steps li.fail .summary{color:var(--fail)}
 #steps li .failure{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;margin-top:2px}
 @media (max-width:900px){body.player-page{height:auto;overflow:visible}.stage{grid-template-columns:minmax(0,1fr);padding:12px 16px}
-.frame-box{height:70vh}.caption{max-height:none}.steps-panel{max-height:60vh}.toolbar{padding:10px 16px}}
+.frame-box{height:70vh}.story-bar{padding:8px 16px}.caption{max-height:none}.steps-panel{max-height:60vh}.toolbar{padding:10px 16px}}

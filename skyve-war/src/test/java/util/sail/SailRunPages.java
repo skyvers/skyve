@@ -1,5 +1,6 @@
 package util.sail;
 
+import static util.sail.SailMediaHtml.descriptionHtml;
 import static util.sail.SailMediaHtml.duration;
 import static util.sail.SailMediaHtml.escape;
 import static util.sail.SailMediaHtml.startPage;
@@ -19,11 +20,14 @@ import jakarta.annotation.Nullable;
 import util.sail.SailMedia.Frame;
 import util.sail.SailMedia.RunInfo;
 import util.sail.SailMedia.StepRecord;
+import util.sail.SailMedia.Story;
 
 /**
  * A run's pages, for {@link SailMedia}: the film strip ({@code index.html}) and the video player ({@code player.html})
  * with its data ({@code video.js}). Each has a header with the run's title, outcome and timing, links to the other
- * pages, and a Settings pop-up with the run's details and its settings that are not defaults.
+ * pages, and a Settings pop-up with the run's details and its settings that are not defaults. What the run's suite,
+ * workflow and automation say they are for (their descriptions) comes under the header, and each interaction's
+ * description under its name.
  */
 final class SailRunPages {
 	/** A setting as {@code name=value (source)}, as {@link SailSettings#describe()} writes it. */
@@ -56,6 +60,30 @@ final class SailRunPages {
 			.append("<a class=\"btn\" href=\"../index.html\">All runs</a>")
 			.append("<button class=\"btn\" type=\"button\" popovertarget=\"settings\">Settings</button></nav></header>");
 		settingsPopup(out, info);
+	}
+
+	/**
+	 * Writes what a run's suite, workflow and automation say they are for, each under its heading, in an element of the
+	 * given tag and class.
+	 *
+	 * @param story	the run's story
+	 * @param tag	the element, such as {@code section}
+	 * @param cssClass	its class
+	 * @return the HTML, or empty when none of them has a description
+	 */
+	static @Nonnull String storyHtml(@Nonnull Story story, @Nonnull String tag, @Nonnull String cssClass) {
+		StringBuilder parts = new StringBuilder(512);
+		if (story.suiteDescription() != null) {
+			parts.append("<div class=\"story-part\"><h2>Suite <span class=\"muted\">").append(escape(story.suite())).append("</span></h2>")
+					.append(descriptionHtml(story.suiteDescription(), "desc")).append("</div>");
+		}
+		if (story.workflowDescription() != null) {
+			parts.append("<div class=\"story-part\"><h2>Workflow</h2>").append(descriptionHtml(story.workflowDescription(), "desc")).append("</div>");
+		}
+		if (story.description() != null) {
+			parts.append("<div class=\"story-part\"><h2>This run</h2>").append(descriptionHtml(story.description(), "desc")).append("</div>");
+		}
+		return parts.isEmpty() ? "" : '<' + tag + " class=\"" + cssClass + "\">" + parts + "</" + tag + '>';
 	}
 
 	/** Writes the pop-up with a run's details and its settings that are not defaults, with their sources. */
@@ -105,13 +133,15 @@ final class SailRunPages {
 		runHeader(result, info, steps,
 					(firstFailure == null) ? "" : "<a href=\"#step-" + firstFailure.sequence() + "\">Jump to the first failure</a>",
 					(playerLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(playerLink) + "\">Video</a>");
-		result.append("<main class=\"content\"><div class=\"card table-wrap\"><table class=\"strip\"><thead><tr><th>#</th><th>Step</th>")
+		result.append("<main class=\"content\">").append(storyHtml(info.story(), "section", "story card"))
+				.append("<div class=\"card table-wrap\"><table class=\"strip\"><thead><tr><th>#</th><th>Step</th>")
 				.append("<th>Outcome</th><th>Time</th><th>Screenshot</th></tr></thead><tbody>");
 		String group = null;
 		for (StepRecord step : steps) {
 			if (! step.procedure().equals(group)) {
 				group = step.procedure();
-				result.append("<tr class=\"group\"><td colspan=\"5\">").append(escape(group)).append("</td></tr>");
+				result.append("<tr class=\"group\"><td colspan=\"5\">").append(escape(group))
+						.append(descriptionHtml(step.procedureDescription(), "desc")).append("</td></tr>");
 			}
 			result.append("<tr id=\"step-").append(step.sequence()).append('"').append(step.failed() ? " class=\"fail\"" : "").append('>')
 					.append("<td class=\"num\">").append(step.sequence()).append("</td>")
@@ -148,10 +178,16 @@ final class SailRunPages {
 	 */
 	static @Nonnull String videoScript(@Nonnull RunInfo info, @Nonnull List<Frame> frames, @Nonnull List<StepRecord> steps, @Nullable String filmStripLink) {
 		List<Map<String, Object>> stepData = new ArrayList<>(steps.size());
+		String group = null;
 		for (StepRecord step : steps) {
 			Map<String, Object> data = new LinkedHashMap<>();
 			data.put("n", Integer.valueOf(step.sequence()));
 			data.put("p", step.procedure());
+			// the interaction's description, once: on the first step of its group, where the player heads the group
+			if ((! step.procedure().equals(group)) && (step.procedureDescription() != null)) {
+				data.put("pd", step.procedureDescription());
+			}
+			group = step.procedure();
 			data.put("d", step.summary());
 			data.put("x", step.xml());
 			data.put("s", Long.valueOf(step.startMillis()));
@@ -190,6 +226,11 @@ final class SailRunPages {
 		startPage(result, info.title() + " · video", SailMediaHtml.PLAYER_STYLE, "player-page");
 		runHeader(result, info, steps, "",
 					(filmStripLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(filmStripLink) + "\">Steps</a>");
+		String story = storyHtml(info.story(), "div", "story");
+		if (! story.isEmpty()) {
+			// folded, so that the video keeps the window's height until it is opened
+			result.append("<details class=\"story-bar\"><summary>What this run tests</summary>").append(story).append("</details>");
+		}
 		result.append("<div class=\"toolbar\"><button id=\"play\" class=\"btn primary\" type=\"button\">Play</button>")
 				.append("<button id=\"prev\" class=\"btn\" type=\"button\" title=\"Previous step (left arrow)\">&lsaquo; Step</button>")
 				.append("<button id=\"next\" class=\"btn\" type=\"button\" title=\"Next step (right arrow)\">Step &rsaquo;</button>")

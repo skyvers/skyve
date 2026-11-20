@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -88,6 +91,42 @@ class SailSuiteTest {
 												"sc/03-security.xml", "99-restore.xml"), ran),
 					() -> assertEquals(9, summary.members(Outcome.PASSED).size()),
 					() -> assertTrue(summary.describe("s").startsWith("SAIL suite s: 9 passed, 0 failed, 0 skipped\n"), summary.describe("s")));
+	}
+
+	/**
+	 * A suite's description is printed, a line per paragraph, when it starts and again just before its summary, and its
+	 * members' runs see it (for their media pages) while they run, and not after.
+	 */
+	@Test
+	void aSuitesDescriptionIsPrintedAndItsMembersSeeIt() {
+		Suite suite = XMLMetaData.unmarshalSAILSuiteString("""
+				<suite xmlns="http://www.skyve.org/xml/sail">
+					<description>
+						The admin module.
+
+						End to end.
+					</description>
+					<member file="a.xml"/>
+				</suite>
+				""", "d.suite.xml");
+		List<SailMedia.Story> stories = new ArrayList<>();
+		PrintStream original = System.out;
+		ByteArrayOutputStream captured = new ByteArrayOutputStream();
+		try (PrintStream capture = new PrintStream(captured, true, StandardCharsets.UTF_8)) {
+			System.setOut(capture);
+			SailSuite.of(suite, "d.suite.xml", member -> stories.add(SailMedia.story(new Automation())))
+						.environment(new SailSettings.Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath()))
+						.execute();
+		}
+		finally {
+			System.setOut(original);
+		}
+		String out = captured.toString(StandardCharsets.UTF_8);
+		String lines = "SAIL suite d.suite.xml description: The admin module.\nSAIL suite d.suite.xml description: End to end.\n";
+		assertAll(() -> assertTrue(out.startsWith(lines), out),
+					() -> assertTrue(out.contains(lines + "SAIL suite d.suite.xml: 1 passed"), "again, just before the summary: " + out),
+					() -> assertEquals(List.of(new SailMedia.Story("d.suite.xml", "The admin module.\n\nEnd to end.", null, null)), stories),
+					() -> assertNull(SailMedia.story(new Automation()).suite(), "cleared when the suite ends"));
 	}
 
 	/** A failed ordinary member does not stop the others; those that require it, directly or not, are skipped. */

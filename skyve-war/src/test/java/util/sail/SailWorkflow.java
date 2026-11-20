@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -19,6 +21,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.Descriptions;
 import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.SuiteMember;
 import org.skyve.metadata.sail.language.Workflow;
@@ -478,6 +481,24 @@ public final class SailWorkflow {
 	}
 
 	/**
+	 * Returns the description of the workflow the legs are: the descriptions of their workflows, each once, in order.
+	 * A workflow of several files has one workflow per file.
+	 *
+	 * @param legs	the legs
+	 * @return the description, or null when no workflow has one
+	 */
+	private static @Nullable String workflowDescription(@Nonnull List<Leg> legs) {
+		Set<String> descriptions = new LinkedHashSet<>();
+		for (Leg leg : legs) {
+			String description = leg.workflow().getDescription();
+			if (description != null) {
+				descriptions.add(description);
+			}
+		}
+		return descriptions.isEmpty() ? null : String.join("\n\n", descriptions);
+	}
+
+	/**
 	 * Runs the legs in order with one shared run.
 	 *
 	 * @param member	the suite member the legs are, or null for a workflow on its own
@@ -499,7 +520,12 @@ public final class SailWorkflow {
 			keptRuns.clear();
 		}
 		boolean passed = false;
-		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
+		String description = workflowDescription(legs);
+		for (String paragraph : Descriptions.paragraphs(description)) {
+			System.out.println("SAIL workflow description: " + paragraph);
+		}
+		// with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
+		SailMedia.beginUnit(description);
 		try {
 			for (Leg leg : legs) {
 				if (stopping()) {

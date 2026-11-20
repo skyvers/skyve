@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -398,6 +399,45 @@ class InterpretedWebDriverExecutorTest {
 		}
 		String stem = "pf-01-session.xml-" + executor.getRunToken() + "-01-Go_back-step01";
 		assertEquals(List.of(stem + ".html", stem + ".png"), files);
+	}
+
+	/**
+	 * The automation's and each interaction's descriptions go to the trace, a line per paragraph, and the interaction's
+	 * to its steps' film strip group, under its name.
+	 */
+	@Test
+	void descriptionsGoToTheTraceAndTheFilmStrip(@TempDir Path directory) throws IOException {
+		executor.useSettings(SailSettings.resolve(SailSettings.Environment.none(), List.of(SailSettings.code().snapshotDir(directory).layer())));
+		Automation automation = XMLMetaData.unmarshalSAILString("""
+				<automation uxui="desktop" userAgentType="desktop" xmlns="http://www.skyve.org/xml/sail">
+					<description>
+						Ben claims a fare.
+
+						Rob approves it.
+					</description>
+					<interaction name="Lodge">
+						<description>Signs in and submits.</description>
+						<method><comment>lodging</comment></method>
+					</interaction>
+					<interaction name="Plain"><method><comment>plain</comment></method></interaction>
+				</automation>
+				""");
+		executor.executeAutomation(automation);
+		Path run;
+		try (Stream<Path> listed = Files.list(directory)) {
+			run = listed.filter(Files::isDirectory).findFirst().orElseThrow();
+		}
+		String strip = Files.readString(run.resolve("index.html"));
+		InOrder order = inOrder(executor.selenide);
+		order.verify(executor.selenide).trace("  Automation: Ben claims a fare.");
+		order.verify(executor.selenide).trace("    Rob approves it.");
+		order.verify(executor.selenide).trace("Interaction: Lodge");
+		order.verify(executor.selenide).trace("  About: Signs in and submits.");
+		order.verify(executor.selenide).trace("Interaction: Plain");
+		verify(executor.selenide, times(1)).trace(startsWith("  About: ")); // none for the interaction with no description
+		assertAll(() -> assertTrue(strip.contains("<tr class=\"group\"><td colspan=\"5\">Lodge<div class=\"desc\"><p>Signs in and submits.</p></div></td></tr>"), strip),
+					() -> assertTrue(strip.contains("<tr class=\"group\"><td colspan=\"5\">Plain</td></tr>"), strip),
+					() -> assertTrue(strip.contains("<h2>This run</h2><div class=\"desc\"><p>Ben claims a fare.</p><p>Rob approves it.</p></div>"), strip));
 	}
 
 	@Test

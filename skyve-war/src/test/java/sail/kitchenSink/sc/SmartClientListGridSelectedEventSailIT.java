@@ -68,13 +68,15 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 	void aSelectedEventThatRerendersRunsOnceAndKeepsTheSelection() {
 		String description = "SAIL selected event " + System.currentTimeMillis();
 		String select = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI, saves a new lookup description, and selects it in the List Grid Fixture's PrimeFaces data table list grid. " +
+							"Checks that the grid is filtered to exactly one row. The test then checks that the selection runs the grid's selected event once, keeps the row selected and sets the view's selected id.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"A lookup value to select\"><method>" +
+							"<interaction name=\"A lookup value to select\"><description>Saves a new lookup description, which the next interaction selects.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"LookupDescription\" />" +
 							"<dataEnter binding=\"description\" value=\"" + description + "\" />" +
 							"<save />" +
 							"</method></interaction>" +
-							"<interaction name=\"Select it in the List Grid Fixture's PrimeFaces data table list grid\"><method>" +
+							"<interaction name=\"Select it in the List Grid Fixture's PrimeFaces data table list grid\"><description>Filters the list grid to the new lookup description, counts the requests and selection events, and then selects the row.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"ListGridFixture\" />" +
 							"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFaces\" column=\"description\" value=\"" + description + "\" />" +
 							"<testGridRows module=\"kitchensink\" query=\"qListGridFixtureFaces\" minRows=\"1\" maxRows=\"1\" />" +
@@ -98,7 +100,8 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 
 		// Remove the lookup value (a view opened by its URL has no Delete, so zoom into it from its list)
 		String remove = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-							"<interaction name=\"Remove the lookup value\"><method>" +
+							"<description>Signs in as admin in the SmartClient UI and deletes the lookup description that the earlier script saved. Checks that no row for it remains.</description>" +
+							"<interaction name=\"Remove the lookup value\"><description>Finds the lookup description in its list, opens it, deletes it, and checks that the list has no row for it.</description><method>" +
 							"<navigateList module=\"kitchensink\" document=\"LookupDescription\" />" +
 							"<listGridFilter module=\"kitchensink\" document=\"LookupDescription\" column=\"description\" value=\"" + description + "\" />" +
 							"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + description + "\" />" +
@@ -123,8 +126,10 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 		String description = "~ SAIL paged " + System.currentTimeMillis();
 		String tag = "SAILPAGED" + System.currentTimeMillis();
 		String generate = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI, uses the Control Panel to generate 100 tagged lookup values (more than a list page holds), and then saves one more whose description sorts after them all. " +
+							"It selects that one in the List Grid Fixture's PrimeFaces data table list grid. The test then refreshes the grid, which fetches only the first page, to check that the view keeps its selected id and does not run the selected event.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"More lookup values than a page holds\"><method>" +
+							"<interaction name=\"More lookup values than a page holds\"><description>Generates 100 tagged lookup values with the Control Panel, and waits for the Generate Test Data job to complete.</description><method>" +
 							"<navigateMenu module=\"admin\" item=\"DevOps/Control Panel\" />" +
 							"<tabSelect path=\"Design\" />" +
 							"<dataEnter binding=\"testModuleName\" value=\"kitchensink\" match=\"code\" />" +
@@ -137,7 +142,7 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 							"<tabSelect path=\"Actual\" />" +
 							"<testGridRows module=\"admin\" query=\"qCompletedJobs\" rowContaining=\"Generate Test Data\" minRows=\"1\" timeoutMillis=\"60000\" />" +
 							"</method></interaction>" +
-							"<interaction name=\"A lookup value after them all, selected\"><method>" +
+							"<interaction name=\"A lookup value after them all, selected\"><description>Saves a lookup description that sorts after the generated ones, filters the list grid to it and selects its row.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"LookupDescription\" />" +
 							"<dataEnter binding=\"description\" value=\"" + description + "\" />" +
 							"<save />" +
@@ -160,7 +165,8 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 								"a first page without the row, the selected id kept, the view unchanged, and no selected event");
 
 		String remove = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-							"<interaction name=\"Remove the lookup values\"><method>" +
+							"<description>Signs in as admin in the SmartClient UI and removes the data that the earlier script made: the extra lookup description and the tagged generated lookup values. Checks that the Delete Test Data job completes.</description>" +
+							"<interaction name=\"Remove the lookup values\"><description>Deletes the extra lookup description, deletes the tagged generated data with the Control Panel, and checks that the delete job has completed.</description><method>" +
 							"<navigateList module=\"kitchensink\" document=\"LookupDescription\" />" +
 							"<listGridFilter module=\"kitchensink\" document=\"LookupDescription\" column=\"description\" value=\"" + description + "\" />" +
 							"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + description + "\" />" +

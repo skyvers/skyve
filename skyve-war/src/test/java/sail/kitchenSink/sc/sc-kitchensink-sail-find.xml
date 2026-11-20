@@ -12,12 +12,14 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and checks that a user can find things by their content: it filters and sorts lists on every column type, uses numbers the server generates, picks combo and lookup values by their text, and follows links. It stops at the first failed check.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<switchMode />
 	</before>
 
 	<interaction name="List steps default to the list a menu item opened">
+		<description>Opens Sign In History and checks that list steps, filters, sorts and row selection act on the list the menu item opened.</description>
 		<method>
 			<comment>Sign In History lists the query qLoginHistory, not its document's default query: list steps that name
 				no list mean the menu item's list</comment>
@@ -36,6 +38,7 @@
 	</interaction>
 
 	<interaction name="Lookup values with generated numbers">
+		<description>Makes three lookup values, keeps the number the server gives each, and keeps just the run token from a description.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
@@ -62,6 +65,7 @@
 	</interaction>
 
 	<interaction name="List filters and sorting">
+		<description>Filters the Lookup values list by description and number with contains, equals and the advanced operators, finding rows by a number copied from a cell, and sorts by number.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<comment>contains on a text column is typed into the filter row</comment>
@@ -117,6 +121,7 @@
 	</interaction>
 
 	<interaction name="Options by code and label">
+		<description>Chooses combo and radio options by their code and by their label and checks each reads back.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<dataEnter binding="combo" value="three" match="code" />
@@ -132,6 +137,7 @@
 	</interaction>
 
 	<interaction name="Lookup description rows by their text">
+		<description>Picks a lookup value by its row text and by typing a search, and checks the chosen description.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<lookupDescriptionPick binding="lookupDescription" rowContaining="SAIL filter {run} b" />
@@ -142,6 +148,7 @@
 	</interaction>
 
 	<interaction name="List attributes to filter by type">
+		<description>Makes three List Attributes records, each with a different value in every column type, for the filters to tell apart.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="List" />
 			<listGridNew module="kitchensink" document="ListAttributes" />
@@ -184,6 +191,7 @@
 	</interaction>
 
 	<interaction name="Filters on enum, boolean, date and time columns">
+		<description>Filters the List Attributes list by enum, domain, boolean, date, date time, time and timestamp columns with each operator, and checks which of the three records each filter keeps.</description>
 		<method>
 			<comment>The list does not show the text column, so rows are told apart by their Date Time, which only this script's rows have: a leftover from an earlier run has the same values as this run's row, so the rows that show still tell</comment>
 			<navigateMenu module="kitchensink" item="List" />
@@ -286,6 +294,7 @@
 	</interaction>
 
 	<interaction name="Association and model list grids">
+		<description>Filters by an association's record and by a model's list grid, sorts, checks a record that another still references cannot be deleted, and then deletes it.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
 			<dataEnter binding="name" value="SAIL association {run}" />
@@ -331,6 +340,7 @@
 	</interaction>
 
 	<interaction name="Lookup description columns in an inline data grid">
+		<description>Enters lookup values in the columns of an inline data grid, edits the row again, saves, and checks the form's own lookup is untouched.</description>
 		<method>
 			<comment>After dataGridNew or dataGridEdit on an inline grid, dataEnter, testValue and the lookup description steps address the row's columns, not the form's lookups of the same bindings</comment>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
@@ -363,6 +373,7 @@
 	</interaction>
 
 	<interaction name="A time column in the filter row, and in the advanced filter of a grid with a filter parameter">
+		<description>Filters a list by time in the filter row and in the advanced filter of a grid that has a filter parameter, checking the time is sent as a time.</description>
 		<method>
 			<comment>The List Grid Fixture's list of column types shows the time column, so its filter row takes a time</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -384,6 +395,7 @@
 	</interaction>
 
 	<interaction name="Remove the list attributes">
+		<description>Deletes the three List Attributes records and checks none are left.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="List" />
 			<listGridFilter module="kitchensink" document="ListAttributes" column="text" value="SAIL types {run}" />
@@ -398,6 +410,7 @@
 	</interaction>
 
 	<interaction name="List attributes: multi-line text">
+		<description>Saves a List Attributes record whose text has several lines, finds it with the advanced filter, checks each line reads back, and deletes it.</description>
 		<method>
 			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space).
 				A text area and a rich text editor get the new lines, typed as Enter.</comment>
@@ -422,6 +435,7 @@
 	</interaction>
 
 	<interaction name="Links: a link in page markup, and tokens in href and bizId">
+		<description>Selects a row to show its id, follows a link in page text to that record, and checks that an id kept earlier works in a link's address and in a record's id.</description>
 		<method>
 			<comment>Selecting a row of the List Grid Fixture's second list grid rerenders the view, which shows the row's id and
 				a blurb's link to it. The rerender refreshes the grid, which keeps the row selected and does not select it
@@ -445,6 +459,7 @@
 	</interaction>
 
 	<interaction name="Remove the lookup values">
+		<description>Deletes the three lookup values made at the start, checking none are left, and signs out.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="{run}" />

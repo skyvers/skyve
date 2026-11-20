@@ -7,11 +7,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and looks at each DevOps screen with its safe actions: Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard. The destructive actions are left to the destructive script.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Control Panel: every tab, a query, cache statistics and generated SAIL">
+		<description>Opens the Control Panel, visits each tab, runs a query, shows the cache statistics, checks that generating SAIL is refused until a UX/UI is chosen, and switches query tracing on and off.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -37,6 +39,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Maintenance: every tab, the backup list and import/export">
+		<description>Opens Data Maintenance, visits its tabs, checks the backup list shows the suite's backup, and that selecting a backup enables Delete and Restore, then opens the import/export list.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Import/Export" />
@@ -58,6 +61,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Creator: write a script and preview it">
+		<description>Opens Document Creator, writes a short script and checks it survives a visit to each preview tab.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
 			<tabSelect path="Input" />
@@ -70,6 +74,7 @@
 		</method>
 	</interaction>
 	<interaction name="Monitoring Dashboard: charts and requests">
+		<description>Opens the Monitoring Dashboard and checks its Charts tab shows and the Requests tab lists requests.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
 			<tabSelect path="Charts" />
@@ -83,6 +88,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Maintenance: save, and the upload backup page">
+		<description>Saves Data Maintenance as it stands, refreshes the backup list and presses Upload Backup without uploading anything, so the backups stay as they were.</description>
 		<method>
 			<comment>With the values as they are rather than testDataEnter's: generated backup, restore and refresh options would change how the other members' jobs run. 99-restore.xml puts the row back.</comment>
 			<navigateEdit document="DataMaintenance" module="admin" />
@@ -99,6 +105,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Creator: generated data, and Submit refused without a module">
+		<description>Fills Document Creator with generated data and presses Submit, checking it is refused because no default module is chosen.</description>
 		<method>
 			<comment>testDataEnter fills the output location (a text), so Submit gets past that check to the module check</comment>
 			<navigateEdit document="DocumentCreator" module="admin" />

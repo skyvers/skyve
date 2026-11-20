@@ -60,6 +60,9 @@ import jakarta.annotation.Nullable;
  * This class records the run; {@link SailRunPages} writes the film strip and player, {@link SailRunsList} the list of
  * runs, {@link SailStepWords} each step's words, and {@link SailMediaHtml} holds their shared parts and the CSS and
  * JavaScript (in {@code util/sail/media/}).
+ * The pages tell the run's story from its script's descriptions ({@link Story}): the suite's (see
+ * {@link #suite(String, String)}), the workflow's (see {@link #beginUnit(String)}), the automation's and each
+ * interaction's.
  * The run's pages have a Settings button that shows its settings that do not come from their defaults, with their
  * sources. With {@value SailSettings#KEEP_MEDIA}{@code =failed}, a run that passed deletes its folders when it ends.
  * <p>
@@ -102,8 +105,10 @@ public final class SailMedia {
 	static final String RUN_JSON = "run.json";
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
+	/** The suite running on this thread, for its runs' pages; see {@link #suite(String, String)}. */
+	private static final ThreadLocal<SuiteStory> SUITE = new ThreadLocal<>();
 	/**
-	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit()} and removed by
+	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit(String)} and removed by
 	 * {@link #endUnit(boolean)}, which its caller calls in a {@code finally}.
 	 */
 	private static final ThreadLocal<Unit> UNIT = new ThreadLocal<>();
@@ -112,15 +117,43 @@ public final class SailMedia {
 	 * this class was loaded, as a folder time.
 	 */
 	static final String SESSION = FOLDER_TIME.format(LocalDateTime.now());
-	/** Numbers the units (see {@link #beginUnit()}) of this session. */
+	/** Numbers the units (see {@link #beginUnit(String)}) of this session. */
 	private static final AtomicInteger UNITS = new AtomicInteger();
 
-	/** A unit (a workflow): its number in the session, how many runs (legs) it has started, and its finished runs. */
+	/**
+	 * A unit (a workflow): its number in the session, its description, how many runs (legs) it has started, and its
+	 * finished runs.
+	 */
 	private static final class Unit {
 		private final int number = UNITS.incrementAndGet();
+		private final String description;
 		private int legs = 0;
 		/** Its finished runs, whose media is kept or deleted together. */
 		private final List<SailMedia> runs = new ArrayList<>();
+
+		private Unit(@Nullable String description) {
+			this.description = description;
+		}
+	}
+
+	/** The suite a run is a member of: its file, and its description. */
+	private record SuiteStory(@Nonnull String name, @Nullable String description) {
+		// a value
+	}
+
+	/**
+	 * What the run's script says it is for, in words: each a {@code <description>}, tidied (see
+	 * {@link org.skyve.metadata.sail.language.Descriptions}); null where there is none.
+	 *
+	 * @param suite	the suite the run is a member of, or null
+	 * @param suiteDescription	the suite's description
+	 * @param workflowDescription	the description of the workflow the run is a leg of
+	 * @param description	the automation's description
+	 */
+	record Story(@Nullable String suite,
+					@Nullable String suiteDescription,
+					@Nullable String workflowDescription,
+					@Nullable String description) {
 	}
 
 	/**
@@ -135,8 +168,8 @@ public final class SailMedia {
 	}
 
 	/**
-	 * One executed step: where it ran, what it was (in words, see {@link SailStepWords#summary(Step)}, and as SAIL), when,
-	 * how it went, and its snapshot.
+	 * One executed step: where it ran (and what its interaction is for, in words), what it was (in words, see
+	 * {@link SailStepWords#summary(Step)}, and as SAIL), when, how it went, and its snapshot.
 	 */
 	record StepRecord(int sequence,
 						@Nonnull String procedure,
@@ -147,7 +180,8 @@ public final class SailMedia {
 						long endMillis,
 						@Nullable String failure,
 						@Nullable String screenshot,
-						@Nullable String source) {
+						@Nullable String source,
+						@Nullable String procedureDescription) {
 		boolean failed() {
 			return failure != null;
 		}
@@ -168,6 +202,7 @@ public final class SailMedia {
 	 * @param started	when it started, as shown
 	 * @param uxui	the automation's UX/UI
 	 * @param settings	its settings that do not come from their defaults, each with its source (see {@link SailSettings#describe()})
+	 * @param story	what its suite, workflow and automation say they are for
 	 */
 	record RunInfo(@Nonnull String name,
 					@Nonnull String title,
@@ -175,8 +210,8 @@ public final class SailMedia {
 					@Nullable String label,
 					@Nonnull String started,
 					@Nonnull String uxui,
-					@Nonnull List<String> settings) {
-		// a value
+					@Nonnull List<String> settings,
+					@Nonnull Story story) {
 	}
 
 	private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
@@ -199,6 +234,7 @@ public final class SailMedia {
 	// the step that is running
 	private int sequence = 0;
 	private String procedure;
+	private String procedureDescription;
 	private int number;
 	private String stepSummary;
 	private String xml;
@@ -261,7 +297,8 @@ public final class SailMedia {
 		String label = LABEL.get();
 		// a load run's virtual users start runs at the same time: their folders name the user and iteration
 		String name = sanitise(FOLDER_TIME.format(now) + '-' + SailLoadProbe.fileLabel() + test + ((label == null) ? "" : '-' + label), 120);
-		RunInfo info = new RunInfo(name, title(automation, test), test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
+		RunInfo info = new RunInfo(name, title(automation, test), test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe(),
+									story(automation));
 		try {
 			SailMedia result = new SailMedia(selenide,
 												automation,
@@ -277,6 +314,22 @@ public final class SailMedia {
 			selenide.trace("Could not make the SAIL media folders, so this run has none: " + e);
 			return null;
 		}
+	}
+
+	/**
+	 * Returns what the run's suite, workflow and automation say they are for: the suite and the unit (a workflow)
+	 * running on this thread, and the automation.
+	 *
+	 * @param automation	the automation
+	 * @return the story
+	 */
+	static @Nonnull Story story(@Nonnull Automation automation) {
+		SuiteStory suite = SUITE.get();
+		Unit unit = UNIT.get();
+		return new Story((suite == null) ? null : suite.name(),
+							(suite == null) ? null : suite.description(),
+							(unit == null) ? null : unit.description,
+							automation.getDescription());
 	}
 
 	/**
@@ -328,12 +381,14 @@ public final class SailMedia {
 	 * Notes that a step starts, and starts or restarts the screencast if the browser has started or been replaced.
 	 *
 	 * @param procedureName	the interaction or procedure
+	 * @param description	what the interaction is for, in words, or null
 	 * @param stepNumber	the step's number in it, from 1
 	 * @param step	the step
 	 */
-	void stepStarted(@Nonnull String procedureName, int stepNumber, @Nonnull Step step) {
+	void stepStarted(@Nonnull String procedureName, @Nullable String description, int stepNumber, @Nonnull Step step) {
 		sequence++;
 		procedure = procedureName;
+		procedureDescription = description;
 		number = stepNumber;
 		try {
 			stepSummary = SailStepWords.summary(step);
@@ -392,8 +447,24 @@ public final class SailMedia {
 			}
 		}
 		steps.add(new StepRecord(sequence, procedure, number, stepSummary, xml, startMillis, endMillis,
-									(failure == null) ? null : hidePasswords(failure), screenshot, source));
+									(failure == null) ? null : hidePasswords(failure), screenshot, source, procedureDescription));
 		xml = null;
+	}
+
+	/**
+	 * Names the suite that the runs started on this thread are members of, for their pages: its file, and what it is
+	 * for. A suite sets it while it runs; {@code null} clears it.
+	 *
+	 * @param name	the suite's file, or null
+	 * @param description	its description, or null
+	 */
+	static void suite(@Nullable String name, @Nullable String description) {
+		if (name == null) {
+			SUITE.remove();
+		}
+		else {
+			SUITE.set(new SuiteStory(name, description));
+		}
 	}
 
 	/**
@@ -408,12 +479,15 @@ public final class SailMedia {
 	/**
 	 * Starts a unit of automation runs on this thread, such as a workflow, whose media is kept or deleted together: with
 	 * {@value SailSettings#KEEP_MEDIA}{@code =failed}, a passed run's folders are deleted only when the whole unit
-	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself.
+	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself. The unit's description (a
+	 * workflow's) is what its runs' pages show for it.
 	 *
 	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
+	 *
+	 * @param description	the unit's description, or null
 	 */
-	static void beginUnit() {
-		UNIT.set(new Unit());
+	static void beginUnit(@Nullable String description) {
+		UNIT.set(new Unit(description));
 	}
 
 	/**
@@ -446,7 +520,7 @@ public final class SailMedia {
 	/**
 	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs.
 	 * Then, when the run passed and {@value SailSettings#KEEP_MEDIA} is {@code failed}, deletes the run's folders:
-	 * at once, or when its unit ends (see {@link #beginUnit()}).
+	 * at once, or when its unit ends (see {@link #beginUnit(String)}).
 	 *
 	 * <p>Side effects: writes, and may delete, files in the run's folders, and rewrites each directory's list of runs.
 	 *
@@ -670,6 +744,11 @@ public final class SailMedia {
 		run.put("steps", Integer.valueOf(steps.size()));
 		run.put("failed", Long.valueOf(steps.stream().filter(StepRecord::failed).count()));
 		run.put("millis", Long.valueOf(runMillis(steps)));
+		Story story = info.story();
+		run.put("suite", story.suite());
+		run.put("suiteDescription", story.suiteDescription());
+		run.put("workflowDescription", story.workflowDescription());
+		run.put("description", story.description());
 		return new Json().toJson(run);
 	}
 

@@ -9,11 +9,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and makes a lookup value with this run's token, keeping its generated number for the next leg.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Make a lookup value and keep its number">
+		<description>Creates a lookup value, saves it and keeps its generated number, then finds it again in the list and reads its description back.</description>
 		<method>
 			<comment>Workflow run {run}</comment>
 			<navigateList module="kitchensink" document="LookupDescription" />

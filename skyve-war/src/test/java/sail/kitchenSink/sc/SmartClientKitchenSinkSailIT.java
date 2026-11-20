@@ -35,23 +35,27 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 	void findFailures() {
 		String script = """
 				<automation uxui="desktop" userAgentType="desktop" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<description>Signs in as admin in the SmartClient UI and tries steps that cannot do what they say: following a link that does not exist, entering an option that does not exist, and filtering an enum column with an operator it does not take. The test expects the script to fail, reporting all three problems with a clear reason for each.</description>
 					<before>
 						<login user="admin" password="admin" />
 						<switchMode />
 					</before>
 					<interaction name="No such link">
+						<description>Opens the List Grid Fixture and follows a link that is not on the page, which is expected to fail by saying which links the page has.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="No such link {run}" />
 						</method>
 					</interaction>
 					<interaction name="No such option">
+						<description>Opens the Kitchen Sink and enters an option label that the combo does not have, which is expected to fail by saying that no option has that label.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="KitchenSink" />
 							<dataEnter binding="combo" value="Fourth" match="label" />
 						</method>
 					</interaction>
 					<interaction name="No such operator">
+						<description>Opens the Kitchen Sink list and filters an enum column with greater than, which is expected to fail by saying that an enum is filtered with equals.</description>
 						<method>
 							<navigateMenu module="kitchensink" item="List" />
 							<listGridFilter module="kitchensink" document="ListAttributes" column="constantEnum" value="One (1)!" operator="greaterThan" />
@@ -85,29 +89,34 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 	void windowFailures() {
 		String script = """
 				<automation uxui="desktop" userAgentType="desktop" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<description>Signs in as admin in the SmartClient UI and tries window steps that cannot do what they say: following links that open the wrong kind of window, closing a window when none is open, and going back with no earlier page. The test expects the script to fail, reporting each problem with a clear reason.</description>
 					<before>
 						<login user="admin" password="admin" />
 						<switchMode />
 					</before>
 					<interaction name="A link that opens its page in this window">
+						<description>Opens the List Grid Fixture and follows a link as if it opened a new window, which is expected to fail because the link opens its page in this window.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open the selected lookup value" exact="true" window="new" />
 						</method>
 					</interaction>
 					<interaction name="No window to close">
+						<description>Opens the List Grid Fixture and closes a window when none is open, which is expected to fail.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<closeWindow />
 						</method>
 					</interaction>
 					<interaction name="A link that opens a new window, without window">
+						<description>Follows a link that opens a new window without saying so, which is expected to fail by telling the author to follow it with window="new".</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open a PDF in a new window" />
 						</method>
 					</interaction>
 					<interaction name="No earlier page in a new window">
+						<description>Follows a link into a new window and goes back, which is expected to fail because the new window has no earlier page.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open a PDF in a new window" window="new" />
@@ -115,6 +124,7 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="The failed interaction's window was closed">
+						<description>Opens the List Grid Fixture, tests a widget that is not there, and closes a window, which is expected to fail because the window the failed interaction left was closed already.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<testWidget binding="selectedVueId" />

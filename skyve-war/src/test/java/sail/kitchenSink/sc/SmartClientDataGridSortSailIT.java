@@ -62,8 +62,10 @@ class SmartClientDataGridSortSailIT extends AbstractSmartClientInterpretedSail {
 	@Test
 	void aHeaderSortDoesNotReorderTheCollection() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI, opens a new kitchensink ActionsFixture, adds three rows named b, c and a, and saves it. " +
+							"Checks that the grid holds exactly three rows after the save. The test then sorts the grid by name in the browser and saves again, to show that sorting does not change the order of the saved collection.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"Rows b, c and a, saved\"><method>" +
+							"<interaction name=\"Rows b, c and a, saved\"><description>Adds three rows in the order b, c, a, saves, and checks that the grid has three rows.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
 							"<tabSelect path=\"Rows\" />" +
 							"<dataGridNew binding=\"rows\" /><dataEnter binding=\"name\" value=\"SAIL sort {run} b\" /><zoomOut />" +

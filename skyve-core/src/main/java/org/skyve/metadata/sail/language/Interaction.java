@@ -86,7 +86,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * Represents a named sequence of automation steps within an {@link Automation} script.
  *
  * <p>An {@code Interaction} is the primary unit of script organisation — analogous
- * to a test method. It has a {@code name} attribute (displayed in reports), optional
+ * to a test method. It has a {@code name} attribute (displayed in reports), an optional
+ * {@code description} (what it does, in words, shown under its name in the reports), optional
  * {@code before} and {@code after} {@link Procedure} hooks, and an ordered list of
  * {@link Step} objects in a {@code method} element.
  *
@@ -101,11 +102,12 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see Procedure
  * @see Step
  */
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"before", "steps", "after"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"description", "before", "steps", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Interaction implements Executable {
 
 	private String name;
+	private String description;
 	private Procedure before;
 	private List<Step> steps = new ArrayList<>();
 	private Procedure after;
@@ -127,6 +129,26 @@ public class Interaction implements Executable {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
+	/**
+	 * Returns what the interaction is for, in words for the people reading its results: its {@code <description>}, tidied by
+	 * {@link Descriptions#normalise(String)}.
+	 *
+	 * @return the description, or {@code null} when it has none
+	 */
+	public @Nullable String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Sets what the interaction is for, in words. The text is tidied by {@link Descriptions#normalise(String)}.
+	 *
+	 * @param description	the description, or {@code null} for none
+	 */
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "description")
+	public void setDescription(@Nullable String description) {
+		this.description = Descriptions.normalise(description);
+	}
+
 	/**
 	 * Returns the before.
 	 * @return the result

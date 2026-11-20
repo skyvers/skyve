@@ -22,6 +22,7 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and does what an administrator does to keep the system running: refreshes document data, checks the mail a job sends is logged but not sent, manages the caches, changes and purges the Monitoring Dashboard, and uses the SmartClient-only User Hits and Content tools.</description>
 	<!--
 		The mail settings put-back at the end of the Mail Log interaction runs only if the steps before it pass (a failed Assert stops the
 		member, and the language has no cleanup that runs after a failure). A failed run leaves mailBogusSend and mailTestRecipient as set,
@@ -33,6 +34,7 @@
 		<switchMode />
 	</before>
 	<interaction name="Clear the completed jobs list">
+		<description>Clears the completed jobs list so that this script's job rows can be told from earlier ones.</description>
 		<method>
 			<comment>This member waits for its jobs by their rows in the completed jobs list, and pf/09-operations.xml leaves refresh jobs there that this member's log checks would read: clear it first. Safe because every sc/05 to sc/09 member runs after both 05-reports-misc.xml members (which check the backup's row) and before the 98-destructive.xml members. pf/09 must not do this: sc/05 runs after it.</comment>
 			<navigateMenu module="admin" item="Jobs" />
@@ -42,6 +44,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Refresh: refused without a refresh option">
+		<description>Presses Refresh in Data Maintenance without choosing a refresh option and checks it is refused with Value required.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Data Refresh" />
@@ -51,6 +54,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Refresh: refresh a document, read the job it ran">
+		<description>Starts a data refresh, declining the confirmation once, then waits for the Refresh job in the completed jobs list and checks it is complete and cannot be rerun or cancelled.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Data Refresh" />
@@ -88,6 +92,7 @@
 		</method>
 	</interaction>
 	<interaction name="Mail Log: the mail a job sends is logged, not sent">
+		<description>Turns on test mail in Configuration, runs a refresh that sends a notification, and checks the Mail Log shows the mail skipped and addressed to the test recipient, then puts the mail settings back.</description>
 		<method>
 			<comment>Mail is only logged: mailBogusSend is set here (98-destructive.xml sets it too) and put back at the end</comment>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
@@ -129,6 +134,7 @@
 		</method>
 	</interaction>
 	<interaction name="Control Panel: caches, evicting and statistics">
+		<description>Opens the Control Panel and checks the cache statistics, evicts the CSRF token, conversation and Hibernate reference caches (declining once first) and checks the conversation cache empties, and checks a built-in cache refuses to be stopped.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -179,6 +185,7 @@
 		</method>
 	</interaction>
 	<interaction name="Monitoring Dashboard: settings are saved, purge forgets the requests">
+		<description>Changes the Monitoring Dashboard's top N setting and checks it is kept and put back, then declines and confirms Purge, checking the earlier requests are forgotten.</description>
 		<method>
 			<comment>Use a document nothing else in this member opens, so the purge's effect shows in the request list</comment>
 			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
@@ -208,6 +215,7 @@
 		</method>
 	</interaction>
 	<interaction name="User Hits (SmartClient only): the hits count what the administrator does">
+		<description>Reads the administrator's desktop hit count in User Hits, visits two other screens, and checks the count has grown.</description>
 		<method>
 			<comment>Every request a signed-in user makes adds a hit to the user's count for the month and device; the list shows nothing until it is fetched, so refresh it</comment>
 			<navigateMenu module="admin" item="DevOps/User Hits" />
@@ -232,6 +240,7 @@
 		</method>
 	</interaction>
 	<interaction name="Content (SmartClient only): an uploaded image is listed, and selecting it shows its link">
+		<description>Gives a new contact an image, finds that image in the Data Maintenance Content tab and checks selecting it shows its file name and type, then deletes the contact.</description>
 		<method>
 			<navigateMenu module="admin" item="Contacts" />
 			<listGridNew module="admin" document="Contact" />
@@ -257,6 +266,7 @@
 		</method>
 	</interaction>
 	<interaction name="Content (SmartClient only): reindex the data, the attachments and both, and read each job">
+		<description>Runs Reindex Data, Reindex Content and Reindex in turn, declining once, waits for each job and checks it completes with the expected log line, then starts content garbage collection and checks content.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Content" />

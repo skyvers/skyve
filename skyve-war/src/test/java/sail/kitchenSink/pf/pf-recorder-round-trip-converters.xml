@@ -13,7 +13,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Used by the recorder round-trip test: in an already signed-in PrimeFaces (tablet UX/UI) session, a user enters dates, times and numbers with non-default formats and then filters the list by each, while the recorder writes a script of what was done, which is then replayed.</description>
 	<interaction name="Converters: entry, then the list's filters as the cells show the values">
+		<description>Makes a Converters Fixture with a month-name date, a 12 hour date time, a timestamp, a time, dollars, two percentages and a plain decimal, then filters the list by each value as the cells show it, and deletes the fixture.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Converters Fixtures" />
 			<listGridNew module="kitchensink" document="ConvertersFixture" />

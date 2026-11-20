@@ -4,11 +4,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and works through Contacts, Communication Templates and Communications, creating, changing and deleting each, and trying generated data on contacts.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Contacts: create, find, change and delete">
+		<description>Creates a contact with an email, mobile and image, finds it in the Contacts list, changes its mobile number, then deletes it and checks it has gone.</description>
 		<method>
 			<navigateMenu module="admin" item="Contacts" />
 			<listGridNew module="admin" document="Contact" />
@@ -32,6 +34,7 @@
 		</method>
 	</interaction>
 	<interaction name="Communication Templates: create and delete">
+		<description>Creates a communication template with some HTML, finds it in the list, and deletes it, checking it has gone.</description>
 		<method>
 			<navigateMenu module="admin" item="Communication/Communication Templates" />
 			<listGridNew module="admin" document="CommunicationTemplate" />
@@ -49,6 +52,7 @@
 		</method>
 	</interaction>
 	<interaction name="Communications: create, every tab, safe actions, delete">
+		<description>Creates a communication, visits each tab, uses the safe actions (add unsubscribe link, add image, test send and the counts) and checks the refusals explain why nothing is tagged, then deletes it.</description>
 		<method>
 			<navigateMenu module="admin" item="Communication/Communications" />
 			<listGridNew module="admin" document="Communication" />
@@ -93,6 +97,7 @@
 		</method>
 	</interaction>
 	<interaction name="Contacts: generated data, from the contacts query">
+		<description>Opens the contacts query and saves a contact filled with generated test data twice, then deletes it, which checks that every Contact field accepts valid data.</description>
 		<method>
 			<navigateList module="admin" query="qContacts" />
 			<listGridNew module="admin" query="qContacts" />

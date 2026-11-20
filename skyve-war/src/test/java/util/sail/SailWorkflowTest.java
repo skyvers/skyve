@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,11 +17,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -34,6 +39,7 @@ import org.openqa.selenium.WebDriver;
 import org.opentest4j.TestAbortedException;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.SuiteMember;
 import org.skyve.metadata.sail.language.Workflow;
@@ -276,6 +282,34 @@ class SailWorkflowTest {
 		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
 		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
+	}
+
+	/**
+	 * A workflow of several files is described by its files' workflow descriptions, each once, in order, while its legs
+	 * run; and by none once it ends.
+	 */
+	@Test
+	void aWorkflowOfSeveralFilesIsDescribedByEachFilesDescriptionOnce() {
+		String first = "<workflow xmlns=\"http://www.skyve.org/xml/sail\"><description>First.</description>" + AUTOMATION + "</workflow>";
+		String second = first.replace("First.", "Second.");
+		List<String> seen = new ArrayList<>();
+		step = browser -> seen.add(SailMedia.story(new Automation()).workflowDescription());
+		PrintStream original = System.out;
+		ByteArrayOutputStream captured = new ByteArrayOutputStream();
+		try (PrintStream capture = new PrintStream(captured, true, StandardCharsets.UTF_8)) {
+			System.setOut(capture);
+			engine.runStrings(first, AUTOMATION, second, first);
+		}
+		finally {
+			System.setOut(original);
+		}
+		engine.closeBrowser();
+		String out = captured.toString(StandardCharsets.UTF_8);
+		assertAll(() -> assertEquals(Collections.nCopies(4, "First.\n\nSecond."), seen),
+					() -> assertTrue(out.startsWith("SAIL workflow description: First.\nSAIL workflow description: Second.\n"),
+										"a line per paragraph, before the first leg: " + out),
+					() -> assertEquals(2, out.split("SAIL workflow description: ", -1).length - 1, "once: " + out),
+					() -> assertNull(SailMedia.story(new Automation()).workflowDescription(), "cleared when the workflow ends"));
 	}
 
 	/** A leg that a step skips makes the workflow skipped, not failed, naming the leg; and its browser is stopped. */

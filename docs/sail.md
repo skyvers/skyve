@@ -329,11 +329,17 @@ skyve-war/target/sail/
 ```
 
 - The list of runs shows each session (one `mvn` run) newest first, and its
-  runs in the order they ran: under each suite file's name, with a
-  workflow's legs grouped together. Each run is named by its first
+  runs in the order they ran: a suite's runs under a heading for the suite,
+  and under it each member file's name, with a workflow's legs grouped
+  together. Each run is named by its first
   interaction, with its outcome, steps and time. "Failed only" and a filter
   box narrow it.
 - The film strip highlights failed steps, and a link jumps to the first one.
+- A script's [descriptions](#descriptions) tell the story of the run: the
+  list of runs shows the suite's under the suite, the workflow's under the
+  workflow and the automation's under each run; the film strip shows the
+  suite's, the workflow's and the automation's above the steps, and each
+  interaction's under its name.
 - The video player has play, pause, previous and next step, a speed control
   and a list of the steps, in words, to jump to.
 - The other values are `failures` (failures only), `snapshots` (failures and
@@ -755,8 +761,9 @@ see [Examples](#examples).
 | `userAgentType` | yes | `desktop`, `tablet`, `phone` or `other`. It selects the device variant of the views built in the test JVM. |
 | `testStrategy` | no | `Assert`, `Verify` or `None`; see [Test Strategies](#test-strategies-and-failure-reports). If it is absent, the automation takes its [workflow's](#workflows) default, else its [suite's](#suites), else Assert. A run's `sail.testStrategy` overrides all of these, except in a locked suite member. |
 
-The children are an optional `<before>`, one or more `<interaction>` elements
-and an optional `<after>`.
+The children are an optional `<description>`
+([Descriptions](#descriptions)), an optional `<before>`, one or more
+`<interaction>` elements and an optional `<after>`.
 
 ### Workflows
 
@@ -782,7 +789,9 @@ A workflow is either several script files or one file whose root is
 ```
 
 The `<workflow>`'s optional `testStrategy` is the default for its automations
-that state none; an automation's own `testStrategy` wins.
+that state none; an automation's own `testStrategy` wins. Its optional
+`<description>`, before the automations, says what the workflow tests
+([Descriptions](#descriptions)).
 
 An IT runs a workflow with `util.AbstractInterpretedSailWorkflow`:
 
@@ -855,6 +864,7 @@ such requirement.
 |---|---|
 | `suite@testStrategy` | The default strategy for the automations of unlocked members, when neither the automation nor its workflow states one |
 | `suite@evidence` | `none`, `failures`, `snapshots`, `video` or `all`: the evidence the suite asks its run to keep. A run's `sail.evidence` replaces it; see [Settings](#settings). |
+| `description` | What the suite tests, in words, before the `<viewRoles>`. At most one. See [Descriptions](#descriptions). |
 | `viewRoles@user`, `role` | The roles the views are built with for a user that the members sign in as, as `viewRoles(...)` registers them ([The test user](#the-test-user)). One `<viewRoles>` per user, with at least one `<role>`. The user can hold `{run}` and `{var:name}`. |
 | `setUp@file`, `@requires` | A set-up member. Zero or more. |
 | `member@file`, `@requires`, `@lockTestStrategy` | An ordinary member. At least one. |
@@ -997,8 +1007,9 @@ file instead.
 
 An `<interaction name="...">` is the unit of a script and appears in failure
 messages. Its steps go in `<method>`. It can also have its own `<before>` and
-`<after>`. Each of `<before>`, `<method>` and `<after>` takes any sequence of
-the steps in the [op-code reference](#op-code-reference).
+`<after>`, and, first, a `<description>` ([Descriptions](#descriptions)).
+Each of `<before>`, `<method>` and `<after>` takes any sequence of the steps
+in the [op-code reference](#op-code-reference).
 
 - The automation's `<before>` runs once, then each interaction, then the
   automation's `<after>`. A step that throws in the automation's `<before>` or
@@ -1008,6 +1019,65 @@ the steps in the [op-code reference](#op-code-reference).
 - After an interaction that did not complete, the context stack is cleared, so
   the next interaction starts clean. Begin each interaction with a navigation
   step.
+
+### Descriptions
+
+A `<description>` says, in words, what a suite, a workflow, an automation or
+an interaction is for, so that someone reading the results, who may never
+see the XML, can follow the story of the testing: who does what, in which UI,
+and what is checked. It is optional, at most one, and the first child of its
+element:
+
+```xml
+<workflow xmlns="http://www.skyve.org/xml/sail">
+	<description>
+		Ben claims a taxi fare with a receipt, and Rob approves it.
+
+		The claim then shows on the next pay run.
+	</description>
+	<automation uxui="external" userAgentType="desktop">
+		<description>Ben lodges the claim in the external UX/UI.</description>
+		<interaction name="Ben lodges the claim">
+			<description>Signs in as staff, adds the line, uploads the receipt and submits.</description>
+			<method>...</method>
+		</interaction>
+	</automation>
+</workflow>
+```
+
+- It is plain text. A blank line starts a new paragraph. Other line breaks and
+  indents are spaces, so write it indented like the rest of the file.
+- It is shown as written: `{run}` and `{var:name}` are not substituted, so it
+  reads the same in every run. Use a [`comment`](#other-steps) step for a line
+  that shows the run's values.
+- A workflow of several files has no `<workflow>` element to describe it:
+  each file's `<automation>` describes its leg. When several `<workflow>`
+  files run as one workflow, their descriptions are shown together, each
+  once, in order.
+- It is not a step: it has no number, no outcome and no screenshot, and it
+  does nothing in the browser.
+- An XML comment is still the place for notes to the script's maintainers
+  (why the order matters, which settings to use). The description is for the
+  reader of the results.
+
+Where it shows:
+
+| Description of | List of runs (`index.html`) | Film strip and video player | Build log |
+|---|---|---|---|
+| The suite | Under a heading for the suite, over its members' runs | Above the steps, headed "Suite" and the suite's file | When the suite starts, and again just before its summary, as `SAIL suite <file> description: <paragraph>` |
+| The workflow | Under the workflow's heading; on its run for a workflow of one | Above the steps, headed "Workflow" | When the workflow starts, as `SAIL workflow description: <paragraph>` |
+| The automation | Under the run's title | Above the steps, headed "This run" | After the settings, as `  Automation: <paragraph>` |
+| The interaction | | Under the interaction's name, in the film strip and in the player's list of steps | Under `Interaction: <name>`, as `  About: <paragraph>` |
+
+In the video player, the suite's, workflow's and automation's descriptions are
+folded under "What this run tests", so that the video keeps the window's
+height. The list of runs' filter also matches the suite's and the workflow's
+descriptions.
+
+`Descriptions.normalise` (skyve-core,
+`org.skyve.metadata.sail.language`) tidies the text as it is read, and
+`getDescription()` on `Suite`, `Workflow`, `Automation` and `Interaction`
+returns it (or `null`).
 
 ### Contexts
 
@@ -1949,9 +2019,8 @@ ITs where you meant to run unit tests.
 |---|---|---|---|
 | `KitchenSinkSuiteSailIT` | `sail/kitchenSink/kitchensink.suite.xml`: the PF and SC conformance scripts, the PF row link script, the SC find script and a one-file workflow; see [Kitchen sink: conformance](#kitchen-sink-conformance). It supplies `{var:password}` in code. | both | `sail` `smoke` |
 | `PrimeFacesKitchenSinkSailIT` | the kitchen sink checks that need Java: a switch to SmartClient with PrimeFaces' user menu and `<switchMode/>` back (`switchModeFromSmartClient`), the find and option steps' failures (`unmatchedOptionsColumnsAndRowsFail`), and the window steps' and `listGridTool`'s failures (`windowAndToolFailures`) | PF, tablet | `sail` `smoke` |
-| `PrimeFacesConvertersSailIT` | `sail/kitchenSink/pf/pf-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then Vue list grid and data table filters | PF, tablet | `sail` |
+| `ConvertersSuiteSailIT` | `sail/kitchenSink/converters.suite.xml`: a member per group of converters and renderer (`pf/pf-converters-*.xml`, `sc/sc-converters-*.xml`): entry in fields and inline grid cells, then Vue list grid and data table filters (PF) or list grid filters (SC); see [Kitchen sink: converters](#kitchen-sink-converters) | both, PF tablet | `sail` |
 | `SmartClientKitchenSinkSailIT` | inline scripts that check the find steps' failures (`findFailures`) and the window steps' failures (`windowFailures`) | SC | `sail` `smoke` |
-| `SmartClientConvertersSailIT` | `sail/kitchenSink/sc/sc-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then list grid filters | SC | `sail` |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/workflow-1..3`: a workflow of three files (PF tablet, SC, PF tablet); the one-file workflow is a member of the kitchen sink suite | both | `sail` `smoke` |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests, one per strategy; refuses a `sail.testStrategy` override | PF, tablet | `sail` `smoke` |
 | `PrimeFacesFocusSailIT` | where a page puts the focus: a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet | `sail` |
@@ -1978,7 +2047,7 @@ ITs where you meant to run unit tests.
 | `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
 | `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
-| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, file and workflow headings and sessions with nothing to show. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
+| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, suite, file and workflow headings and sessions with nothing to show, and the filter matches the suite's, workflow's and runs' descriptions. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2272,9 +2341,10 @@ strip and the player into the same folder.
   member's file. Suites, workflows and ITs with several tests therefore keep
   every run. Each directory's `index.html` lists the runs by session (the
   JVM's run of tests), newest first; in a session, the runs are in the order
-  they ran, under their suite file (the script that labelled them) and, for
-  a workflow's legs, under the workflow. Each run shows its first
-  interaction, outcome, steps and time. This comes from each run's
+  they ran, under their suite and its member file (the script that labelled
+  them) and, for a workflow's legs, under the workflow. Each run shows its
+  first interaction, outcome, steps and time, and its
+  [description](#descriptions). This comes from each run's
   `run.json`; runs written before that file existed come last, by their
   folders' names. The pages are static files that open from the file
   system, light or dark as the system is. When both
@@ -2972,7 +3042,9 @@ conformance for [workflows](#workflows): in the three files, PrimeFaces makes a
 lookup value and keeps its number, then SmartClient finds it by the number and
 `{run}` and changes it, and PrimeFaces finds the change and deletes it.
 
-**Converters.** `kitchensink.ConvertersFixture` has an attribute for each of the
+### Kitchen sink: converters
+
+`kitchensink.ConvertersFixture` has an attribute for each of the
 60 converters (`ConverterName`), named after it in lower camel case
 (`DD_MMM_YYYY_HH24_MI` is `ddMmmYyyyHh24Mi`) and labelled with the converter's
 name, of the type the converter takes, and `plainDecimal2`, a decimal with no
@@ -2992,8 +3064,12 @@ is saved again with OK, which stores its magnitude in PrimeFaces (the absolute
 column's `lessThan 0` filter finds no row) and keeps the negative in SmartClient
 (it finds the record, as does `equals -7.50`).
 
-`PrimeFacesConvertersSailIT` and `SmartClientConvertersSailIT` run a script per
-group (`pf/pf-converters-<group>.xml`, `sc/sc-converters-<group>.xml`): records
+The converters suite, `sail/kitchenSink/converters.suite.xml`, which
+`ConvertersSuiteSailIT` runs (tag `sail`), has a member per group and renderer
+(`pf/pf-converters-<group>.xml`, `sc/sc-converters-<group>.xml`), each
+independent with its own run token, so it needs no bracket;
+`-Dsail.suite.only=pf/` runs one renderer's, and
+`-Dsail.suite.only=pf/pf-converters-dates` one script. In each script, records
 a, b and c (and d and e in the numbers group) are typed into every field as a
 user types them, and into an inline grid row with the next record's values (so
 that a cell's value differs from its field's); both are checked with `testValue`
@@ -3336,6 +3412,8 @@ that show it, relative to the repository root:
 | Mechanism | Shown in |
 |---|---|
 | Every element and attribute of `sail.xsd`, or the reason one is unused | `skyve-war/src/test/java/sail/SailLanguageCoverageTest.java` (its allow-list, 33 entries, each with its reason) |
+| [Descriptions](#descriptions) | Every shipped suite and SAIL file, and the scripts built in the ITs under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/kitchenSink/kitchensink.suite.xml` (a suite's, in paragraphs), `skyve-war/src/test/java/sail/kitchenSink/workflow/kitchensink-workflow.xml` (a workflow's and its automations') and `skyve-war/src/test/java/sail/kitchenSink/pf/PrimeFacesActionUploadSailIT.java` (a script built in Java) |
+| A suite of independent scripts per renderer | `skyve-war/src/test/java/sail/kitchenSink/converters.suite.xml` |
 | Op-codes: [Session](#session) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Login", "Switch mode" and "Logout"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Login" (with `switchMode`) and "Logout" |
 | Op-codes: [Navigation](#navigation) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Windows, back and refresh", "Menus", "Contexts, links, maps and scripts" (`navigateMap`); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Windows, back, refresh and list grid tools", "A tree and a calendar", "Menus" |
 | Op-codes: [Contexts](#contexts-1) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Links: a link in page markup, and tokens in href and bizId" |
@@ -4068,6 +4146,11 @@ Report any runtime bug the suites find as a Skyve issue. Finally, run
 
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
+
+- `<description>` is new and optional on `<suite>`, `<workflow>`,
+  `<automation>` and `<interaction>` ([Descriptions](#descriptions)). A
+  script that uses it needs this version's `sail.xsd`: an older Skyve rejects
+  it when the script loads.
 
 - **Breaking:** `Executor` has 20 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,

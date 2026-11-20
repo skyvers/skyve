@@ -48,8 +48,9 @@ class SmartClientFastTypingSailIT extends AbstractSmartClientInterpretedSail {
 	@Test
 	void aBurstOfKeysIsKeptAndAClickStraightAfterRuns() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI and opens the User wizard from the Users list. The script gets as far as the wizard's new password step, after entering a contact name, an email and a user name and confirming a password. The test then types the new password quickly, to check that every key is kept and that a click on Next straight afterwards still runs.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"The user name and password step of the User wizard\"><method>" +
+							"<interaction name=\"The user name and password step of the User wizard\"><description>Starts a new user, enters a contact name and email, checks them, starts the wizard, and enters a user name and a confirmation password.</description><method>" +
 							"<navigateMenu module=\"admin\" item=\"Security Admin/Users\" />" +
 							"<tabSelect path=\"Users\" />" +
 							"<listGridNew module=\"admin\" query=\"qUsers\" createView=\"true\" />" +
@@ -113,8 +114,9 @@ class SmartClientFastTypingSailIT extends AbstractSmartClientInterpretedSail {
 	@Test
 	void aValueTypedButNotCommittedIsGatheredOnlyForTheUser() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI and opens the kitchensink List Attributes document, which has a date field. The test then types a date into that field without leaving it, to check that a background request leaves the typed text alone and that a request the user asks for commits it.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"A view with a date\"><method>" +
+							"<interaction name=\"A view with a date\"><description>Opens the List Attributes view.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"ListAttributes\" />" +
 							"</method></interaction></automation>";
 		Assertions.assertDoesNotThrow(() -> sailString(script));

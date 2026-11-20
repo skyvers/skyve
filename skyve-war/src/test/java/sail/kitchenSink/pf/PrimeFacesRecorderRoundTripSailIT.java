@@ -43,20 +43,24 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 
 	/** Signs in and opens the Control Panel's SAIL tab. */
 	private static final String SIGN_IN = HEAD +
+			"<description>Signs in as admin in the PrimeFaces tablet UX/UI and opens the SAIL tab of the Control Panel, ready for recording to start. The recorder test runs it first. It checks nothing itself.</description>" +
 			"<before><login user=\"admin\" password=\"admin\" /></before>" +
-			"<interaction name=\"Control Panel\"><method>" + TO_CONTROL_PANEL + "</method></interaction>" +
+			"<interaction name=\"Control Panel\"><description>Opens the Control Panel and selects its SAIL tab.</description><method>" + TO_CONTROL_PANEL + "</method></interaction>" +
 			TAIL;
 	/** Starts recording: in PrimeFaces, the page loads again with the recorder. */
 	private static final String START = HEAD +
-			"<interaction name=\"Start recording\"><method>" + TO_CONTROL_PANEL + "<action name=\"StartSAILRecording\" /></method></interaction>" +
+			"<description>Opens the SAIL tab of the Control Panel in the PrimeFaces tablet UX/UI and starts the recorder, as a user would. It checks nothing itself.</description>" +
+			"<interaction name=\"Start recording\"><description>Opens the SAIL tab of the Control Panel and runs its StartSAILRecording action.</description><method>" + TO_CONTROL_PANEL + "<action name=\"StartSAILRecording\" /></method></interaction>" +
 			TAIL;
 	private static final String STOP = HEAD +
-			"<interaction name=\"Stop recording\"><method>" + TO_CONTROL_PANEL + "<action name=\"StopSAILRecording\" /></method></interaction>" +
+			"<description>Opens the SAIL tab of the Control Panel in the PrimeFaces tablet UX/UI and stops the recorder, as a user would. It checks nothing itself.</description>" +
+			"<interaction name=\"Stop recording\"><description>Opens the SAIL tab of the Control Panel and runs its StopSAILRecording action.</description><method>" + TO_CONTROL_PANEL + "<action name=\"StopSAILRecording\" /></method></interaction>" +
 			TAIL;
 
 	/** Contacts: create, find, change and delete (declined, then confirmed), from the PrimeFaces admin suite. */
 	private static final String CONTACTS = HEAD +
-			"<interaction name=\"Contacts: create, find, change and delete\"><method>" +
+			"<description>Records and replays the admin Contacts workflow in the PrimeFaces tablet UX/UI, signed in as admin. A contact is created, found, changed and deleted, and the test checks that the recording of those gestures replays unedited.</description>" +
+			"<interaction name=\"Contacts: create, find, change and delete\"><description>Creates a contact and saves it, finds it in the Contacts list, changes its mobile number and saves, declines a delete and then confirms one. Checks the saved values and that no row for the contact remains.</description><method>" +
 			"<navigateMenu module=\"admin\" item=\"Contacts\" />" +
 			"<listGridNew module=\"admin\" document=\"Contact\" />" +
 			"<dataEnter binding=\"name\" value=\"SAIL Recorded Contact {run}\" />" +
@@ -226,7 +230,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		sailString(START);
 		awaitRecorder();
 
-		sailString(HEAD + "<interaction name=\"New lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the PrimeFaces tablet UX/UI. Starts a new lookup value and tries to save it with no description, which the form refuses.</description>" +
+					"<interaction name=\"New lookup value\"><description>Opens the Lookup values list, starts a new lookup value, saves it with nothing entered, and checks that the save fails.</description><method>" +
 					"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" +
 					"<listGridNew module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<save testSuccess=\"false\" />" +
@@ -239,7 +244,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		new Actions(driver()).sendKeys(Keys.ESCAPE).perform();
 		assertNotEquals(Boolean.TRUE, js("return SKYVE.SailRecorder.checking();"), "Esc leaves Check mode");
 
-		sailString(HEAD + "<interaction name=\"Lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the PrimeFaces tablet UX/UI. Enters a lookup value's description and saves it.</description>" +
+					"<interaction name=\"Lookup value\"><description>Enters a description for the lookup value and saves it.</description><method>" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<dataEnter binding=\"description\" value=\"" + value + "\" />" +
 					"<save />" +
@@ -247,7 +253,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		awaitRecorder();
 		click(field("description"), true);
 		awaitRecorder();
-		sailString(HEAD + "<interaction name=\"Back to the list\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the PrimeFaces tablet UX/UI. Returns from the lookup value to its list.</description>" +
+					"<interaction name=\"Back to the list\"><description>Closes the lookup value to go back to its list.</description><method>" +
 					"<pushListContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<ok />" +
@@ -273,7 +280,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		awaitPanel();
 		panel("collapse");
 		// leave no lookup value behind
-		sailString(HEAD + "<interaction name=\"Delete the lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the PrimeFaces tablet UX/UI. Deletes the lookup value that the test made, so that none is left behind.</description>" +
+					"<interaction name=\"Delete the lookup value\"><description>Opens the lookup value from its list and deletes it.</description><method>" +
 					"<pushListContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + value + "\" />" +
 					"<delete />" +

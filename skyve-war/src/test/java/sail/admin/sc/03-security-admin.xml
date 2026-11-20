@@ -8,12 +8,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and walks through Security Admin: making a group and a user, the new user's own sign in and password change, the logs, and the configuration screen.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Data Groups: create, find and delete">
+		<description>Creates a data group, finds it in the list, and deletes it, checking it has gone.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
 			<listGridNew module="admin" document="DataGroup" />
@@ -29,6 +31,7 @@
 		</method>
 	</interaction>
 	<interaction name="Groups: a group needs roles">
+		<description>Tries to save a group with no roles and checks it is refused, then gives it two roles and saves it, checking the group is listed.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Groups" />
 			<listGridNew module="admin" document="Group" />
@@ -46,6 +49,7 @@
 		</method>
 	</interaction>
 	<interaction name="Users: make a user with the wizard">
+		<description>Makes a user with the wizard: searches for a contact, makes a new one, sets a user name and password, picks the group, and checks the user is listed with its groups.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Users" />
@@ -81,6 +85,7 @@
 		</method>
 	</interaction>
 	<interaction name="The new user signs in and changes their password">
+		<description>Signs in as the new user, checks the menu matches the user's roles, rejects a too-short new password, changes the password, and checks only the new one signs in.</description>
 		<method>
 			<logout />
 			<login user="sail{run}" password="Sail{run}Pass1" />
@@ -114,6 +119,7 @@
 		</method>
 	</interaction>
 	<interaction name="Sign In History and Security Log show the sign ins">
+		<description>Checks the new user's sign ins appear in Sign In History and opens the Security Log.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Sign In History" />
 			<testGridRows module="admin" query="qLoginHistory" rowContaining="sail{run}" minRows="1" />
@@ -124,6 +130,7 @@
 		</method>
 	</interaction>
 	<interaction name="Delete the user and the group">
+		<description>Deletes the new user and then the group, checking each has gone from its list.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Users" />
@@ -138,6 +145,7 @@
 		</method>
 	</interaction>
 	<interaction name="Configuration: every tab (saved only in 98-destructive)">
+		<description>Opens Configuration and visits its tabs without saving, which the destructive script does later.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
 			<tabSelect path="General" />
@@ -147,12 +155,14 @@
 		</method>
 	</interaction>
 	<interaction name="Mail Log">
+		<description>Opens the Mail Log and checks its Database Mail Logs tab shows.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Mail Log" />
 			<testWidget tab="Database Mail Logs" />
 		</method>
 	</interaction>
 	<interaction name="Groups: generated data, with a role, saved twice">
+		<description>Opens Groups and saves a group filled with generated test data and a role twice, then deletes it.</description>
 		<method>
 			<navigateList document="Group" module="admin" />
 			<listGridNew document="Group" module="admin" />
@@ -173,6 +183,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Groups: generated data, saved twice">
+		<description>Opens Data Groups and saves a data group filled with generated test data twice, then deletes it.</description>
 		<method>
 			<navigateList document="DataGroup" module="admin" />
 			<listGridNew document="DataGroup" module="admin" />

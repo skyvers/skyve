@@ -37,6 +37,7 @@ import org.skyve.web.UserAgentType;
 import util.sail.SailMedia.Frame;
 import util.sail.SailMedia.RunInfo;
 import util.sail.SailMedia.StepRecord;
+import util.sail.SailMedia.Story;
 
 /**
  * Tests the pages that SAIL step snapshots and video write: the film strip, the player and its data, and the list
@@ -44,14 +45,15 @@ import util.sail.SailMedia.StepRecord;
  */
 @SuppressWarnings({"static-method", "java:S5960"}) // test-only assertions
 class SailMediaTest {
+	private static final Story NO_STORY = new Story(null, null, null, null);
 	private static final RunInfo INFO = new RunInfo("20261106-120000-000-KitchenSinkIT.test", "Contacts: create", "KitchenSinkIT.test", "01-setup.xml",
 													"2026-11-06 12:00:00", "tablet",
-													List.of("testStrategy=Verify (-Dsail.testStrategy)", "var.password=******** (code)"));
+													List.of("testStrategy=Verify (-Dsail.testStrategy)", "var.password=******** (code)"), NO_STORY);
 	private static final List<StepRecord> STEPS = List.of(
-			new StepRecord(1, "Contacts: create", 1, "Navigate menu (item: Contacts, module: admin)", "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null),
+			new StepRecord(1, "Contacts: create", 1, "Navigate menu (item: Contacts, module: admin)", "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null, null),
 			new StepRecord(2, "Contacts: create", 2, "Data enter (binding: name, value: a < b)", "<dataEnter binding=\"name\" value=\"a &lt; b\"/>", 1250L, 1300L,
-							"Interaction \"Contacts: create\" step 2: <boom> & more", "002-Contacts-create-dataEnter.png", "002-Contacts-create-dataEnter.html"),
-			new StepRecord(3, "Contacts: create", 3, "Save", "<save/>", 1300L, 1700L, "second failure", null, null));
+							"Interaction \"Contacts: create\" step 2: <boom> & more", "002-Contacts-create-dataEnter.png", "002-Contacts-create-dataEnter.html", null),
+			new StepRecord(3, "Contacts: create", 3, "Save", "<save/>", 1300L, 1700L, "second failure", null, null, null));
 
 	@Test
 	void theFilmStripHasARowPerStepAndLeadsToTheFirstFailure() {
@@ -88,7 +90,7 @@ class SailMediaTest {
 
 	@Test
 	void aRunWithDefaultSettingsSaysSo() {
-		RunInfo info = new RunInfo("r", "T.t", "T.t", null, "2026-11-17 12:00:00", "desktop", List.of());
+		RunInfo info = new RunInfo("r", "T.t", "T.t", null, "2026-11-17 12:00:00", "desktop", List.of(), NO_STORY);
 		String html = SailRunPages.filmStripHtml(info, STEPS, null);
 		assertTrue(html.contains("Settings: all defaults"), html);
 	}
@@ -127,7 +129,7 @@ class SailMediaTest {
 		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media"))
 																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
 		Path media = base.resolve("media");
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path first;
 		Path second;
 		try {
@@ -139,7 +141,7 @@ class SailMediaTest {
 		finally {
 			SailMedia.endUnit(true);
 		}
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path kept;
 		try {
 			kept = run(failedOnly, media, "unitFailedLater", null, true);
@@ -173,7 +175,7 @@ class SailMediaTest {
 		DataEnter step = new DataEnter();
 		step.setBinding("text");
 		step.setValue("x");
-		media.stepStarted("Interaction", 1, step);
+		media.stepStarted("Interaction", null, 1, step);
 		media.stepEnded(failure);
 		media.finish(passed);
 		// the folder is named by the time, the test (outside the harness: none here) and the label
@@ -268,7 +270,7 @@ class SailMediaTest {
 		Path run = Files.createDirectories(base.resolve(folder));
 		Files.writeString(run.resolve("player.html"), "player");
 		RunInfo info = new RunInfo(folder, title, "B.test", label, "2026-11-06 " + folder.substring(9, 11) + ':' + folder.substring(11, 13) + ":00",
-									"phone", List.of());
+									"phone", List.of(), NO_STORY);
 		Files.writeString(run.resolve(SailMedia.RUN_JSON), SailMedia.runJson(info, place, passed ? STEPS.subList(0, 1) : STEPS, passed));
 	}
 
@@ -279,7 +281,7 @@ class SailMediaTest {
 		SailSettings settings = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media")).layer()));
 		Path media = base.resolve("media");
 		Path alone = run(settings, media, "alone", null, true);
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path first;
 		Path second;
 		try {

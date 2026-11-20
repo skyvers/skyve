@@ -11,12 +11,15 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>A lookup value is made in PrimeFaces, then found by its number and deleted in SmartClient, proving the two renderers share one run's data.</description>
 	<automation uxui="external" userAgentType="desktop">
+		<description>Signs in as admin in the PrimeFaces external UX/UI, makes a lookup value and keeps the number and title the server gives it.</description>
 		<before>
 			<login user="admin" password="{var:password}" />
 			<testSuccess />
 		</before>
 		<interaction name="PrimeFaces: make a lookup value and keep its number">
+			<description>Creates a lookup value in the external UX/UI, saves it, and keeps the number and title the server gives it for the SmartClient leg to find.</description>
 			<method>
 				<navigateList module="kitchensink" document="LookupDescription" />
 				<listGridNew module="kitchensink" document="LookupDescription" />
@@ -29,11 +32,13 @@
 		</interaction>
 	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in the SmartClient desktop UX/UI, finds the lookup value made in PrimeFaces by its number, and deletes it.</description>
 		<before>
 			<login user="admin" password="{var:password}" />
 			<switchMode />
 		</before>
 		<interaction name="SmartClient: find the lookup value by its number and delete it">
+			<description>Filters the Lookup values list by the kept number, opens the one row and checks its number, then deletes it and checks it has gone.</description>
 			<method>
 				<comment>Made in PrimeFaces as {var:title}</comment>
 				<navigateMenu module="kitchensink" item="Lookup values" />

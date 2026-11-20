@@ -10,12 +10,15 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Backs up the data before the suite changes it, first in PrimeFaces and then in SmartClient, so that the final restore has something to put back and both UIs' backup screens are proved to work.</description>
 	<automation uxui="tablet" userAgentType="tablet">
+		<description>Signs in as admin in PrimeFaces (tablet UX/UI), clears the completed jobs list and backs up the data, checking the backup appears in the list.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 		</before>
 		<interaction name="Clear the completed jobs list">
+			<description>Deletes the completed jobs so that later job rows can be told from earlier ones, and checks the list is empty.</description>
 			<method>
 				<comment>The suite waits for its jobs (backup, test data, restore) by their rows in the completed jobs list. Every restore leaves a RestoreJob row in the data it restores, so without this the restore's own row could not be told from an earlier one. The list is job history only.</comment>
 				<navigateMenu module="admin" item="Jobs" />
@@ -25,6 +28,7 @@
 			</method>
 		</interaction>
 		<interaction name="Back up the data before the suite (PrimeFaces)">
+			<description>Opens Data Maintenance, starts a full backup without redaction, waits for the Backup job to complete in the Jobs list, and checks the backup is listed.</description>
 			<method>
 				<navigateEdit module="admin" document="DataMaintenance" />
 				<tabSelect path="Backup/Restore" />
@@ -49,12 +53,14 @@
 		</after>
 	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI), clears the completed jobs list again and backs up the data, checking that both backups are now listed.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="Clear the completed jobs list again">
+			<description>Clears the completed jobs list again, so the PrimeFaces backup's row cannot be mistaken for the next one, and checks it is empty.</description>
 			<method>
 				<comment>Clear PrimeFaces' backup row too, so that the wait below is for this backup's job, and the 05-reports-misc.xml members find exactly one Backup row</comment>
 				<navigateMenu module="admin" item="Jobs" />
@@ -64,6 +70,7 @@
 			</method>
 		</interaction>
 		<interaction name="Back up the data before the suite (SmartClient)">
+			<description>Starts the same backup in SmartClient, waits for the Backup job to complete, and checks the Backup/Restore list now shows both backups.</description>
 			<method>
 				<navigateEdit module="admin" document="DataMaintenance" />
 				<tabSelect path="Backup/Restore" />

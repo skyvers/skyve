@@ -14,11 +14,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and works through Tags and bulk communications: makes four contacts, tags them from a spreadsheet, combines and clears tags, copies a tag, sends a communication to a tag, runs a bulk delete on tagged contacts, and cleans up.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Contacts: four contacts for the tags, none left by an earlier run">
+		<description>Checks no SAILTAGS contacts are left from an earlier run, then creates four contacts named SAILTAGS Alpha to Delta and checks they are listed.</description>
 		<method>
 			<navigateMenu module="admin" item="Contacts" />
 			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
@@ -48,6 +50,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: tag A and tag B, loaded from a spreadsheet">
+		<description>Opens the Tags list and creates tag A and tag B, each loaded from a column of a spreadsheet, checking that three contacts are matched and tagged for each.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridNew module="admin" query="qTags" />
@@ -90,6 +93,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: combine tag A with tag B (intersect, except, union), untag, clear">
+		<description>Combines tag A with tag B by intersect, union and except, checking the tagged count after each (two, three, one, then four), then untags and clears, and checks tag B is untouched.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag A {run}" />
@@ -151,6 +155,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: TagAll tags every record of a document, Clear removes them">
+		<description>Creates a tag for every Contact with Tag All, checks at least the four contacts are tagged, clears it and deletes the tag.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridNew module="admin" query="qTags" />
@@ -175,6 +180,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: copy tag B to a user, then delete the original (the copy keeps its records)">
+		<description>Copies tag B to a user, checking the copy is refused until a user is chosen, then deletes the original and checks the copy keeps its three records.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
@@ -214,6 +220,7 @@
 		</method>
 	</interaction>
 	<interaction name="Communications: a communication to tag B, count, results, batch files, zip and delete the batch">
+		<description>Creates a communication to tag B, checks the count and test results say three communications, creates the batch files, then zips the batch, declines and confirms deleting it, and deletes the communication.</description>
 		<method>
 			<navigateMenu module="admin" item="Communication/Communications" />
 			<listGridNew module="admin" document="Communication" />
@@ -266,6 +273,7 @@
 		</method>
 	</interaction>
 	<interaction name="Tags: a bulk document action deletes the tagged contacts">
+		<description>Runs a bulk Delete Documents action on tag B and checks that only SAILTAGS Alpha, which was not in tag B, is left.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
@@ -285,6 +293,7 @@
 		</method>
 	</interaction>
 	<interaction name="Clean up: delete tags A and B and the last contact">
+		<description>Deletes tags A and B and the last SAILTAGS contact, checking each has gone.</description>
 		<method>
 			<navigateList module="admin" query="qTags" />
 			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag A {run}" />

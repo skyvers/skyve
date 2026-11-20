@@ -10,11 +10,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and checks that no restore marker is left from an earlier run, so the suite starts from data it can trust.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Precondition: no restore marker left over">
+		<description>Opens Data Groups and checks that no group named SAIL restore marker exists, which proves the last run restored its backup.</description>
 		<method>
 			<comment>A marker is left over when a run was interrupted or its restore failed, so the data may hold what that run did. If this fails, check the data (or restore that run's backup), delete the SAIL restore marker data group, and run again. The suite then runs nothing else and does not restore.</comment>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />

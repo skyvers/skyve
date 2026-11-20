@@ -19,7 +19,9 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) after a refused bad password, then goes through the Kitchen Sink module: lookups and list grids with their filters and sorts, every widget, actions and dialogs, links and windows, ordered grids, and the menus. It checks that what a user types is what the screens show back, and that filters and sorts pick the right rows.</description>
 	<interaction name="Login">
+		<description>Tries a wrong password and checks it is refused, then signs in as admin.</description>
 		<method>
 			<comment>A bad password is refused, then admin signs in</comment>
 			<login user="admin" password="not the password" />
@@ -30,6 +32,7 @@
 		</method>
 	</interaction>
 	<interaction name="Lookup values: create one to look up">
+		<description>Creates a lookup value with this run's token, so later steps have a value to look up.</description>
 		<method>
 			<navigateList module="kitchensink" document="LookupDescription" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
@@ -43,6 +46,7 @@
 		</method>
 	</interaction>
 	<interaction name="Model Lookup Fixture: a model's list grid in an edit view">
+		<description>Opens the Model Lookup Fixture and checks its list grid, which is built from a model, lists the lookup value, and opens it from there.</description>
 		<method>
 			<comment>A list grid of a model is named by the model's document (here, the view's) and the model</comment>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
@@ -56,6 +60,7 @@
 		</method>
 	</interaction>
 	<interaction name="Lookup description columns in an inline data grid">
+		<description>Picks a lookup value in the Model Lookup Fixture by typing and from the list, adds a row to its inline grid, finds the row by the value in its cells, then removes it.</description>
 		<method>
 			<comment>After dataGridNew or dataGridEdit on an inline grid, dataEnter, testValue and the lookup description steps address the row's cells, not the form's lookups of the same bindings. The single-column lookup: PF SAIL reads a lookup's suggestions as a list, not as a multi-column table</comment>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
@@ -79,6 +84,7 @@
 		</method>
 	</interaction>
 	<interaction name="Lookup values: generated numbers, filters and sorts">
+		<description>Makes three lookup values and keeps the number each is given, then filters the Lookup values list by description and by number with equals, greater than and less than, sorts by number and description, and clears the filters.</description>
 		<method>
 			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
 			<navigateList module="kitchensink" document="LookupDescription" />
@@ -142,6 +148,7 @@
 		</method>
 	</interaction>
 	<interaction name="List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table">
+		<description>Opens the List Grid Fixture and checks text filters and sorts give the same rows in its Vue list grid (equals, starts with) and its PrimeFaces data table (contains).</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<comment>Vue list grid</comment>
@@ -180,6 +187,7 @@
 		</method>
 	</interaction>
 	<interaction name="List attributes: a value of each column type">
+		<description>Makes three List Attributes records, each with a value in every column type: text, enum, boolean, dates, times and timestamps.</description>
 		<method>
 			<navigateList module="kitchensink" document="ListAttributes" />
 			<listGridNew module="kitchensink" document="ListAttributes" />
@@ -227,6 +235,7 @@
 		</method>
 	</interaction>
 	<interaction name="List attributes: multi-line text">
+		<description>Saves a List Attributes record whose text has several lines, checks each line reads back, and deletes it.</description>
 		<method>
 			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space)</comment>
 			<navigateList module="kitchensink" document="ListAttributes" />
@@ -248,6 +257,7 @@
 		</method>
 	</interaction>
 	<interaction name="List Grid Fixture: filters on each column type">
+		<description>Filters the List Grid Fixture's Vue list grid by each column type (enums, booleans, dates, times and timestamps, in the default and other formats) with every operator, then does the same for the PrimeFaces data table, checking the rows each filter keeps.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<comment>Vue list grid: an enum by its label or its code, a boolean, dates, date times, times and timestamps written as their attributes show them</comment>
@@ -408,6 +418,7 @@
 		</method>
 	</interaction>
 	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
+		<description>Selects, opens and cancels a row in the List Grid Fixture's Vue list grid and PrimeFaces data table, making a record from each, which checks the same steps work on both.</description>
 		<method>
 			<comment>Each list grid chooses how PrimeFaces renders it with its componentBuilderClass property. The same steps run on each.</comment>
 			<comment>Vue list grid: componentBuilderClass is vue</comment>
@@ -443,6 +454,7 @@
 		</method>
 	</interaction>
 	<interaction name="Links: a link in page markup, and tokens in href and bizId">
+		<description>Selects a row to show its id, follows a link in page text to that record, and checks that an id kept earlier works in a link's address and in a record's id.</description>
 		<method>
 			<comment>Selecting a data table row shows its id, and a blurb's link to it</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -462,6 +474,7 @@
 		</method>
 	</interaction>
 	<interaction name="Windows, back and refresh">
+		<description>Follows a link that opens a new window, makes a lookup value there, nests a second window, closes both, then reloads, opens a PDF window, uses Back and Reload, and removes the value.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
@@ -508,12 +521,14 @@
 		</method>
 	</interaction>
 	<interaction name="Kitchen Sink: generated test data">
+		<description>Opens the Kitchen Sink and fills it with generated test data.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<testDataEnter />
 		</method>
 	</interaction>
 	<interaction name="Kitchen Sink: every widget">
+		<description>Fills in every Kitchen Sink widget (combos, radios, spinner, dates, times, lookups, inline and container data grids, and a file upload) and checks each value reads back.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<tabSelect path="Widgets" />
@@ -641,6 +656,7 @@
 		</method>
 	</interaction>
 	<interaction name="Actions Fixture: actions, buttons and change events">
+		<description>Presses the Actions Fixture's toolbar, form, tab and shared buttons, uploads files that are refused for three different reasons and one that is accepted, checks which actions are hidden or disabled, and reads a row cell and the title, then declines and confirms a delete.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<action name="RunFromToolbar" />
@@ -716,6 +732,7 @@
 		</method>
 	</interaction>
 	<interaction name="Dialogs Fixture: confirmations and server-side questions">
+		<description>Answers server-side Yes or No questions on the Dialogs Fixture both ways, and a client-side confirmation, declining and accepting, checking each outcome.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="DialogsFixture" />
 			<comment>No confirm attribute answers yes; confirm="false" answers no</comment>
@@ -735,6 +752,7 @@
 		</method>
 	</interaction>
 	<interaction name="Escaping Fixture: zoom in">
+		<description>Tries to zoom into a record with required fields empty and checks it is refused with the required message, then fills them in and zooms in.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="EscapingFixture" />
 			<comment>Zooming in validates the required fields first</comment>
@@ -751,6 +769,7 @@
 		</method>
 	</interaction>
 	<interaction name="Contexts, links, maps and scripts">
+		<description>Opens views through links and URLs, runs an action, shows a growl by running a script and checks it, waits for a timer, calls a server-side helper and opens a map.</description>
 		<method>
 			<clearContext />
 			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
@@ -808,6 +827,7 @@
 		</method>
 	</interaction>
 	<interaction name="Lookup values: zoom and delete">
+		<description>Opens each of the lookup values made earlier from the list and deletes it, checking none are left.</description>
 		<method>
 			<navigateList module="kitchensink" document="LookupDescription" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
@@ -832,6 +852,7 @@
 		</method>
 	</interaction>
 	<interaction name="Ordered grid: drag rows into a new order, and keep it once saved">
+		<description>Makes an Ordered Grid Fixture with three rows, drags a row to the top and another down, saving between, and checks after reopening that the saved order is kept.</description>
 		<method>
 			<navigateList module="kitchensink" document="OrderedGridFixture" />
 			<listGridNew module="kitchensink" document="OrderedGridFixture" />
@@ -869,6 +890,7 @@
 		</method>
 	</interaction>
 	<interaction name="Ordered list membership: keep its order once saved">
+		<description>Makes lookup values and an owner with an ordered list of members, reorders them with the move buttons, and checks the saved order is kept after saving and reopening.</description>
 		<method>
 			<comment>Lookup values to be members</comment>
 			<navigateList module="kitchensink" document="LookupDescription" />
@@ -912,6 +934,7 @@
 		</method>
 	</interaction>
 	<interaction name="Menus">
+		<description>Checks the tablet menu offers Actions Fixture and Security Admin/Users but not the desktop-only Heap Dumps, and opens an item.</description>
 		<method>
 			<testMenu module="kitchensink" />
 			<testMenu module="kitchensink" item="Actions Fixture" />
@@ -928,6 +951,7 @@
 		</method>
 	</interaction>
 	<interaction name="Switch mode">
+		<description>Presses Switch Mode while already in PrimeFaces and checks the menu is still there.</description>
 		<method>
 			<comment>PrimeFaces is showing already: nothing to do</comment>
 			<switchMode />
@@ -936,6 +960,7 @@
 		</method>
 	</interaction>
 	<interaction name="Logout">
+		<description>Signs out.</description>
 		<method>
 			<logout />
 		</method>

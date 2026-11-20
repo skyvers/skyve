@@ -58,6 +58,7 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.sail.execution.SailCall;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.Descriptions;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
@@ -278,20 +279,21 @@ public abstract class InterpretedWebDriverExecutor<
 		failures.clear();
 		thrown.clear();
 		media = SailMedia.start(selenide, automation, resolved);
+		traceDescription("Automation", automation.getDescription());
 
 		boolean passed = false;
 		TestAbortedException skipped = null;
 		try {
 			Procedure before = automation.getBefore();
 			if (before != null) {
-				runSteps("Before Automation", before.getSteps(), true);
+				runSteps("Before Automation", null, before.getSteps(), true);
 			}
 			for (Interaction interaction : automation.getInteractions()) {
 				executeInteraction(interaction);
 			}
 			Procedure after = automation.getAfter();
 			if (after != null) {
-				runSteps("After Automation", after.getSteps(), true);
+				runSteps("After Automation", null, after.getSteps(), true);
 			}
 			passed = failures.isEmpty();
 		}
@@ -369,6 +371,7 @@ public abstract class InterpretedWebDriverExecutor<
 	private void runInteraction(@Nonnull Interaction interaction) {
 		String name = interaction.getName();
 		selenide.trace("Interaction: " + name);
+		traceDescription("About", interaction.getDescription());
 		LOGGER.info("Execute Interaction {}", name);
 
 		List<Step> steps = new ArrayList<>();
@@ -377,11 +380,11 @@ public abstract class InterpretedWebDriverExecutor<
 			steps.addAll(before.getSteps());
 		}
 		steps.addAll(interaction.getSteps());
-		boolean completed = runSteps(name, steps, false);
+		boolean completed = runSteps(name, interaction.getDescription(), steps, false);
 
 		Procedure after = interaction.getAfter();
 		if (after != null) {
-			completed = runSteps(name + " (after)", after.getSteps(), false) && completed;
+			completed = runSteps(name + " (after)", null, after.getSteps(), false) && completed;
 		}
 
 		if (! completed) {
@@ -392,14 +395,28 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
+	 * Writes a description to the trace, one line per paragraph, the first headed by what it describes.
+	 *
+	 * @param heading	what it describes, such as {@code Automation}
+	 * @param description	the description, or null for none (nothing is written)
+	 */
+	private void traceDescription(@Nonnull String heading, @Nullable String description) {
+		List<String> paragraphs = Descriptions.paragraphs(description);
+		for (int i = 0, l = paragraphs.size(); i < l; i++) {
+			selenide.trace(((i == 0) ? "  " + heading + ": " : "    ") + paragraphs.get(i));
+		}
+	}
+
+	/**
 	 * Runs steps in order.
 	 *
 	 * @param name	the procedure name for failure messages
+	 * @param description	what the interaction is for, in words, for the media; or null
 	 * @param steps	the steps to run
 	 * @param halt	true to stop with an error at a step that throws, whatever the strategy
 	 * @return true if every step ran, false if a step threw and was recorded under Verify
 	 */
-	private boolean runSteps(@Nonnull String name, @Nonnull List<Step> steps, boolean halt) {
+	private boolean runSteps(@Nonnull String name, @Nullable String description, @Nonnull List<Step> steps, boolean halt) {
 		procedureName = name;
 		previousStep = null;
 		for (int i = 0, l = steps.size(); i < l; i++) {
@@ -409,7 +426,7 @@ public abstract class InterpretedWebDriverExecutor<
 			nextStep = (i + 1 < l) ? steps.get(i + 1) : null;
 			int failuresBefore = failures.size();
 			if (media != null) {
-				media.stepStarted(name, stepNumber, step);
+				media.stepStarted(name, description, stepNumber, step);
 			}
 			// what the page says about the window's OS focus as the step starts, for a failure's diagnosis; after a step
 			// that opened, closed or switched windows there is no baseline, as those blur pages, and a blur can arrive late

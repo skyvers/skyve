@@ -13,13 +13,16 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Restores the newest backup, made in SmartClient before the suite, then checks from both renderers that the data is back (the marker has gone), deletes the backups, and saves a change to prove the restored data can still be edited.</description>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI), restores the newest backup, checks the marker has gone and deletes that backup.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="Restore the backup made before the suite (SmartClient)">
+			<description>Selects the newest backup in Data Maintenance, sets the restore options, declines the restore once and then confirms it, and waits for the Restore job to complete.</description>
 			<method>
 				<navigateEdit module="admin" document="DataMaintenance" />
 				<tabSelect path="Backup/Restore" />
@@ -43,6 +46,7 @@
 			</method>
 		</interaction>
 		<interaction name="Sign in again after the restore, and delete SmartClient's backup">
+			<description>Signs out and back in after the restore, checks the SAIL restore marker has gone, and deletes the backup, checking the Delete Backup button is disabled again.</description>
 			<method>
 				<logout />
 				<login user="admin" password="admin" />
@@ -64,11 +68,13 @@
 		</after>
 	</automation>
 	<automation uxui="tablet" userAgentType="tablet">
+		<description>Signs in as admin in PrimeFaces (tablet UX/UI), checks the marker has gone, declines a restore of its own backup and deletes it, then saves Update My Details.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 		</before>
 		<interaction name="Check the restore, decline a restore of PrimeFaces' backup, and delete it">
+			<description>Checks the marker has gone, selects the remaining backup and sets the restore options, declines the restore, and deletes the backup, which leaves no backup behind.</description>
 			<method>
 				<comment>The marker left after the backups has gone</comment>
 				<navigateMenu module="admin" item="Security Admin/Data Groups" />
@@ -91,6 +97,7 @@
 			</method>
 		</interaction>
 		<interaction name="Home: Update My Details after the restore (PrimeFaces)">
+			<description>Changes admin's mobile number through Update My Details and checks the new number on the User Dashboard, which proves a save works after a restore.</description>
 			<method>
 				<comment>Runtime issue P4: the restore wrote the tables behind Hibernate's shared cache, so this save failed with an optimistic lock. It runs after both backups' deletes, so a failure here leaves no backup behind. It leaves admin's mobile number changed; nothing depends on it.</comment>
 				<navigateEdit module="admin" document="UserDashboard" />
@@ -105,12 +112,14 @@
 		</after>
 	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI) and saves Update My Details to check that the restored data still accepts a change.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="Home: Update My Details after the restore (SmartClient)">
+			<description>Changes admin's mobile number through Update My Details in SmartClient and checks the new number on the User Dashboard.</description>
 			<method>
 				<comment>Runtime issue P4, as above, in SmartClient</comment>
 				<navigateEdit module="admin" document="UserDashboard" />

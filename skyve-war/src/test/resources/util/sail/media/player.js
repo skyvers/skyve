@@ -10,7 +10,11 @@ var img = $('frame'), cap = $('caption'), seek = $('seek'), play = $('play'), sp
 var t0 = F.length ? F[0][1] : 0, end = F.length ? F[F.length - 1][1] - t0 : 0, items = [], group = null, ol = null;
 seek.max = Math.max(F.length - 1, 0);
 S.forEach(function (s, k) {
-	if (s.p !== group) { group = s.p; var section = el('section'); section.append(el('h3', null, s.p)); ol = el('ol'); section.append(ol); list.append(section); }
+	if (s.p !== group) {
+		group = s.p; var section = el('section'); section.append(el('h3', null, s.p));
+		if (s.pd) { var desc = el('div', 'desc'); s.pd.split('\n\n').forEach(function (p) { desc.append(el('p', null, p)); }); section.append(desc); }
+		ol = el('ol'); section.append(ol); list.append(section);
+	}
 	var li = el('li', s.f ? 'fail' : null); li.value = s.n; li.title = s.x;
 	li.append(el('div', 'summary', s.d || s.x));
 	if (s.f) { li.append(el('div', 'failure', s.f)); }
@@ -63,7 +67,7 @@ seek.oninput = function () { pin = -1; go(parseInt(seek.value, 10)); };
 document.addEventListener('keydown', function (e) {
 	var tag = e.target.tagName;
 	if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey || e.altKey) return;
-	if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); play.click(); }
+	if (e.key === ' ' && tag !== 'BUTTON' && tag !== 'SUMMARY') { e.preventDefault(); play.click(); }
 	else if (e.key === 'ArrowLeft') { e.preventDefault(); $('prev').click(); }
 	else if (e.key === 'ArrowRight') { e.preventDefault(); $('next').click(); }
 });

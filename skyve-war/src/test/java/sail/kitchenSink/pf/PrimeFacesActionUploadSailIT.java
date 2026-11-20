@@ -37,7 +37,11 @@ class PrimeFacesActionUploadSailIT extends AbstractInterpretedSailWorkflow {
 
 	private static String automation(String uxui, String userAgentType) {
 		return "<automation uxui=\"" + uxui + "\" userAgentType=\"" + userAgentType + "\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-				"<interaction name=\"Action upload (" + uxui + ")\"><method>" +
+				"<description>Signs in as admin and uploads a file to the kitchensink ActionsFixture document in the " + uxui + " UX/UI. " +
+				"Checks that a successful upload closes its upload page by itself, refreshes the view, and shows the upload's messages in the view's growl, whether another growl is pushed just before or after them.</description>" +
+				"<interaction name=\"Action upload (" + uxui + ")\">" +
+				"<description>Hides the upload page's close icons, so that the page has to close itself, and pushes a growl just before the upload's messages arrive. " +
+				"Uploads a file, checks that all the messages show, pushes another growl, and checks that the messages and the outcome are still there.</description><method>" +
 				"<login user=\"admin\" password=\"admin\" />" +
 				"<testSuccess />" +
 				"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +

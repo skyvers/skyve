@@ -10,11 +10,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and checks the Run From Row link in a data grid row of the Actions Fixture: that it asks first, runs only when confirmed, works by the row's text and by its number, and does not select the row when clicked.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Actions Fixture: a link in a data grid row">
+		<description>Adds two rows to the Actions Fixture grid, declines and then confirms the Run From Row link on the first and clicks the link on the second by row number, checking after each step which rows say they have run.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<tabSelect path="Rows" />

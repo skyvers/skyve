@@ -6,6 +6,8 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import org.skyve.metadata.sail.language.Descriptions;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -63,6 +65,26 @@ final class SailMediaHtml {
 			}
 		}
 		return result.toString();
+	}
+
+	/**
+	 * Writes a description as HTML: a {@code div} of the given class with a paragraph for each of its paragraphs (see
+	 * {@link Descriptions#paragraphs(String)}).
+	 *
+	 * @param description	a tidied description, or null
+	 * @param cssClass	the {@code div}'s class
+	 * @return the HTML, or empty when there is no description
+	 */
+	static @Nonnull String descriptionHtml(@Nullable String description, @Nonnull String cssClass) {
+		if (description == null) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder(description.length() + 64);
+		result.append("<div class=\"").append(cssClass).append("\">");
+		for (String paragraph : Descriptions.paragraphs(description)) {
+			result.append("<p>").append(escape(paragraph)).append("</p>");
+		}
+		return result.append("</div>").toString();
 	}
 
 	/** A duration as shown: {@code 250 ms}, {@code 1.3 s} or {@code 2 min 5 s}. */

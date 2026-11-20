@@ -27,6 +27,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * token that {@code {run}} stands for, and the variables that capture steps set for {@code {var:name}}. An automation
  * can therefore find what an earlier one made.
  *
+ * <p>An optional {@code description} says what the workflow tests, in words, for its reports (see
+ * {@link Descriptions}).
+ *
  * <p>An optional {@code testStrategy} on the workflow is the default for its automations that state none; an
  * automation's own attribute wins (see {@link #getEffectiveTestStrategy(Automation)}).
  *
@@ -37,10 +40,11 @@ import jakarta.xml.bind.annotation.XmlType;
  *
  * @see Automation
  */
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "automations"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "description", "automations"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Workflow {
 	private TestStrategy testStrategy;
+	private String description;
 	private List<Automation> automations = new ArrayList<>();
 
 	/**
@@ -60,6 +64,26 @@ public class Workflow {
 	@XmlAttribute(name = "testStrategy")
 	public void setTestStrategy(@Nullable TestStrategy testStrategy) {
 		this.testStrategy = testStrategy;
+	}
+
+	/**
+	 * Returns what the workflow is for, in words for the people reading its results: its {@code <description>}, tidied by
+	 * {@link Descriptions#normalise(String)}.
+	 *
+	 * @return the description, or {@code null} when it has none
+	 */
+	public @Nullable String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Sets what the workflow is for, in words. The text is tidied by {@link Descriptions#normalise(String)}.
+	 *
+	 * @param description	the description, or {@code null} for none
+	 */
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "description")
+	public void setDescription(@Nullable String description) {
+		this.description = Descriptions.normalise(description);
 	}
 
 	/**

@@ -4,11 +4,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces on a phone and checks that the phone menu hides the desktop-only items and opens every item it does show.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Phone menu">
+		<description>Checks Data Groups and Document Creator are missing from the phone menu, then opens each menu item the phone offers, checking a few of the screens show their fields or rows.</description>
 		<method>
 			<comment>Desktop, external and tablet only</comment>
 			<testMenu module="admin" item="Security Admin/Data Groups" present="false" />

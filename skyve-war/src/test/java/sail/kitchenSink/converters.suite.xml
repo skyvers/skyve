@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The converters conformance suite: a script per group of converters (dates, date times, timestamps, date times and
+	timestamps shown as dates, times, numbers) in each renderer, on kitchensink.ConvertersFixture; see "Converters" in
+	docs/sail.md. Each member makes its own records, named with its run token, so the suite needs no bracket and can run
+	again and again against any disposable server. Every script states its own testStrategy (Assert). ConvertersSuiteSailIT
+	runs it; so can SailRunIT (-Dsail.run=sail/kitchenSink/converters.suite.xml). -Dsail.suite.only=pf/ or sc/ chooses one
+	renderer's members, and -Dsail.suite.only=pf/pf-converters-dates one script.
+-->
+<suite evidence="failures"
+		xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+		xmlns="http://www.skyve.org/xml/sail"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>
+		Checks that every value converter Skyve offers shows, accepts and filters values the same way a user would expect,
+		in PrimeFaces (tablet) and in SmartClient. Each group of converters (dates, date times, timestamps, date times and
+		timestamps shown only as dates, times, and numbers) has a script per renderer.
+
+		Each script types a few records into every field and into an inline grid row, as a user would type them, and
+		checks the values after the save and again after reopening the record. It then filters the list by each column,
+		with values written as the cells show them, and checks which rows each filter leaves. The values are chosen to
+		catch the usual mistakes: a day and month swapped, times at noon, midnight and PM, rounding, negatives, percentages
+		and durations.
+
+		A pass means a user sees, enters and finds the same value in either renderer, whatever converter a field uses.
+	</description>
+	<member file="pf/pf-converters-dates.xml"/>
+	<member file="pf/pf-converters-dateTimes.xml"/>
+	<member file="pf/pf-converters-timestamps.xml"/>
+	<member file="pf/pf-converters-dateOnly.xml"/>
+	<member file="pf/pf-converters-times.xml"/>
+	<member file="pf/pf-converters-numbers.xml"/>
+	<member file="sc/sc-converters-dates.xml"/>
+	<member file="sc/sc-converters-dateTimes.xml"/>
+	<member file="sc/sc-converters-timestamps.xml"/>
+	<member file="sc/sc-converters-dateOnly.xml"/>
+	<member file="sc/sc-converters-times.xml"/>
+	<member file="sc/sc-converters-numbers.xml"/>
+</suite>

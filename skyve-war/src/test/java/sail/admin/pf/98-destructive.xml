@@ -10,11 +10,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and runs the actions that change the whole server, using safe values, after every other member has finished and before the restore puts the data back.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Clear the completed jobs list">
+		<description>Clears the completed jobs list so that this script's job rows can be told apart.</description>
 		<method>
 			<comment>This member waits for its jobs by their rows in the completed jobs list: clear it first, so that a row left by another member (the other renderer's 98-destructive.xml, if it stopped early) cannot be taken for this member's. The admin suite runs both 05-reports-misc.xml members, which check the backup's row, before either 98-destructive.xml.</comment>
 			<navigateMenu module="admin" item="Jobs" />
@@ -24,6 +26,7 @@
 		</method>
 	</interaction>
 	<interaction name="Configuration: save safe values (mail is only logged)">
+		<description>Saves Configuration with explicit safe values and test mail turned on, and checks they are kept after reopening.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
 			<tabSelect path="General" />
@@ -40,6 +43,7 @@
 		</method>
 	</interaction>
 	<interaction name="Mail: a test email, and sends that refuse without recipients">
+		<description>Checks the test email form is hidden because mail is not configured, and that sending a communication with nothing tagged is refused.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
 			<tabSelect path="General" />
@@ -58,6 +62,7 @@
 		</method>
 	</interaction>
 	<interaction name="Test data: generate tagged data, check it cannot be rerun, then delete the tagged data">
+		<description>Generates three tagged Contact records from the Control Panel as a job, checks the job completes and cannot be rerun, then deletes the tagged data with a second job.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -89,6 +94,7 @@
 		</method>
 	</interaction>
 	<interaction name="Jobs: delete the completed jobs">
+		<description>Deletes the completed jobs, declining once and then confirming, and checks the list is empty.</description>
 		<method>
 			<navigateMenu module="admin" item="Jobs" />
 			<action name="DeleteCompletedJobs" confirm="false" />

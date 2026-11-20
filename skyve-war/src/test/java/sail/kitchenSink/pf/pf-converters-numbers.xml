@@ -8,7 +8,7 @@
 	month swapped, 12 hour times at PM, noon and midnight, month names, seconds, negatives, separators, $, percentages
 	(over 1000% too), rounding, durations rounded to the minute, and the absolute converter of a stored negative.
 	Equals compares the stored value exactly, so a value shown rounded is not filtered by what it shows.
-	Run by PrimeFacesConvertersSailIT.
+	A member of converters.suite.xml (ConvertersSuiteSailIT).
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"
@@ -16,10 +16,12 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and checks that decimals, dollars, percentages, durations and integers with separators are shown, typed, saved and filtered in the format each field uses. It types records into the fields and an inline grid row, checks the values as saved and after reopening, then filters the list by each column as its cells show the values in both the Vue list grid and the PrimeFaces data table.</description>
 	<before>
 		<login user="admin" password="admin" />
 	</before>
 	<interaction name="Numbers: record a, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose number fields hold positive values such as $1,234.56, 12% and 9,876,543,210, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridNew module="kitchensink" query="qConvertersNumbers" />
@@ -165,6 +167,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: record b, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose number fields hold negative values such as -42.5, -5% and -1, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridNew module="kitchensink" query="qConvertersNumbers" />
@@ -310,6 +313,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: record c, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose number fields hold values that need rounding or are large, such as 1,250% and 33.333%, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridNew module="kitchensink" query="qConvertersNumbers" />
@@ -455,6 +459,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: record d, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose number fields hold the positive values again with durations and decimals that round differently, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridNew module="kitchensink" query="qConvertersNumbers" />
@@ -600,6 +605,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: record e, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose number fields hold half-way and negative values that test rounding and the minute duration, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridNew module="kitchensink" query="qConvertersNumbers" />
@@ -745,6 +751,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: filter the Vue list grid by each column, as its cells show the values">
+		<description>Filters the Vue list grid of Converters Fixtures by each number column, typed as the cells show the values, with equals, less than and greater than, and checks which of the run's records each filter leaves.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersNumbers" />
 			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />
@@ -1146,6 +1153,7 @@
 		</method>
 	</interaction>
 	<interaction name="Numbers: filter the PrimeFaces data table by each column, as its cells show the values">
+		<description>Filters the PrimeFaces data table of Converters Fixtures by each number column, typed as the cells show the values, with equals, and checks which of the run's records each filter leaves.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ConvertersDataTables" />
 			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />

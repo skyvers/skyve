@@ -20,6 +20,11 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 		xmlns="http://www.skyve.org/xml/sail"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Checks that the Kitchen Sink module, a deliberately exhaustive set of every widget, field type and view feature Skyve offers, behaves the same way for a user in PrimeFaces and in SmartClient. The scripts open the Kitchen Sink screens, fill and save fields, filter and sort lists, and check what the application shows back.
+
+		The suite has a conformance script for each renderer, with companion scripts that find records (SmartClient) and follow row links (PrimeFaces), and one workflow that crosses the two renderers. Each member makes and deletes its own data, so the suite can be run against any disposable server as often as needed. The two conformance scripts list every failure in a run, not just the first, and the suite keeps a screenshot and the page source of each.
+
+		A pass means each renderer shows and accepts the same things, and a record made in one renderer is found and changed in the other. The workflow stops at its first failed check, because it deletes the record it found.</description>
 	<member file="pf/pf-kitchensink-sail.xml"/>
 	<member file="pf/pf-kitchensink-row-link.xml"/>
 	<member file="sc/sc-kitchensink-sail.xml"/>

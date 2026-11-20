@@ -21,6 +21,7 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and does what an administrator does to keep the system running: refreshes document data, checks the mail a job sends is logged but not sent, manages the caches, and changes and purges the Monitoring Dashboard.</description>
 	<!--
 		The mail settings put-back at the end of the Mail Log interaction runs only if the steps before it pass (a failed Assert stops the
 		member, and the language has no cleanup that runs after a failure). A failed run leaves mailBogusSend and mailTestRecipient as set,
@@ -31,6 +32,7 @@
 		<testSuccess />
 	</before>
 	<interaction name="Data Refresh: refused without a refresh option">
+		<description>Selects a document to refresh in Data Maintenance without choosing a refresh option and checks the refresh is refused with Value required.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Data Refresh" />
@@ -43,6 +45,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Refresh: refresh a document, read the job it ran">
+		<description>Refreshes the DataGroup document, declining the confirmation once, then waits for the Refresh job in the completed jobs list and checks it is complete, its log names only DataGroup, and it cannot be rerun or cancelled.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Data Refresh" />
@@ -78,6 +81,7 @@
 		</method>
 	</interaction>
 	<interaction name="Mail Log: the mail a job sends is logged, not sent">
+		<description>Turns on test mail in Configuration, runs a refresh that sends a notification, and checks the Mail Log shows the mail skipped and addressed to the test recipient, then puts the mail settings back.</description>
 		<method>
 			<comment>Mail is only logged: mailBogusSend is set here (98-destructive.xml sets it too) and put back at the end</comment>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
@@ -125,6 +129,7 @@
 		</method>
 	</interaction>
 	<interaction name="Control Panel: caches, evicting and statistics">
+		<description>Opens the Control Panel and checks the cache statistics, evicts the CSRF token, conversation and Hibernate reference caches (declining once first) and checks the conversation cache empties, and checks a built-in cache refuses to be stopped.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -175,6 +180,7 @@
 		</method>
 	</interaction>
 	<interaction name="Monitoring Dashboard: settings are saved, purge forgets the requests">
+		<description>Changes the Monitoring Dashboard's top N setting and checks it is kept and put back, then declines and confirms Purge, checking the earlier requests are forgotten.</description>
 		<method>
 			<comment>Use a document nothing else in this member opens, so the purge's effect shows in the request list</comment>
 			<navigateMenu module="admin" item="DevOps/DocumentCreator" />

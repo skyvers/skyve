@@ -7,12 +7,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and creates users in bulk from lists of email addresses, both by creating and by inviting them, and through the user wizard with generated user names and passwords, checking the users and the mail log, then cleans up.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="A group for the new users">
+		<description>Creates a group with two roles to give to the new users, and checks it is listed.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Groups" />
 			<listGridNew module="admin" document="Group" />
@@ -26,6 +28,7 @@
 		</method>
 	</interaction>
 	<interaction name="Create Users is refused without a group, without addresses and with a bad address">
+		<description>Tries Create Users with no group, no addresses and a bad address, checking each is refused with its own message and no users appear.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Invite Users" />
@@ -42,6 +45,7 @@
 		</method>
 	</interaction>
 	<interaction name="Clear the completed jobs list">
+		<description>Clears the completed jobs list so that the next job's row can be told from earlier ones.</description>
 		<method>
 			<comment>This member waits for its jobs by their rows in the completed jobs list: clear it first, so that an earlier job's row cannot be taken for this member's. 05-reports-misc.xml checks the backup job's row, so this member runs after it (admin.suite.xml), and before 98-destructive.xml.</comment>
 			<navigateMenu module="admin" item="Jobs" />
@@ -51,6 +55,7 @@
 		</method>
 	</interaction>
 	<interaction name="Create Users: two users from two addresses, as a job">
+		<description>Creates two users from two addresses, waits for the Create Users job and checks it completed and its log says both users were created.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Invite Users" />
@@ -77,6 +82,7 @@
 		</method>
 	</interaction>
 	<interaction name="The created users are in the Users list, with the group, home module and an expired password">
+		<description>Opens one created user and checks the user name, contact, group, home module and expired password, sets a password, and signs in as that user to check the menu matches their role.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Users" />
@@ -110,6 +116,7 @@
 		</method>
 	</interaction>
 	<interaction name="Mail is only logged: turn on bogus send">
+		<description>Turns on test mail in Configuration so that invitations are logged and not sent.</description>
 		<method>
 			<comment>Invitations send email. With mailBogusSend on the mail is written to the Mail Log and not sent (98-destructive.xml saves the same values). The test recipient is run-unique so the Mail Log rows are this run's; it is set back to sail.test@example.com after the check, with bogus send left on (as 98 leaves it).</comment>
 			<navigateMenu module="admin" item="Security Admin/Configuration" />
@@ -122,6 +129,7 @@
 		</method>
 	</interaction>
 	<interaction name="Invite Users: two users from two addresses, and the invitations are logged, not sent">
+		<description>Invites two users by email, waits for the job, checks both were created and emailed, and finds both in the Users list and their invitations in the Mail Log, addressed to the test recipient.</description>
 		<method>
 			<navigateMenu module="admin" item="Jobs" />
 			<action name="DeleteCompletedJobs" />
@@ -163,6 +171,7 @@
 		</method>
 	</interaction>
 	<interaction name="User wizard: Back, refusals, a generated user name and a generated password">
+		<description>Runs the user wizard, checking Back works, mismatched passwords are refused, and a user can be saved after going back and forward.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Users" />
 			<tabSelect path="Users" />
@@ -196,6 +205,7 @@
 		</method>
 	</interaction>
 	<interaction name="GenerateUniqueUserName and GeneratePassword on the new user, who signs in with them">
+		<description>Generates a unique user name twice and a password for the new user, signs in with the generated password, and checks that the expired password leads to the reset password page.</description>
 		<method>
 			<tabSelect path="Profile" />
 			<comment>The user name comes from the contact's name: letters only, lower case, at most 9 characters; a trailing number makes it unique</comment>
@@ -226,6 +236,7 @@
 		</method>
 	</interaction>
 	<interaction name="Clean up: the users, their contacts and the group">
+		<description>Deletes the five users, their five contacts and the group, checking each list is clear.</description>
 		<method>
 			<comment>Deleting a user leaves the contact, so the contacts (their email addresses hold the run token) go too</comment>
 			<navigateMenu module="admin" item="Security Admin/Users" />

@@ -2,6 +2,7 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,25 +34,28 @@ import util.sail.SailMedia.Frame;
 import util.sail.SailMedia.Place;
 import util.sail.SailMedia.RunInfo;
 import util.sail.SailMedia.StepRecord;
+import util.sail.SailMedia.Story;
 
 /**
  * Uses the generated SAIL media pages in a headless Chrome. The video player: the step list, a click on a step,
  * stepping with the buttons and the arrow keys, seeking, and playing to the end; its run has a step during which no
  * frame was drawn, which must still be the step shown when it is clicked (it once showed the step before). The list of
- * runs: its "Failed only" and text filters, which hide the runs, headings and sessions with nothing to show. The pages
- * come from a JDK {@link HttpServer}, so this needs no Skyve server; it needs Chrome. The frames are not real images:
- * the test reads which one the player shows from its source.
+ * runs: its "Failed only" and text filters, which hide the runs, headings and sessions with nothing to show, and
+ * match the suite's, workflow's and runs' descriptions. The pages come from a JDK {@link HttpServer}, so this needs
+ * no Skyve server; it needs Chrome. The frames are not real images: the test reads which one the player shows from
+ * its source.
  */
 @Tag("sail")
 @SuppressWarnings("java:S5960") // test-only assertions
 class SailMediaPagesSailIT {
+	private static final Story NO_STORY = new Story(null, null, null, null);
 	private static final RunInfo INFO = new RunInfo("20261106-120000-000-PlayerIT.test", "Open and save", "PlayerIT.test", null,
-													"2026-11-06 12:00:00", "desktop", List.of());
+													"2026-11-06 12:00:00", "desktop", List.of(), NO_STORY);
 	/** Step 2 runs from 2000 to 3000 ms with no frame drawn during it. */
 	private static final List<StepRecord> STEPS = List.of(
-			new StepRecord(1, "Open", 1, "Go to a.xhtml", "<navigateLink href=\"a.xhtml\"/>", 1000L, 2000L, null, null, null),
-			new StepRecord(2, "Open", 2, "Pause 1000 ms", "<pause millis=\"1000\"/>", 2000L, 3000L, null, null, null),
-			new StepRecord(3, "Save", 1, "Save", "<save/>", 3000L, 4000L, null, null, null));
+			new StepRecord(1, "Open", 1, "Go to a.xhtml", "<navigateLink href=\"a.xhtml\"/>", 1000L, 2000L, null, null, null, null),
+			new StepRecord(2, "Open", 2, "Pause 1000 ms", "<pause millis=\"1000\"/>", 2000L, 3000L, null, null, null, null),
+			new StepRecord(3, "Save", 1, "Save", "<save/>", 3000L, 4000L, null, null, null, null));
 	private static final List<Frame> FRAMES = List.of(new Frame("f0.png", 500L),
 														new Frame("f1.png", 1200L),
 														new Frame("f2.png", 1500L),
@@ -179,10 +183,15 @@ class SailMediaPagesSailIT {
 	}
 
 	private static void listedRun(Path base, String folder, String title, String label, Place place, boolean passed) throws IOException {
+		listedRun(base, folder, title, label, place, passed, NO_STORY);
+	}
+
+	private static void listedRun(Path base, String folder, String title, String label, Place place, boolean passed, Story story)
+	throws IOException {
 		Path run = Files.createDirectories(base.resolve(folder));
 		Files.writeString(run.resolve("player.html"), "player");
-		RunInfo info = new RunInfo(folder, title, "B.test", label, "2026-11-06 12:00:00", "phone", List.of());
-		List<StepRecord> steps = List.of(new StepRecord(1, title, 1, "Save", "<save/>", 0L, 10L, passed ? null : "it failed", null, null));
+		RunInfo info = new RunInfo(folder, title, "B.test", label, "2026-11-06 12:00:00", "phone", List.of(), story);
+		List<StepRecord> steps = List.of(new StepRecord(1, title, 1, "Save", "<save/>", 0L, 10L, passed ? null : "it failed", null, null, null));
 		Files.writeString(run.resolve(SailMedia.RUN_JSON), SailMedia.runJson(info, place, steps, passed));
 	}
 
@@ -222,6 +231,55 @@ class SailMediaPagesSailIT {
 					() -> assertEquals(List.of("A1 earlier session"), shownRuns()),
 					() -> assertEquals(List.of(), shownHeadings()),
 					() -> assertEquals(1L, shownSessions()));
+	}
+
+	/**
+	 * Writes a list of one session: a suite with a description, whose member file has a run and a workflow of two legs,
+	 * each with descriptions; then a run outside the suite.
+	 */
+	private void openTheListOfStories() throws IOException {
+		Path runs = Files.createDirectories(root.resolve("stories"));
+		Place none = new Place("20261120-115900-000", 0, 0);
+		String suite = "Inspections end to end.\n\nRuns on a phone and in the office.";
+		listedRun(runs, "20261120-120000-000-B.test", "HM1 home lists inspections", "10-home.xml", none, true,
+					new Story("insp.suite.xml", suite, null, "Lists the day's inspections."));
+		listedRun(runs, "20261120-120100-000-B.test", "HM2 phone: works offline", "10-home.xml", new Place(none.session(), 7, 1), true,
+					new Story("insp.suite.xml", suite, "An inspector works offline and the office recalls it.", "Records it offline."));
+		listedRun(runs, "20261120-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new Place(none.session(), 7, 2), true,
+					new Story("insp.suite.xml", suite, "An inspector works offline and the office recalls it.", "Recalls it."));
+		listedRun(runs, "20261120-120300-000-B.test", "CK1 checks out", null, none, true);
+		Files.writeString(runs.resolve("index.html"), SailRunsList.runsIndexHtml(runs));
+		driver.get(url + "stories/index.html");
+	}
+
+	/**
+	 * The text filter matches a suite's, a workflow's and a run's descriptions, and text that runs on from one paragraph
+	 * to the next; the suite's heading shows while any of its runs does.
+	 */
+	@Test
+	void theTextFilterMatchesTheDescriptions() throws IOException {
+		openTheListOfStories();
+		WebElement find = driver.findElement(By.id("find"));
+		find.sendKeys("inspections end to end");
+		assertAll("the suite's description",
+					() -> assertEquals(List.of("HM1 home lists inspections", "HM2 phone: works offline", "HM2 office: recalls it"), shownRuns()),
+					() -> assertTrue(shownHeadings().get(0).startsWith("Suite insp.suite.xml"), shownHeadings().toString()));
+		find.clear();
+		find.sendKeys("end to end. runs on");
+		assertEquals(3, shownRuns().size(), "across the suite's two paragraphs");
+		find.clear();
+		find.sendKeys("office recalls");
+		assertEquals(List.of("HM2 phone: works offline", "HM2 office: recalls it"), shownRuns(), "the workflow's description");
+		find.clear();
+		find.sendKeys("day's inspections");
+		assertAll("a run's own description",
+					() -> assertEquals(List.of("HM1 home lists inspections"), shownRuns()),
+					() -> assertEquals(2, shownHeadings().size(), "the suite and its file; not the workflow, which has no run shown"));
+		find.clear();
+		find.sendKeys("checks out");
+		assertAll("a run outside the suite: no suite heading",
+					() -> assertEquals(List.of("CK1 checks out"), shownRuns()),
+					() -> assertEquals(List.of(), shownHeadings()));
 	}
 
 	/** The titles of the runs shown, in order. */

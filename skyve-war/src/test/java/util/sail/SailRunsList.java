@@ -1,5 +1,6 @@
 package util.sail;
 
+import static util.sail.SailMediaHtml.descriptionHtml;
 import static util.sail.SailMediaHtml.duration;
 import static util.sail.SailMediaHtml.escape;
 import static util.sail.SailMediaHtml.startPage;
@@ -27,8 +28,9 @@ import jakarta.annotation.Nullable;
 
 /**
  * A directory's list of runs ({@code index.html}), for {@link SailMedia}: by session (a JVM's run of tests), newest
- * first, and in each session the runs in the order they ran, under their suite files, with a workflow's legs under the
- * workflow. It reads each run's {@value SailMedia#RUN_JSON}, and filters by outcome and text.
+ * first, and in each session the runs in the order they ran, under their suite and its member files, with a workflow's
+ * legs under the workflow. The suite, the workflow and each run show their descriptions. It reads each run's
+ * {@value SailMedia#RUN_JSON}, and filters by outcome and text.
  */
 final class SailRunsList {
 	/** The columns of a session's table, by heading; every row has one cell for each. */
@@ -51,8 +53,18 @@ final class SailRunsList {
 		}
 
 		@Nullable String label() {
-			Object label = (summary == null) ? null : summary.get("label");
-			return (label == null) ? null : label.toString();
+			return text("label");
+		}
+
+		/** Its suite's file, or null when it is not a suite member. */
+		@Nullable String suite() {
+			return text("suite");
+		}
+
+		/** A text value of its summary, or null when it has none. */
+		@Nullable String text(@Nonnull String key) {
+			Object value = (summary == null) ? null : summary.get(key);
+			return (value == null) ? null : value.toString();
 		}
 
 		long unit() {
@@ -123,21 +135,33 @@ final class SailRunsList {
 	}
 
 	/**
-	 * Writes one session's table: its runs in order, under their suite files and units. Each file heading and unit
-	 * heading takes the next group number; a run row names its file's and unit's groups ({@code data-g},
-	 * {@code data-u}), which is how the filters find the headings to hide with it.
+	 * Writes one session's table: its runs in order, under their suites, suite files and units. Each suite, file and
+	 * unit heading takes the next group number; a run row names its suite's, file's and unit's groups ({@code data-s},
+	 * {@code data-g}, {@code data-u}), which is how the filters find the headings to hide with it.
 	 *
 	 * @return the next group number (groups number the file and unit headings across the page, for the filters)
 	 */
 	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup) {
 		int group = firstGroup;
 		sessionHeadingHtml(out, session, runs);
+		String suite = null;
+		int suiteGroup = 0;
 		String label = null;
 		int fileGroup = 0;
 		for (int i = 0, sequence = 1; i < runs.size(); ) {
 			ListedRun run = runs.get(i);
+			String runSuite = run.suite();
+			boolean newSuite = ! Objects.equals(runSuite, suite);
+			if (newSuite) {
+				suite = runSuite;
+				suiteGroup = (suite == null) ? 0 : ++group;
+				if (suite != null) {
+					out.append("<tr class=\"group suite\" data-header=\"g").append(suiteGroup).append("\"><td colspan=\"").append(HEADINGS.size())
+						.append("\">Suite ").append(escape(suite)).append(descriptionHtml(run.text("suiteDescription"), "desc")).append("</td></tr>");
+				}
+			}
 			String runLabel = run.label();
-			if (! Objects.equals(runLabel, label)) {
+			if (newSuite || (! Objects.equals(runLabel, label))) {
 				label = runLabel;
 				fileGroup = (label == null) ? 0 : ++group;
 				if (label != null) {
@@ -152,7 +176,7 @@ final class SailRunsList {
 				unitRowHtml(out, runs.subList(i, end), unitGroup);
 			}
 			for (int j = i; j < end; j++) {
-				runRowHtml(out, runs.get(j), new RowPlace(sequence++, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1));
+				runRowHtml(out, runs.get(j), new RowPlace(sequence++, suiteGroup, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1));
 			}
 			i = end;
 		}
@@ -193,12 +217,13 @@ final class SailRunsList {
 		return result;
 	}
 
-	/** Writes a unit's heading row: its title, how many legs, its outcome and total time. */
+	/** Writes a unit's heading row: its title, how many legs, its description, its outcome and total time. */
 	private static void unitRowHtml(@Nonnull StringBuilder out, @Nonnull List<ListedRun> legs, int unitGroup) {
 		boolean unitFailed = legs.stream().anyMatch(ListedRun::failed);
 		out.append("<tr class=\"unit").append(unitFailed ? " fail" : "").append("\" data-header=\"g").append(unitGroup)
 			.append("\"><td></td><td></td><td><div class=\"summary\">").append(escape(unitTitle(legs)))
-			.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div></td><td>")
+			.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div>")
+			.append(descriptionHtml(legs.get(0).text("workflowDescription"), "desc")).append("</td><td>")
 			.append(unitFailed ? "<span class=\"badge fail\">Failed</span>" : "<span class=\"badge pass\">Passed</span>")
 			.append("</td><td></td><td class=\"num\">")
 			.append(duration(legs.stream().mapToLong(ListedRun::millis).sum())).append("</td><td></td></tr>");
@@ -228,11 +253,12 @@ final class SailRunsList {
 	 * Where a run's row is in its session's table.
 	 *
 	 * @param sequence	its number in the session, from 1
+	 * @param suiteGroup	its suite's heading's group, or 0 when it has none
 	 * @param fileGroup	its suite file's heading's group, or 0 when it has none
 	 * @param unitGroup	its unit's heading's group, or 0 when it is not in a unit
 	 * @param leg	its number in its unit, from 1; or 0 when it is not in a unit
 	 */
-	private record RowPlace(int sequence, int fileGroup, int unitGroup, int leg) {
+	private record RowPlace(int sequence, int suiteGroup, int fileGroup, int unitGroup, int leg) {
 		// a value
 	}
 
@@ -240,10 +266,12 @@ final class SailRunsList {
 	private static void runRowHtml(@Nonnull StringBuilder out, @Nonnull ListedRun run, @Nonnull RowPlace place) {
 		Map<String, Object> summary = run.summary();
 		boolean failed = run.failed();
+		int suiteGroup = place.suiteGroup();
 		int fileGroup = place.fileGroup();
 		int unitGroup = place.unitGroup();
 		int leg = place.leg();
 		out.append("<tr data-run data-failed=\"").append(failed).append('"')
+			.append((suiteGroup == 0) ? "" : " data-s=\"g" + suiteGroup + '"')
 			.append((fileGroup == 0) ? "" : " data-g=\"g" + fileGroup + '"')
 			.append((unitGroup == 0) ? "" : " data-u=\"g" + unitGroup + '"');
 		String classes = (failed ? "fail" : "") + ((leg == 0) ? "" : (failed ? " leg" : "leg"));
@@ -260,7 +288,11 @@ final class SailRunsList {
 				.append("</td><td>").append((leg == 0) ? "" : "<span class=\"leg-no\">leg " + leg + "</span>")
 				.append("<div class=\"summary\">").append(escape(run.title())).append("</div><div class=\"muted small\">")
 				.append(escape(String.valueOf(summary.get("test")))).append((label == null) ? "" : " &middot; " + escape(String.valueOf(label)))
-				.append("</div></td><td>")
+				.append("</div>")
+				// a workflow of one has no unit heading, so its run shows the workflow's description
+				.append((leg == 0) ? descriptionHtml(run.text("workflowDescription"), "desc") : "")
+				.append(descriptionHtml(run.text("description"), "desc"))
+				.append("</td><td>")
 				.append(failed ? "<span class=\"badge fail\">" + ((failedSteps == 0) ? "Failed" : failedSteps + " failed") + "</span>"
 								: "<span class=\"badge pass\">Passed</span>")
 				.append("</td><td class=\"num\">").append(number(summary.get("steps")))

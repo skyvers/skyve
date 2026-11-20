@@ -48,6 +48,12 @@ tr.leg td:nth-child(3){padding-left:30px;position:relative}
 tr.leg td:nth-child(3)::before{content:"";position:absolute;left:14px;top:0;bottom:0;border-left:2px solid var(--border)}
 .leg-no{float:right;margin-left:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 td.shot img{display:block;max-width:300px;border:1px solid var(--border);border-radius:4px}
+.desc p{margin:0 0 6px;max-width:90ch}.desc p:last-child{margin-bottom:0}
+.story{display:grid;gap:12px;padding:14px 18px;margin-bottom:16px}
+.story h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 4px}
+.story h2 .muted{text-transform:none;letter-spacing:0;font-weight:400;overflow-wrap:anywhere}
+tr.group .desc,td .desc{font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+tr.suite td{background:var(--sunken);font-size:14px}
 .pop{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 64px);overflow:auto;padding:18px 20px;
 border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 12px 32px rgba(0,0,0,.25)}
 .pop::backdrop{background:rgba(0,0,0,.3)}
