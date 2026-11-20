@@ -23,8 +23,6 @@ S.forEach(function (s, k) {
 });
 /* the last frame drawn at or before t */
 function frameAt(t) { var lo = 0, hi = F.length - 1; if (hi < 0) return 0; while (lo < hi) { var m = (lo + hi + 1) >> 1; if (F[m][1] <= t) lo = m; else hi = m - 1; } return lo; }
-/* the first frame drawn at or after t (F.length if none) */
-function frameFrom(t) { var lo = 0, hi = F.length; while (lo < hi) { var m = (lo + hi) >> 1; if (F[m][1] < t) lo = m + 1; else hi = m; } return lo; }
 function stepAt(t) { var r = -1; for (var k = 0; k < S.length; k++) { if (S[k].s <= t) r = k; else break; } return r; }
 function caption(k) {
 	var cur = list.querySelector('li.current'); if (cur) cur.classList.remove('current');
@@ -47,11 +45,10 @@ function show() {
 	if (k !== shown) { shown = k; caption(k); }
 }
 function go(k) { i = Math.max(0, Math.min(F.length - 1, k)); show(); if (playing) schedule(); }
-/* shows a step: its first frame, or the screen as it was during it when nothing was drawn then */
+/* shows a step as it finished: the last frame drawn by its end (the screen as it was during it when nothing was
+   drawn then), as the film strip's screenshot shows it; Play goes on from there */
 function jump(k) {
-	var s = S[k], f = frameFrom(s.s);
-	if (f >= F.length || F[f][1] > s.e) f = frameAt(s.e);
-	pin = k; go(f);
+	pin = k; go(frameAt(S[k].e));
 }
 function schedule() {
 	clearTimeout(timer);

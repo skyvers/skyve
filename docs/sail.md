@@ -2056,7 +2056,7 @@ ITs where you meant to run unit tests.
 | `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
 | `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
-| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, suite, file and workflow headings and sessions with nothing to show, and the filter matches the suite's, workflow's and runs' descriptions. A run page's previous and next run buttons: to the neighbours' pages of the same kind (else the other), across sessions, with the run's place in its session, opened by URL and from the file system; none without `runs-order.js`. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
+| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown, as it finished (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, suite, file and workflow headings and sessions with nothing to show, and the filter matches the suite's, workflow's and runs' descriptions. A run page's previous and next run buttons: to the neighbours' pages of the same kind (else the other), across sessions, with the run's place in its session, opened by URL and from the file system; none without `runs-order.js`. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2339,7 +2339,8 @@ strip and the player into the same folder.
   what it does in words, any failure, and the step as SAIL. It has play and
   pause, previous and next step, a speed of 0.5x to 8x and a slider. Beside
   the frames, the steps are listed in words under their interactions; clicking
-  one shows its first frame. Space plays and pauses, and the arrow keys move a
+  one, or moving a step, shows it as it finished (its last frame, as the film
+  strip's screenshot shows it), and Play goes on from there. Space plays and pauses, and the arrow keys move a
   step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
   Selenium was built for. Frames are written and acknowledged on a thread of

@@ -121,28 +121,28 @@ class SailMediaPagesSailIT {
 	void aClickedStepIsTheStepShown() throws IOException {
 		openThePlayer();
 		steps().get(2).click();
-		assertShown(3, "f3.png", "a step's first frame");
+		assertShown(3, "f4.png", "a step as it finished: the last frame drawn by its end, not f3 as it started");
 		steps().get(1).click();
 		assertShown(2, "f2.png", "no frame was drawn during the step: the screen as it was, and still this step");
 		steps().get(0).click();
-		assertShown(1, "f1.png", "the first step");
+		assertShown(1, "f2.png", "the first step as it finished, not f1 as it started");
 	}
 
 	@Test
 	void theButtonsAndArrowKeysStepThroughTheSteps() throws IOException {
 		openThePlayer();
 		driver.findElement(By.id("next")).click();
-		assertShown(1, "f1.png", "next from before the first step");
+		assertShown(1, "f2.png", "next from before the first step: the step as it finished");
 		driver.findElement(By.id("next")).click();
 		assertShown(2, "f2.png", "next");
 		driver.findElement(By.tagName("body")).sendKeys(Keys.ARROW_RIGHT);
-		assertShown(3, "f3.png", "the right arrow");
+		assertShown(3, "f4.png", "the right arrow");
 		driver.findElement(By.id("next")).click();
-		assertShown(3, "f3.png", "no step after the last");
+		assertShown(3, "f4.png", "no step after the last");
 		driver.findElement(By.tagName("body")).sendKeys(Keys.ARROW_LEFT);
 		assertShown(2, "f2.png", "the left arrow");
 		driver.findElement(By.id("prev")).click();
-		assertShown(1, "f1.png", "previous");
+		assertShown(1, "f2.png", "previous");
 	}
 
 	@Test
