@@ -3964,8 +3964,11 @@ do. Mike reverted that fix for this release: the deferred change handler raced
 the field's blur rerender, so a field with a rerender in both its change and
 blur handlers sent its two rerenders at once on one conversation (the Biz Hub
 Apps timesheets' W6b failure); before it, and again now, they go one after the
-other. The change and blur handling is to be redone as a
-whole after the release; `SmartClientRerenderOnceSailIT` checks that the
+other. The revert also takes out the follow-ups' commit of a field's typed
+text before a gather, so a save, action or zoom made while a date's text is
+still being typed gathers the value from before the typing, as before
+16 Nov (SmartClient never commits a date item's text until it is left). The
+change and blur handling is to be redone as a whole after the release; `SmartClientRerenderOnceSailIT` checks that the
 Rerender Fixture, which mirrors the Apps week ending date, sends its change and
 blur rerenders one after the other, never at once.
 
