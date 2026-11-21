@@ -32,7 +32,9 @@ public enum Capability {
 	/** Trusted key presses and chords: {@link Keys}. */
 	KEYS(Keys.class),
 	/** The window's size: {@link Window}. */
-	WINDOW(Window.class);
+	WINDOW(Window.class),
+	/** Recording a window as a stream of images, for video: {@link PageScreencast}. */
+	SCREENCAST(PageScreencast.class);
 
 	private final Class<?> type;
 
@@ -52,7 +54,7 @@ public enum Capability {
 	/**
 	 * Returns the capability whose operations an interface offers.
 	 *
-	 * <p>Complexity: O(c) in the number of capabilities (twelve).
+	 * <p>Complexity: O(c) in the number of capabilities (thirteen).
 	 *
 	 * @param type	one of the capabilities' interfaces, such as {@link Cookies}
 	 * @return its capability

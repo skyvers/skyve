@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
@@ -29,7 +30,7 @@ import jakarta.annotation.Nullable;
  */
 public class FakeBrowserControl extends SailBrowserControl
 								implements RequestInterception, RequestLog, NetworkConditions, InitScripts, Dialogs, Cookies,
-											StorageQuota, PageLifecycle, TouchEmulation, Tabs, Keys, Window {
+											StorageQuota, PageLifecycle, TouchEmulation, Tabs, Keys, Window, PageScreencast {
 	private final Set<Capability> supported;
 	private final List<String> calls = new ArrayList<>();
 	private final List<RequestRule> rules = new ArrayList<>();
@@ -38,6 +39,8 @@ public class FakeBrowserControl extends SailBrowserControl
 	private final List<Dialog> dialogs = new ArrayList<>();
 	private final List<BrowserCookie> cookies = new ArrayList<>();
 	private int held;
+	private Consumer<Image> screencastSink;
+	private RuntimeException screencastFailure;
 	private int tabs = 1;
 	/** When the request log and the dialogs began: long before any step, unless a test says otherwise. */
 	private Instant watchingSince = Instant.EPOCH;
@@ -164,6 +167,31 @@ public class FakeBrowserControl extends SailBrowserControl
 	public @Nonnull FakeBrowserControl withTabs(int count) {
 		tabs = count;
 		return this;
+	}
+
+	/**
+	 * Makes starting a screencast fail, as a browser with no such window does.
+	 *
+	 * @param failure	what {@link #startScreencast(String, Options, Consumer)} throws, or null for it to start
+	 * @return this fake
+	 */
+	public @Nonnull FakeBrowserControl withScreencastFailure(@Nullable RuntimeException failure) {
+		screencastFailure = failure;
+		return this;
+	}
+
+	/**
+	 * Delivers a frame to the screencast's sink, as the browser would.
+	 *
+	 * @param frame	the frame
+	 * @return true if a screencast was on, false if the frame was dropped
+	 */
+	public boolean drawFrame(@Nonnull Image frame) {
+		if (screencastSink == null) {
+			return false;
+		}
+		screencastSink.accept(frame);
+		return true;
 	}
 
 	private void note(@Nonnull Object... parts) {
@@ -410,5 +438,23 @@ public class FakeBrowserControl extends SailBrowserControl
 	public @Nonnull Dimension resizeWindow(int width, int height) {
 		note("resizeWindow", Integer.valueOf(width), Integer.valueOf(height));
 		return new Dimension(width, height);
+	}
+
+	// ---- screencast
+
+	@Override
+	public void startScreencast(@Nonnull String windowHandle, @Nonnull Options options, @Nonnull Consumer<Image> sink) {
+		note("startScreencast", windowHandle, options.format(), Integer.valueOf(options.quality()), Integer.valueOf(options.maxWidth()),
+				Integer.valueOf(options.maxHeight()));
+		if (screencastFailure != null) {
+			throw screencastFailure;
+		}
+		screencastSink = sink;
+	}
+
+	@Override
+	public void stopScreencast() {
+		note("stopScreencast");
+		screencastSink = null;
 	}
 }
