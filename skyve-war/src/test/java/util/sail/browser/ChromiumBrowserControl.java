@@ -47,7 +47,7 @@ import util.sail.browser.RequestRule.Stage;
 
 /**
  * Controls a Chromium browser (Chrome or Edge): every capability. Request interception, the request log, network
- * conditions, init scripts, dialogs, the storage quota, page lifecycle and touch go through the Chrome DevTools
+ * conditions, init scripts, dialogs, the storage quota, page lifecycle, touch and the screencast go through the Chrome DevTools
  * Protocol; cookies, tabs, keys and the window through plain WebDriver, as {@link WebDriverBrowserControl} does.
  * <p>
  * <b>The whole browser, not one page.</b> It attaches to every tab, every page in them, every service worker and
@@ -69,6 +69,12 @@ import util.sail.browser.RequestRule.Stage;
  * as Selenium's typed {@code selenium-devtools-vNNN} bindings lag Chrome: Chrome 158 against devtools v142 printed
  * "Unable to find CDP implementation matching 158". Nothing of the protocol leaves this class.
  * <p>
+ * <b>One DevTools session per page.</b> Nothing else may attach to a page: a second session on it (such as a screencast
+ * opened with its own connection and {@code Target.attachToTarget}) makes a document that loads after the browser
+ * goes offline report {@code navigator.onLine === true}, though its requests fail. So the screencast
+ * ({@link PageScreencast}) runs on this control's own session for the window, and the control, which connects as
+ * soon as it is made, attaches to every page of a run that records video.
+ * <p>
  * Ported from basix-cloud's {@code SailDevTools}.
  * <p>
  * Threading: methods may be called from any thread. Every DevTools command and event is handled in turn on one thread
@@ -81,7 +87,7 @@ import util.sail.browser.RequestRule.Stage;
  * other documents, and a request of a document its frame has already left isn't held.
  */
 public final class ChromiumBrowserControl extends WebDriverBrowserControl
-		implements RequestInterception, RequestLog, NetworkConditions, InitScripts, Dialogs, StorageQuota, PageLifecycle, TouchEmulation {
+		implements RequestInterception, RequestLog, NetworkConditions, InitScripts, Dialogs, StorageQuota, PageLifecycle, TouchEmulation, PageScreencast {
 	/** A DevTools session on one of the browser's targets. */
 	private record Target(@Nonnull String targetId, @Nonnull String type) {
 		boolean isPage() {
@@ -160,6 +166,10 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	 * handled first, or the detach of one dropped as Chrome said it had gone. Only on the DevTools thread.
 	 */
 	private final Set<String> gone = new HashSet<>();
+	/** The screencast's sink, DevTools session and page target; null when none is on. Touched only on the DevTools thread. */
+	private Consumer<Image> screencastSink;
+	private String screencastSession;
+	private String screencastTarget;
 
 	// The settings, applied to each target as it attaches. Touched only on the DevTools thread.
 	private Map<String, Object> network = networkConditions(false, 0, -1, -1);
@@ -487,12 +497,17 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	/**
-	 * Forgets the held requests of a page that has closed (or a worker that has stopped), and the document it showed.
+	 * Forgets the held requests of a page that has closed (or a worker that has stopped), the document it showed and its screencast.
 	 * Only the page's own requests go: those of the iframes in it don't. Runs on the DevTools thread.
 	 *
 	 * @param targetId	the target's id, which for a page is its main frame's id
 	 */
 	private void closed(@Nonnull String targetId) {
+		if (targetId.equals(screencastTarget)) {
+			screencastSink = null; // the page has closed, and its recording with it
+			screencastSession = null;
+			screencastTarget = null;
+		}
 		String document = documents.remove(targetId);
 		if (document != null) {
 			leftDocuments.add(document);
@@ -783,6 +798,110 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		});
 	}
 
+	// ---- screencast
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>It is DevTools' {@code Page.startScreencast} on this control's session for the window's page, never on a
+	 * session of its own: see the class comment for why a second session on a page is not opened. Frames are
+	 * acknowledged here, as they arrive, so the browser sends the next.
+	 */
+	@Override
+	public void startScreencast(@Nonnull String windowHandle, @Nonnull Options options, @Nonnull Consumer<Image> sink) {
+		String targetId = windowHandle.replaceFirst("^CDwindow-", ""); // a window handle is a page's target id
+		Map<String, Object> params = Map.of("format", options.format(),
+											"quality", Integer.valueOf(options.quality()),
+											"maxWidth", Integer.valueOf(options.maxWidth()),
+											"maxHeight", Integer.valueOf(options.maxHeight()));
+		call(() -> {
+			String sessionId = null;
+			for (Entry<String, Target> session : sessions.entrySet()) {
+				if (session.getValue().isPage() && session.getValue().targetId().equals(targetId)) {
+					sessionId = session.getKey();
+				}
+			}
+			if (sessionId == null) {
+				throw new IllegalStateException("The browser has no attached page " + windowHandle);
+			}
+			stopScreencastNow();
+			screencastSink = sink;
+			screencastSession = sessionId;
+			screencastTarget = targetId;
+			try {
+				send(sessionId, "Page.startScreencast", params);
+			}
+			catch (RuntimeException e) {
+				screencastSink = null;
+				screencastSession = null;
+				screencastTarget = null;
+				throw e;
+			}
+			return null;
+		});
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>It does nothing, and does not connect to DevTools, if no screencast was started (or the control has been
+	 * released), so stopping the recording of a browser that has quit does not try to reach it again.
+	 */
+	@Override
+	public void stopScreencast() {
+		synchronized (this) {
+			if (thread == null) {
+				return;
+			}
+		}
+		call(() -> {
+			stopScreencastNow();
+			return null;
+		});
+	}
+
+	/** Stops the screencast, if one is on, and forgets it. Runs on the DevTools thread. */
+	private void stopScreencastNow() {
+		String sessionId = screencastSession;
+		screencastSink = null;
+		screencastSession = null;
+		screencastTarget = null;
+		if (sessionId != null) {
+			sendQuietly(sessionId, "Page.stopScreencast", Map.of()); // the page may have gone
+		}
+	}
+
+	/** Acknowledges a screencast frame, so that the browser sends the next, and hands it to the sink. Runs on the DevTools thread. */
+	private void screencastFrame(@Nonnull Map<String, Object> frame) {
+		String sessionId = screencastSession;
+		Consumer<Image> sink = screencastSink;
+		if ((sessionId == null) || (sink == null)) {
+			return; // stopped, or its page has closed: a frame already on its way is dropped
+		}
+		Object ack = frame.get("sessionId");
+		if (ack != null) {
+			acknowledge(sessionId, ack);
+		}
+		if (frame.get("data") instanceof String base64) {
+			Object timestamp = map(frame, "metadata").get("timestamp"); // seconds
+			long millis = (timestamp instanceof Number n) ? Math.round(n.doubleValue() * 1000.0) : System.currentTimeMillis();
+			sink.accept(new Image(base64, millis));
+		}
+	}
+
+	/** Acknowledges a frame without waiting for the answer, as a frame's turn on the DevTools thread should be short. */
+	private void acknowledge(@Nonnull String sessionId, @Nonnull Object frameId) {
+		Connection c = connection;
+		if (c != null) {
+			try {
+				c.send(new SessionID(sessionId), new Command<>("Page.screencastFrameAck", Map.of("sessionId", frameId)));
+			}
+			catch (RuntimeException e) {
+				System.out.println(PREFIX + "could not acknowledge a screencast frame: " + firstLine(e)); // the browser has gone
+			}
+		}
+	}
+
 	// ---- lifetime
 
 	/** Connects to DevTools and starts watching the browser, the first time. */
@@ -827,6 +946,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 				gone.add(sessionId); // not dropped as gone already, so its attach comes later
 			}
 		});
+		listen("Page.screencastFrame", this::screencastFrame);
 		listen("Fetch.requestPaused", this::paused);
 		listen("Page.frameNavigated", this::navigated);
 		listen("Page.javascriptDialogOpening", params -> dialogs.add(new Dialog(dialogType(string(params, "type")),

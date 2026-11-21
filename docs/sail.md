@@ -2349,8 +2349,15 @@ strip and the player into the same folder.
   when that is the video's end). Space plays and pauses, and the arrow keys move a
   step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
-  Selenium was built for. Frames are written and acknowledged on a thread of
-  their own, so the test does not wait for them. A browser without DevTools
+  Selenium was built for. It is the `SCREENCAST` [capability](#capabilities) of the
+  browser's control, which runs it on the control's own DevTools session for the
+  window; the video opens no connection or session of its own, because a second
+  DevTools session on a page makes any document loaded after the browser goes
+  offline report `navigator.onLine === true` (its requests still fail), so video
+  would change what a test sees. For the same reason, a Chrome run with video
+  makes the control, and so connects to DevTools, at its first step. The control
+  acknowledges each frame as it arrives, and the frames are written on a thread of
+  their own, so the test does not wait for them. A browser without the capability
   (not Chromium) has no video; the run carries on and the trace says so.
 - **Folders.** Each automation run gets its own folder under each directory,
   named by its start time, the test (`Class.method`) and, in a suite, the
@@ -2471,8 +2478,9 @@ Firefox) without changing a call.
 | `TABS` | `Tabs`: open, switch, close, visit a new tab and return | yes (WebDriver) | yes |
 | `KEYS` | `Keys`: trusted key presses and chords | yes (WebDriver) | yes |
 | `WINDOW` | `Window`: resize | yes (WebDriver) | yes |
+| `SCREENCAST` | `PageScreencast`: record a window as a stream of images (the SAIL video) | yes | no |
 
-Chromium supports all twelve. They are tested on Chrome; Edge and a remote (grid)
+Chromium supports all thirteen. They are tested on Chrome; Edge and a remote (grid)
 Chromium without a DevTools endpoint are not yet verified.
 
 A custom `<call>` can use them too:

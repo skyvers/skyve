@@ -23,14 +23,7 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.devtools.Command;
-import org.openqa.selenium.devtools.Connection;
-import org.openqa.selenium.devtools.Event;
-import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.SeleniumCdpConnection;
-import org.openqa.selenium.devtools.idealized.target.model.SessionID;
 import org.openqa.selenium.json.Json;
-import org.openqa.selenium.json.JsonInput;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
@@ -38,6 +31,9 @@ import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import util.sail.browser.Capability;
+import util.sail.browser.PageScreencast;
+import util.sail.browser.SailBrowserControl;
 
 /**
  * Step snapshots and a video of one automation run, for a person to look through what a SAIL run did.
@@ -69,9 +65,9 @@ import jakarta.annotation.Nullable;
  * <p>
  * Recordings show what the browser showed: a run against real data records real data.
  * <p>
- * Threading: an instance belongs to the thread running its automation. Screencast frames arrive on the CDP
- * connection's thread, which acknowledges each without waiting and hands it to a single worker thread to write, so the
- * test thread never waits for them until the run ends.
+ * Threading: an instance belongs to the thread running its automation. Screencast frames arrive on the browser
+ * control's DevTools thread, which acknowledges each without waiting and hands it to a single worker thread to write,
+ * so the test thread never waits for them until the run ends.
  */
 public final class SailMedia {
 	/**
@@ -760,34 +756,32 @@ public final class SailMedia {
 
 	/**
 	 * Chrome's DevTools screencast of one browser window: each frame is written to {@code frames/} with the time Chrome
-	 * drew it, and acknowledged so that Chrome sends the next.
+	 * drew it. The browser's control ({@link SailBrowserControl}, capability {@link Capability#SCREENCAST}) records it
+	 * and acknowledges each frame so that Chrome sends the next; this writes them.
 	 * <p>
-	 * It opens its own CDP connection ({@link SeleniumCdpConnection}) and speaks raw CDP: it attaches to the window's
-	 * target with {@code Target.attachToTarget}, then sends {@code Page.*} commands and listens for
-	 * {@code Page.screencastFrame} by name. Selenium's typed DevTools would need a {@code selenium-devtools} module for
-	 * the browser's version, and Chrome is newer than the newest on the classpath, where Selenium falls back to a no-op.
+	 * It opens no DevTools connection or session of its own, on purpose: a second session attached to a page makes
+	 * any document loaded after the browser goes offline report {@code navigator.onLine === true}, though its
+	 * requests fail, so video would change what a test sees. The control's own session for the window carries the
+	 * screencast instead (see {@link PageScreencast}). A browser whose control lacks the capability (not Chromium) has
+	 * no video.
 	 */
 	static final class Screencast {
-		@SuppressWarnings("resource") // closed by stop()
-		private final Connection connection;
-		private final SessionID session;
+		private final PageScreencast recorder;
 		private final Path folder;
 		private final List<Frame> frames;
 		private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
-		/** Writes frames in order, off the test thread and off the CDP connection's thread. */
+		/** Writes frames in order, off the test thread and off the control's DevTools thread. */
 		private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
 			Thread result = new Thread(r, "sail-screencast");
 			result.setDaemon(true);
 			return result;
 		});
 
-		private Screencast(@Nonnull Connection connection,
-							@Nonnull SessionID session,
+		private Screencast(@Nonnull PageScreencast recorder,
 							@Nonnull Path folder,
 							@Nonnull List<Frame> frames,
 							@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
-			this.connection = connection;
-			this.session = session;
+			this.recorder = recorder;
 			this.folder = folder;
 			this.frames = frames;
 			this.selenide = selenide;
@@ -800,68 +794,65 @@ public final class SailMedia {
 		 * @param folder	the run's video folder
 		 * @param frames	the run's frames, which this adds to (guarded by itself)
 		 * @param selenide	for the trace
-		 * @return the screencast, or null when the browser has no CDP (not Chromium) or it cannot start
+		 * @return the screencast, or null when the browser has no screencast (not Chromium) or it cannot start
 		 */
-		@SuppressWarnings("resource") // the connection is the screencast's, which stop() closes; closed here if it cannot start
 		static @Nullable Screencast start(@Nonnull WebDriver driver,
 											@Nonnull Path folder,
 											@Nonnull List<Frame> frames,
 											@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
-			if (! (driver instanceof HasDevTools)) {
-				selenide.trace("SAIL video is not supported for " + driver.getClass().getSimpleName() +
-								" (it needs Chromium's DevTools); carrying on without it");
-				return null;
-			}
-			Connection connection = null;
 			try {
-				connection = SeleniumCdpConnection.create(driver).orElse(null);
-				if (connection == null) {
-					selenide.trace("SAIL video is not supported: the browser offers no CDP connection; carrying on without it");
-					return null;
-				}
-				// A Chrome window handle is its CDP target id
-				Map<String, Object> attached = connection.sendAndWait(null,
-																		new Command<Map<String, Object>>("Target.attachToTarget",
-																											Map.of("targetId", driver.getWindowHandle(),
-																													"flatten", Boolean.TRUE),
-																											Json.MAP_TYPE),
-																		selenide.timeout());
-				SessionID session = new SessionID(String.valueOf(attached.get("sessionId")));
-				Screencast result = new Screencast(connection, session, folder, frames, selenide);
-				connection.addListener(new Event<>("Page.screencastFrame", Screencast::readFrame), (sequence, frame) -> result.received(frame));
-				connection.sendAndWait(session,
-										new Command<>("Page.startScreencast", Map.of("format", FRAME_FORMAT,
-																					"quality", Integer.valueOf(FRAME_QUALITY),
-																					"maxWidth", Integer.valueOf(FRAME_MAX_WIDTH),
-																					"maxHeight", Integer.valueOf(FRAME_MAX_HEIGHT))),
-										selenide.timeout());
-				selenide.trace(String.format("SAIL video: Chrome DevTools screencast over raw CDP, %s quality %d, at most %dx%d",
-												FRAME_FORMAT, Integer.valueOf(FRAME_QUALITY), Integer.valueOf(FRAME_MAX_WIDTH), Integer.valueOf(FRAME_MAX_HEIGHT)));
-				return result;
+				// For Chromium this makes the control, which connects to DevTools and attaches to the page
+				SailBrowserControl control = SailBrowserControl.of(driver);
+				return start(control, driver.getWindowHandle(), folder, frames, selenide);
 			}
 			catch (RuntimeException e) {
 				selenide.trace("SAIL video could not start, so this run has none: " + e);
-				if (connection != null) {
-					connection.close();
-				}
 				return null;
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		private static @Nonnull Map<String, Object> readFrame(@Nonnull JsonInput input) {
-			return (Map<String, Object>) input.read(Json.MAP_TYPE);
+		/**
+		 * Starts the screencast of a window of a browser that has one.
+		 *
+		 * @param control	the browser's control
+		 * @param windowHandle	the window
+		 * @param folder	the run's video folder
+		 * @param frames	the run's frames, which this adds to (guarded by itself)
+		 * @param selenide	for the trace
+		 * @return the screencast, or null when the control has no screencast or it cannot start
+		 */
+		static @Nullable Screencast start(@Nonnull SailBrowserControl control,
+											@Nonnull String windowHandle,
+											@Nonnull Path folder,
+											@Nonnull List<Frame> frames,
+											@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
+			if (! control.supports(Capability.SCREENCAST)) {
+				selenide.trace("SAIL video is not supported for " + control.browser() +
+								" (it needs Chromium's DevTools); carrying on without it");
+				return null;
+			}
+			PageScreencast recorder = control.require(PageScreencast.class, "SAIL video");
+			Screencast result = new Screencast(recorder, folder, frames, selenide);
+			try {
+				recorder.startScreencast(windowHandle,
+											new PageScreencast.Options(FRAME_FORMAT, FRAME_QUALITY, FRAME_MAX_WIDTH, FRAME_MAX_HEIGHT),
+											result::received);
+			}
+			catch (RuntimeException e) {
+				selenide.trace("SAIL video could not start, so this run has none: " + e);
+				result.worker.shutdown();
+				return null;
+			}
+			selenide.trace(String.format("SAIL video: Chrome DevTools screencast on the browser control's own page session, %s quality %d, at most %dx%d",
+											FRAME_FORMAT, Integer.valueOf(FRAME_QUALITY), Integer.valueOf(FRAME_MAX_WIDTH), Integer.valueOf(FRAME_MAX_HEIGHT)));
+			return result;
 		}
 
 		/**
-		 * Called on the CDP connection's thread for each frame: acknowledges it (asynchronously, so that Chrome sends the
-		 * next one) and hands it to the worker to write.
+		 * Called on the control's DevTools thread for each frame, which the control has acknowledged already: hands it
+		 * to the worker to write.
 		 */
-		private void received(@Nonnull Map<String, Object> frame) {
-			Object sessionId = frame.get("sessionId");
-			if (sessionId != null) {
-				connection.send(session, new Command<>("Page.screencastFrameAck", Map.of("sessionId", sessionId)));
-			}
+		private void received(@Nonnull PageScreencast.Image frame) {
 			try {
 				worker.execute(() -> write(frame));
 			}
@@ -870,20 +861,15 @@ public final class SailMedia {
 			}
 		}
 
-		private void write(@Nonnull Map<String, Object> frame) {
+		private void write(@Nonnull PageScreencast.Image frame) {
 			try {
-				Object data = frame.get("data");
-				Object metadata = frame.get("metadata");
-				Object timestamp = (metadata instanceof Map<?, ?> m) ? m.get("timestamp") : null;
-				long millis = (timestamp instanceof Number n) ? Math.round(n.doubleValue() * 1000.0) : System.currentTimeMillis();
-				if (data instanceof String base64) {
-					String file;
-					synchronized (frames) {
-						file = String.format("frames/%06d.jpg", Integer.valueOf(frames.size() + 1));
-						frames.add(new Frame(file, millis));
-					}
-					Files.write(folder.resolve(file), Base64.getDecoder().decode(base64));
+				byte[] image = Base64.getDecoder().decode(frame.base64());
+				String file;
+				synchronized (frames) {
+					file = String.format("frames/%06d.jpg", Integer.valueOf(frames.size() + 1));
+					frames.add(new Frame(file, frame.millis()));
 				}
+				Files.write(folder.resolve(file), image);
 			}
 			catch (IOException | RuntimeException e) {
 				selenide.trace("Could not save a SAIL video frame: " + e);
@@ -891,11 +877,11 @@ public final class SailMedia {
 		}
 
 		/**
-		 * Stops the screencast, waits for the frames already received to be written, and closes the connection.
+		 * Stops the screencast and waits for the frames already received to be written.
 		 */
 		void stop() {
 			try {
-				connection.sendAndWait(session, new Command<>("Page.stopScreencast", Map.of()), selenide.timeout());
+				recorder.stopScreencast();
 			}
 			catch (RuntimeException e) { // the browser has gone
 				selenide.trace("Could not stop the SAIL video screencast: " + e);
@@ -910,7 +896,6 @@ public final class SailMedia {
 			catch (@SuppressWarnings("unused") InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			connection.close();
 		}
 	}
 }
