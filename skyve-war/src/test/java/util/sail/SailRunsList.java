@@ -122,6 +122,18 @@ final class SailRunsList {
 	 * @return the page
 	 */
 	static @Nonnull String runsIndexHtml(@Nonnull List<ListedRun> runs) {
+		return runsIndexHtml(runs, "");
+	}
+
+	/**
+	 * Writes a list of runs, as {@link #runsIndexHtml(List)} does, from a folder other than the runs' directory.
+	 *
+	 * @param runs	the runs, in the list's order
+	 * @param runsLink	the runs' directory relative to the list, ending in {@code /} (such as {@code media/}), or empty
+	 *			when the list is in it
+	 * @return the page
+	 */
+	static @Nonnull String runsIndexHtml(@Nonnull List<ListedRun> runs, @Nonnull String runsLink) {
 		long failedRuns = runs.stream().filter(ListedRun::failed).count();
 		StringBuilder result = new StringBuilder(4096 + (runs.size() * 768));
 		startPage(result, "SAIL runs", "", null);
@@ -140,7 +152,7 @@ final class SailRunsList {
 				end++;
 			}
 			List<ListedRun> sessionRuns = runs.subList(i, end);
-			group = sessionHtml(result, session, sessionRuns, group);
+			group = sessionHtml(result, session, sessionRuns, group, runsLink);
 			i = end;
 		}
 		result.append("</main>").append(SailMediaHtml.RUNS_SCRIPT).append("</body></html>\n");
@@ -152,9 +164,11 @@ final class SailRunsList {
 	 * unit heading takes the next group number; a run row names its suite's, file's and unit's groups ({@code data-s},
 	 * {@code data-g}, {@code data-u}), which is how the filters find the headings to hide with it.
 	 *
+	 * @param runsLink	the runs' directory relative to the list, or empty
 	 * @return the next group number (groups number the file and unit headings across the page, for the filters)
 	 */
-	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup) {
+	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup,
+									@Nonnull String runsLink) {
 		int group = firstGroup;
 		sessionHeadingHtml(out, session, runs);
 		String suite = null;
@@ -189,7 +203,7 @@ final class SailRunsList {
 				unitRowHtml(out, runs.subList(i, end), unitGroup);
 			}
 			for (int j = i; j < end; j++) {
-				runRowHtml(out, runs.get(j), new RowPlace(sequence++, suiteGroup, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1));
+				runRowHtml(out, runs.get(j), new RowPlace(sequence++, suiteGroup, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1), runsLink);
 			}
 			i = end;
 		}
@@ -275,8 +289,8 @@ final class SailRunsList {
 		// a value
 	}
 
-	/** Writes one run's row. */
-	private static void runRowHtml(@Nonnull StringBuilder out, @Nonnull ListedRun run, @Nonnull RowPlace place) {
+	/** Writes one run's row, linking to its pages through the runs' directory ({@code runsLink}, or empty). */
+	private static void runRowHtml(@Nonnull StringBuilder out, @Nonnull ListedRun run, @Nonnull RowPlace place, @Nonnull String runsLink) {
 		Map<String, Object> summary = run.summary();
 		boolean failed = run.failed();
 		int suiteGroup = place.suiteGroup();
@@ -311,7 +325,7 @@ final class SailRunsList {
 				.append("</td><td class=\"num\">").append(number(summary.get("steps")))
 				.append("</td><td class=\"num\">").append(duration(run.millis())).append("</td>");
 		}
-		String href = escape(run.name());
+		String href = escape(runsLink + run.name());
 		out.append("<td class=\"links\">");
 		if (Files.exists(run.folder().resolve("index.html"))) {
 			out.append("<a class=\"btn\" href=\"").append(href).append("/index.html\">Steps</a>");

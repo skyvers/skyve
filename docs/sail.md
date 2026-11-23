@@ -318,10 +318,10 @@ screenshots of every step, a video of each script and the failures, under the
 
 ```text
 skyve-war/target/sail/
+  index.html                        every run, newest first: open this in a browser
   failures/                         a screenshot (.png) and page (.html) for each failure
     recordings-contacts.xml-mwk2437ma-01-Contacts_create-step04.png
   media/
-    index.html                      every run, newest first: open this in a browser
     runs-order.js                   the runs in the list's order, for each run's previous and next run buttons
     20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
@@ -2363,9 +2363,13 @@ strip and the player into the same folder.
   named by its start time, the test (`Class.method`) and, in a suite, the
   member's file. Suites, workflows and ITs with several tests therefore keep
   every run. Each directory's `index.html` lists the runs by session (the
-  JVM's run of tests), newest first; in a session, the runs are in the order
-  they ran, under their suite and its member file (the script that labelled
-  them) and, for a workflow's legs, under the workflow. Each run shows its
+  JVM's run of tests), newest first. For the default directory
+  (`target/sail/media`, from [`sail.evidence`](#settings)) the list is one
+  folder up, in `target/sail`, beside `media/` and `failures/`, so that it is
+  the one page to open; it removes a list that an earlier version left in
+  `media/`. For a directory that is set, the list is in the directory. In a
+  session, the runs are in the order they ran, under their suite and its
+  member file (the script that labelled them) and, for a workflow's legs, under the workflow. Each run shows its
   first interaction, outcome, steps and time, and its
   [description](#descriptions). This comes from each run's
   `run.json`; runs written before that file existed come last, by their

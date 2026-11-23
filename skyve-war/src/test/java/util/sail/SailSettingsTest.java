@@ -481,6 +481,17 @@ class SailSettingsTest {
 					() -> assertNull(snapshots.videoDir()));
 	}
 
+	/** The default media directory's list of runs is in target/sail, above it; a directory that is set keeps its own. */
+	@Test
+	void theDefaultMediaDirectorysListIsInTheFolderAboveIt() {
+		SailSettings all = resolve(SailSettings.suite("s.xml", null, Evidence.all));
+		SailSettings set = resolve(SailSettings.code().snapshotDir(Path.of("shots")).layer());
+		assertAll(() -> assertEquals(directory.resolve("target/sail"), all.runsListDir(all.snapshotDir())),
+					() -> assertEquals(directory.resolve("shots"), set.runsListDir(set.snapshotDir())),
+					() -> assertEquals(directory.resolve("target/sail"), set.runsListDir(directory.resolve("target/sail/media")),
+										"set to the default directory, it is the default directory"));
+	}
+
 	@Test
 	void withAddsLayersToTheSameSources() {
 		system.put(SailSettings.TIMEOUT_SECONDS, "5");

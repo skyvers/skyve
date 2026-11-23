@@ -1302,6 +1302,20 @@ public final class SailSettings {
 	}
 
 	/**
+	 * Returns the folder for a media directory's list of runs ({@code index.html}): for the default directory, the
+	 * evidence folder above it ({@code target/sail}), so that the one page to open sits beside {@code media/} and
+	 * {@code failures/}; for a directory that is set, the directory itself, since its parent may be anything.
+	 *
+	 * @param mediaDir	a snapshot or video directory
+	 * @return the folder
+	 */
+	@Nonnull Path runsListDir(@Nonnull Path mediaDir) {
+		Path defaultDir = environment.workingDirectory().resolve(DEFAULT_MEDIA_DIR);
+		Path parent = mediaDir.getParent();
+		return (mediaDir.equals(defaultDir) && (parent != null)) ? parent : mediaDir;
+	}
+
+	/**
 	 * Returns the evidence request.
 	 *
 	 * @return {@code none} unless set

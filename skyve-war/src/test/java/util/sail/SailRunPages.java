@@ -32,6 +32,8 @@ import util.sail.SailMedia.Story;
 final class SailRunPages {
 	/** A setting as {@code name=value (source)}, as {@link SailSettings#describe()} writes it. */
 	private static final Pattern SETTING = Pattern.compile("^([\\w.]+)=(.*) \\(([^()]*)\\)$", Pattern.DOTALL);
+	/** The list of runs when it is in the directory of runs, beside the run's folder. */
+	static final String RUNS_BESIDE = "../index.html";
 
 	/** A run's outcome as a badge: passed, or how many steps failed. */
 	private static @Nonnull String outcomeBadge(int failed) {
@@ -50,9 +52,10 @@ final class SailRunPages {
 	 * @param page	{@code steps} for the film strip, {@code video} for the player
 	 * @param extraSub	more for the line under the title (HTML), or empty
 	 * @param links	the links, as HTML
+	 * @param runsLink	the list of runs, relative to the page
 	 */
 	private static void runHeader(@Nonnull StringBuilder out, @Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nonnull String page,
-									@Nonnull String extraSub, @Nonnull String links) {
+									@Nonnull String extraSub, @Nonnull String links, @Nonnull String runsLink) {
 		int failed = (int) steps.stream().filter(StepRecord::failed).count();
 		out.append("<header class=\"top\"><div class=\"heading\"><h1>").append(escape(info.title())).append("</h1><div class=\"sub\">")
 			.append(outcomeBadge(failed))
@@ -63,7 +66,7 @@ final class SailRunPages {
 			.append(extraSub).append("</div></div><nav class=\"nav\" data-run=\"").append(escape(info.name())).append("\" data-page=\"").append(page).append("\">")
 			.append(links)
 			.append("<a id=\"prevRun\" class=\"btn\" hidden>&lsaquo; Run</a>")
-			.append("<a class=\"btn\" href=\"../index.html\">All runs</a>")
+			.append("<a class=\"btn\" href=\"").append(escape(runsLink)).append("\">All runs</a>")
 			.append("<a id=\"nextRun\" class=\"btn\" hidden>Run &rsaquo;</a>")
 			.append("<button class=\"btn\" type=\"button\" popovertarget=\"settings\">Settings</button></nav></header>")
 			.append(SailMediaHtml.RUN_NAV_SCRIPT);
@@ -135,12 +138,23 @@ final class SailRunPages {
 	 * @return the page
 	 */
 	static @Nonnull String filmStripHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String playerLink) {
+		return filmStripHtml(info, steps, playerLink, RUNS_BESIDE);
+	}
+
+	/**
+	 * Writes the film strip of a run, as {@link #filmStripHtml(RunInfo, List, String)} does, with its list of runs where
+	 * it is.
+	 *
+	 * @param runsLink	the list of runs, relative to the film strip
+	 */
+	static @Nonnull String filmStripHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String playerLink, @Nonnull String runsLink) {
 		StepRecord firstFailure = steps.stream().filter(StepRecord::failed).findFirst().orElse(null);
 		StringBuilder result = new StringBuilder(8192 + (steps.size() * 768));
 		startPage(result, info.title() + " · steps", "", null);
 		runHeader(result, info, steps, "steps",
 					(firstFailure == null) ? "" : "<a href=\"#step-" + firstFailure.sequence() + "\">Jump to the first failure</a>",
-					(playerLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(playerLink) + "\">Video</a>");
+					(playerLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(playerLink) + "\">Video</a>",
+					runsLink);
 		result.append("<main class=\"content\">").append(storyHtml(info.story(), "section", "story card"))
 				.append("<div class=\"card table-wrap\"><table class=\"strip\"><thead><tr><th>#</th><th>Step</th>")
 				.append("<th>Outcome</th><th>Time</th><th>Screenshot</th></tr></thead><tbody>");
@@ -230,10 +244,21 @@ final class SailRunPages {
 	 * @return the page
 	 */
 	static @Nonnull String playerHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String filmStripLink) {
+		return playerHtml(info, steps, filmStripLink, RUNS_BESIDE);
+	}
+
+	/**
+	 * Writes the video player of a run, as {@link #playerHtml(RunInfo, List, String)} does, with its list of runs where
+	 * it is.
+	 *
+	 * @param runsLink	the list of runs, relative to the player
+	 */
+	static @Nonnull String playerHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String filmStripLink, @Nonnull String runsLink) {
 		StringBuilder result = new StringBuilder(16384);
 		startPage(result, info.title() + " · video", SailMediaHtml.PLAYER_STYLE, "player-page");
 		runHeader(result, info, steps, "video", "",
-					(filmStripLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(filmStripLink) + "\">Steps</a>");
+					(filmStripLink == null) ? "" : "<a class=\"btn\" href=\"" + escape(filmStripLink) + "\">Steps</a>",
+					runsLink);
 		String story = storyHtml(info.story(), "div", "story");
 		if (! story.isEmpty()) {
 			// folded, so that the video keeps the window's height until it is opened

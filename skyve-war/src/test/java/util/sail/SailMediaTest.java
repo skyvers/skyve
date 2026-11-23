@@ -19,6 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.json.Json;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CallParameter;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -152,6 +153,62 @@ class SailMediaTest {
 		assertAll(() -> assertFalse(Files.exists(first), "the passed unit's runs are deleted"),
 					() -> assertFalse(Files.exists(second), "the passed unit's runs are deleted"),
 					() -> assertTrue(Files.exists(kept.resolve("index.html")), "a failed unit keeps its passed runs"));
+	}
+
+	/**
+	 * With the default media directory (from an evidence request), the list of runs is one folder up, in target/sail
+	 * beside media/, and links into media/; the run's pages link back up to it; runs-order.js stays beside the runs;
+	 * and a list an earlier version left in media/ is removed. A directory that is set keeps its list in itself.
+	 */
+	@Test
+	void theDefaultDirectorysListOfRunsIsInTheEvidenceFolder(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings defaulted = SailSettings.resolve(environment, List.of(SailSettings.code().evidence(Suite.Evidence.all).layer()));
+		Path evidence = base.resolve("target/sail");
+		Path media = evidence.resolve("media");
+		Files.createDirectories(media);
+		Files.writeString(media.resolve("index.html"), "an earlier version's list");
+
+		Path folder = run(defaulted, media, "rooted", null, true);
+		String list = Files.readString(evidence.resolve("index.html"));
+		String strip = Files.readString(folder.resolve("index.html"));
+		String player = Files.readString(folder.resolve("player.html"));
+		String href = "media/" + folder.getFileName();
+		assertAll(() -> assertTrue(list.contains("href=\"" + href + "/index.html\">Steps</a>"), list),
+					() -> assertTrue(list.contains("href=\"" + href + "/player.html\">Video</a>"), list),
+					() -> assertTrue(strip.contains("<a class=\"btn\" href=\"../../index.html\">All runs</a>"), "the film strip's All runs"),
+					() -> assertTrue(player.contains("<a class=\"btn\" href=\"../../index.html\">All runs</a>"), "the player's All runs"),
+					() -> assertTrue(Files.exists(media.resolve(SailMedia.RUNS_ORDER_JS)), "runs-order.js beside the runs"),
+					() -> assertFalse(Files.exists(media.resolve("index.html")), "the earlier list in media/ is removed"));
+
+		SailSettings set = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("shots")).layer()));
+		Path shots = base.resolve("shots");
+		Path setFolder = run(set, shots, "set", null, true);
+		String setList = Files.readString(shots.resolve("index.html"));
+		assertAll(() -> assertTrue(setList.contains("href=\"" + setFolder.getFileName() + "/index.html\">Steps</a>"), setList),
+					() -> assertTrue(Files.readString(setFolder.resolve("index.html")).contains("href=\"../index.html\">All runs</a>"),
+										"a set directory's run links to the list beside it"),
+					() -> assertFalse(Files.exists(base.resolve("index.html")), "no list above a set directory"));
+	}
+
+	/**
+	 * With keepMedia=failed and the default media directory, a passed run is deleted and the list in the evidence
+	 * folder is rewritten without it.
+	 */
+	@Test
+	void aDeletedRunLeavesTheEvidenceFoldersList(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().evidence(Suite.Evidence.snapshots)
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path evidence = base.resolve("target/sail");
+		Path media = evidence.resolve("media");
+		Path failed = run(failedOnly, media, "rootFailed", "a failure", true);
+		Path passed = run(failedOnly, media, "rootPassed", null, true);
+		String list = Files.readString(evidence.resolve("index.html"));
+		assertAll(() -> assertFalse(Files.exists(passed), "a passed run's folder is deleted"),
+					() -> assertTrue(list.contains("1 runs"), list),
+					() -> assertTrue(list.contains("media/" + failed.getFileName() + "/index.html"), list),
+					() -> assertFalse(Files.exists(media.resolve("index.html")), "no list in media/"));
 	}
 
 	/** Runs one step in a run's media, labelled, and ends it; returns the run's folder. */

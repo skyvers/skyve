@@ -53,7 +53,8 @@ import util.sail.browser.SailBrowserControl;
  * script, so suites, workflows and ITs with several tests keep every run, with a {@value #RUN_JSON} summary of it.
  * Each directory gets an {@code index.html} listing its runs by what they do (their first interaction), with their
  * outcomes, and filters, and a {@value #RUNS_ORDER_JS} of the runs in that order, from which each run's pages make
- * their previous and next run buttons. Everything is static HTML that opens from the file system, light or dark as the system is.
+ * their previous and next run buttons. The default directory's list is one folder up, in the evidence folder beside
+ * {@code media/} and {@code failures/} (see {@link SailSettings#runsListDir(Path)}), so that it is the page to open. Everything is static HTML that opens from the file system, light or dark as the system is.
  * This class records the run; {@link SailRunPages} writes the film strip and player, {@link SailRunsList} the list of
  * runs, {@link SailStepWords} each step's words, and {@link SailMediaHtml} holds their shared parts and the CSS and
  * JavaScript (in {@code util/sail/media/}).
@@ -219,6 +220,9 @@ public final class SailMedia {
 	private final Place place;
 	private final Path snapshotRun;
 	private final Path videoRun;
+	/** Where the snapshot and video directories' lists of runs go (see {@link SailSettings#runsListDir(Path)}). */
+	private final Path snapshotList;
+	private final Path videoList;
 	private final boolean saveSource;
 	private final SailSettings.KeepMedia keepMedia;
 	/** Whether the run passed with no failed step, once it has finished. */
@@ -253,6 +257,8 @@ public final class SailMedia {
 		this.place = (unit == null) ? new Place(SESSION, 0, 0) : new Place(SESSION, unit.number, ++unit.legs);
 		this.snapshotRun = snapshotRun;
 		this.videoRun = videoRun;
+		this.snapshotList = (snapshotRun == null) ? null : settings.runsListDir(snapshotRun.getParent());
+		this.videoList = (videoRun == null) ? null : settings.runsListDir(videoRun.getParent());
 		this.saveSource = settings.snapshotSource();
 		this.keepMedia = settings.keepMedia();
 	}
@@ -549,9 +555,10 @@ public final class SailMedia {
 			String summary = runJson(info, place, steps, passed);
 			if (filmStrip != null) {
 				String playerLink = (player == null) ? null : link(snapshotRun, player);
-				Files.writeString(filmStrip, SailRunPages.filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
+				Files.writeString(filmStrip, SailRunPages.filmStripHtml(info, steps, playerLink, link(snapshotRun, snapshotList.resolve("index.html"))),
+									StandardCharsets.UTF_8);
 				Files.writeString(snapshotRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
-				writeRunsIndex(snapshotRun.getParent());
+				writeRunsIndex(snapshotRun.getParent(), snapshotList);
 			}
 			if (player != null) {
 				String filmStripLink = (filmStrip == null) ? null : link(videoRun, filmStrip);
@@ -560,9 +567,10 @@ public final class SailMedia {
 					written = new ArrayList<>(frames);
 				}
 				Files.writeString(videoRun.resolve("video.js"), SailRunPages.videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
-				Files.writeString(player, SailRunPages.playerHtml(info, steps, filmStripLink), StandardCharsets.UTF_8);
+				Files.writeString(player, SailRunPages.playerHtml(info, steps, filmStripLink, link(videoRun, videoList.resolve("index.html"))),
+									StandardCharsets.UTF_8);
 				Files.writeString(videoRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
-				writeRunsIndex(videoRun.getParent());
+				writeRunsIndex(videoRun.getParent(), videoList);
 			}
 			selenide.trace("SAIL media written: " + steps.size() + " steps" +
 							((videoRun == null) ? "" : ", " + frames.size() + " video frames") +
@@ -578,37 +586,48 @@ public final class SailMedia {
 	 * Deletes the run's folders, and lists the runs left in each directory that had a list.
 	 */
 	private void delete() {
-		List<Path> folders = new ArrayList<>(2);
+		Map<Path, Path> folders = new LinkedHashMap<>(4);
 		if (snapshotRun != null) {
-			folders.add(snapshotRun);
+			folders.put(snapshotRun, snapshotList);
 		}
-		if ((videoRun != null) && (! videoRun.equals(snapshotRun))) {
-			folders.add(videoRun);
+		if (videoRun != null) {
+			folders.putIfAbsent(videoRun, videoList);
 		}
-		for (Path folder : folders) {
+		for (Map.Entry<Path, Path> folder : folders.entrySet()) {
+			Path run = folder.getKey();
+			Path list = folder.getValue();
 			try {
-				org.skyve.util.FileUtil.delete(folder.toFile());
-				if (Files.exists(folder.getParent().resolve("index.html"))) {
-					writeRunsIndex(folder.getParent());
+				org.skyve.util.FileUtil.delete(run.toFile());
+				if (Files.exists(list.resolve("index.html"))) {
+					writeRunsIndex(run.getParent(), list);
 				}
 			}
 			catch (IOException | RuntimeException e) {
-				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + folder + ": " + e);
+				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + run + ": " + e);
 				return;
 			}
 		}
-		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders);
+		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders.keySet());
 	}
 
 	/**
-	 * Rewrites a directory's list of runs, and its runs' order for the run pages' previous and next run buttons
-	 * ({@value #RUNS_ORDER_JS}). Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one directory at
-	 * the same time, and two writers of one file would garble it.
+	 * Rewrites a directory's list of runs, in its list folder (the directory, or for the default one the evidence folder
+	 * above it; see {@link SailSettings#runsListDir(Path)}), and its runs' order for the run pages' previous and next run
+	 * buttons ({@value #RUNS_ORDER_JS}), which stays in the directory beside the runs. A list moved up removes the one
+	 * an earlier version left in the directory, so that there is one page to open. Synchronised: a load run's virtual
+	 * users ({@link SailLoad}) end runs in one directory at the same time, and two writers of one file would garble it.
+	 *
+	 * @param directory	the directory of runs
+	 * @param list	the folder for its list of runs
 	 */
-	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
+	private static synchronized void writeRunsIndex(@Nonnull Path directory, @Nonnull Path list) throws IOException {
 		List<SailRunsList.ListedRun> runs = SailRunsList.listedRuns(directory);
-		Files.writeString(directory.resolve("index.html"), SailRunsList.runsIndexHtml(runs), StandardCharsets.UTF_8);
+		String runsLink = list.equals(directory) ? "" : link(list, directory) + '/';
+		Files.writeString(list.resolve("index.html"), SailRunsList.runsIndexHtml(runs, runsLink), StandardCharsets.UTF_8);
 		Files.writeString(directory.resolve(RUNS_ORDER_JS), SailRunsList.runsOrderScript(runs), StandardCharsets.UTF_8);
+		if (! runsLink.isEmpty()) {
+			Files.deleteIfExists(directory.resolve("index.html"));
+		}
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {
