@@ -56,6 +56,11 @@ Each of these sits beside the string form it replaces and calls it.
 | `NumberGenerator` | `next`, `nextInt` and `nextLong` with a `ModuleDocument` |
 | `SingletonCachedBizlet` | `clear(ModuleDocument)` |
 | `Tag` | `countDocument(ModuleDocument)` |
+| `Util` | `getDocumentUrl(ModuleDocument)`, `getDocumentUrl(ModuleDocument, String bizId)`, `getCompleteSuggestions(ModuleDocument, String, String)` |
+| `Binder` | `validateMessage(String, ModuleDocument)` |
+| `DynamicBean` | `DynamicBean(ModuleDocument, Map)` |
+| `ReferenceListModel` | the protected `ReferenceListModel(ModuleDocument, String)` constructor |
+| `UtilImpl.ArchiveConfig` | `findArchiveDocConfig(ModuleDocument)`, which matches the names written in the archive configuration, so a referenced document is found only if the configuration names the referencing module |
 
 They take the interfaces, not the generated enums. So your own implementation works too, such as an enum of your own or a test double. For a job, resolve it with `toJob()` and pass the `JobMetaData` to `JobScheduler`.
 
@@ -156,7 +161,7 @@ Use the string forms when the name isn't fixed when the application is built:
 
 The typed overloads are `default` methods. A Mockito `mock(User.class)` doesn't run them: an unstubbed `isInRole(AdminRole.X)` returns `false`, even when `isInRole("admin", "X")` is stubbed. Stub the overload the code under test calls. With Skyve's Mockito setup, `mock(User.class, CALLS_REAL_METHODS)` can't run an interface's default methods. To exercise the delegation itself, mock an `abstract` class that implements the interface, with `CALLS_REAL_METHODS`.
 
-- **Bare `any()` can be ambiguous.** A typed overload with as many parameters as an existing one, such as `newDocumentQuery(ModuleDocument)` next to `newDocumentQuery(Document)`, makes a stub or verification with a bare `any()` ambiguous, so it no longer compiles. Name the type, as in `any(Document.class)` or `any(ModuleDocument.class)`.
+- **Bare `any()` can be ambiguous.** A typed overload with as many parameters as an existing one, such as `newDocumentQuery(ModuleDocument)` next to `newDocumentQuery(Document)`, makes a stub or verification with a bare `any()` ambiguous, so it no longer compiles. The same goes for `Util.getDocumentUrl(any())` (next to `getDocumentUrl(Bean)`) and `Binder.validateMessage(anyString(), any())` (next to `validateMessage(String, Document...)`). Name the type, as in `any(Document.class)` or `any(ModuleDocument.class)`.
 - **Enum classes and the repository.** `Enumeration.getImplementingType()` finds a generated enum through the bean class of its document, which the repository's `vtable` resolves. A test that installs no repository in `ProvidedRepositoryFactory` gets the enum of the vanilla domain class, as before, and a `MetaDataException` caused by a `ClassNotFoundException` if that class doesn't declare it. An enumeration that references another document's enumeration, with `documentRef` or `moduleRef`, still needs a repository to resolve the reference, and throws an `IllegalStateException` without one, as it always has. A test that installs a mocked repository must stub `vtable`, or an enum of a static document can't be found. `getImplementingType(Customer)` resolves for a given customer rather than the current user's.
 
 ## Upgrading

@@ -2,7 +2,7 @@
 
 ## Test Coverage
 
-The active coverage plan is in [../coverage-plan.md](../coverage-plan.md). Read it before starting coverage-improvement work.
+The active coverage plan is in [coverage-plan.md](coverage-plan.md). Read it before starting coverage-improvement work.
 
 **Target:** 80% line coverage of the _testable_ surface area across `skyve-core`, `skyve-ext`, and `skyve-web`. Many packages are excluded (code generators, SAIL execution, view rendering infrastructure, full-runtime persistence); see the skip list in the plan.
 
@@ -34,7 +34,7 @@ Tests written in `skyve-war` that call `skyve-core` classes contribute to `skyve
 
 ### Working Order
 
-Follow the tier ordering in [../coverage-plan.md](../coverage-plan.md):
+Follow the tier ordering in [coverage-plan.md](coverage-plan.md):
 
 1. Fluent builder packages (`metadata/view/fluent`, `metadata/module/fluent`, `metadata/model/document/fluent`, and so on); highest line-count return for lowest effort.
 2. Domain types and converters; small files, deterministic, no mocking.

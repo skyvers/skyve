@@ -3581,7 +3581,7 @@ caused by it says so (see [Lost OS focus](#test-strategies-and-failure-reports))
 
 The SAIL recorder writes a script of what a user does in SmartClient or PrimeFaces. The script is a first draft: an
 editor (a person or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not
-matter. The plan it was built to is [plan_sail_recorder.md](ai/plan_sail_recorder.md).
+matter.
 
 ### The gate
 

@@ -104,7 +104,7 @@ Pure Mockito unit tests
 
 `docs/ai/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
 
-Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [docs/coverage-plan.md](../coverage-plan.md).
+Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [coverage-plan.md](coverage-plan.md).
 
 ## Test Placement Decision
 
