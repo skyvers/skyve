@@ -20,7 +20,7 @@ class ReportParameterDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesReportParameter() {
 		ReportParameter bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
+				.build(AdminDocument.REPORT_PARAMETER);
 		assertNotNull(bean);
 	}
 

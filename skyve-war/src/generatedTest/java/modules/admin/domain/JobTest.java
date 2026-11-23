@@ -14,6 +14,6 @@ public class JobTest extends AbstractDomainTest<Job> {
 	protected Job getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+			.build(AdminDocument.JOB);
 	}
 }

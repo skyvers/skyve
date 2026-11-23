@@ -59,7 +59,7 @@ import jakarta.servlet.http.HttpSession;
 import modules.admin.User.UserExtension;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Startup.StartupBizlet;
-import modules.admin.domain.Configuration;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -120,8 +120,7 @@ class WebUtilH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRequestPasswordResetUsesExtMailService() throws Exception {
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		String email = "reset-" + System.nanoTime() + "@skyve.org";
 		user.setUserName("reset." + System.nanoTime());
 		user.getContact().setEmail1(email);
@@ -129,7 +128,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		CORE.getPersistence().save(user);
 		applyTestUser();
 		int beforeLogCount = CORE.getPersistence()
-								.newDocumentQuery(modules.admin.domain.MailLog.MODULE_NAME, modules.admin.domain.MailLog.DOCUMENT_NAME)
+								.newDocumentQuery(AdminDocument.MAIL_LOG)
 								.beanResults()
 								.size();
 
@@ -140,7 +139,7 @@ class WebUtilH2Test extends AbstractH2Test {
 
 		applyTestUser();
 		List<PersistentBean> logs = CORE.getPersistence()
-										.newDocumentQuery(modules.admin.domain.MailLog.MODULE_NAME, modules.admin.domain.MailLog.DOCUMENT_NAME)
+										.newDocumentQuery(AdminDocument.MAIL_LOG)
 										.beanResults();
 		assertTrue(logs.size() > beforeLogCount);
 
@@ -169,8 +168,7 @@ class WebUtilH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void requestPasswordResetRollsBackWhenMailServiceFails() {
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		String email = "failed-reset-" + System.nanoTime() + "@skyve.org";
 		user.setUserName("failed.reset." + System.nanoTime());
 		user.getContact().setEmail1(email);
@@ -188,8 +186,7 @@ class WebUtilH2Test extends AbstractH2Test {
 	void testResetPasswordProcessesExistingTokenWithRealPersistence() throws Exception {
 		long suffix = System.nanoTime();
 		String token = "token-" + suffix;
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setBizId("rtu-" + suffix);
 		user.setUserName("reset.token." + suffix);
 		user.setPassword(EXT.hashPassword("OldPassword0!"));
@@ -218,8 +215,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		ensurePasswordResetExpiryMinutes(1);
 		long suffix = System.nanoTime();
 		String token = "expired-token-" + suffix;
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setBizId("ertu-" + suffix);
 		user.setUserName("expired.reset." + suffix);
 		user.setPassword(EXT.hashPassword("OldPassword0!"));
@@ -238,8 +234,7 @@ class WebUtilH2Test extends AbstractH2Test {
 
 	@Test
 	void sendRegistrationEmailExecutesResendActivationAction() throws Exception {
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName("registration.email." + System.nanoTime());
 		user.setActivated(Boolean.FALSE);
 		useDirectBasicUserRole(user);
@@ -346,8 +341,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		when(request.getRemoteAddr()).thenReturn("127.0.0.1");
 		AbstractPersistence persistence = AbstractPersistence.get();
 		int beforeLoginRecordCount = persistence
-										.newDocumentQuery(modules.admin.domain.UserLoginRecord.MODULE_NAME,
-												modules.admin.domain.UserLoginRecord.DOCUMENT_NAME)
+										.newDocumentQuery(AdminDocument.USER_LOGIN_RECORD)
 										.beanResults()
 										.size();
 		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -376,8 +370,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		verify(session).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, result);
 		assertSame(result, CORE.getPersistence().getUser());
 		int afterLoginRecordCount = CORE.getPersistence()
-										.newDocumentQuery(modules.admin.domain.UserLoginRecord.MODULE_NAME,
-												modules.admin.domain.UserLoginRecord.DOCUMENT_NAME)
+										.newDocumentQuery(AdminDocument.USER_LOGIN_RECORD)
 										.beanResults()
 										.size();
 		assertTrue(afterLoginRecordCount > beforeLoginRecordCount);
@@ -421,8 +414,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		when(request.getUserPrincipal()).thenReturn(() -> CUSTOMER + '/' + USER);
 
 		int beforeLogCount = CORE.getPersistence()
-									.newDocumentQuery(modules.admin.domain.SecurityLog.MODULE_NAME,
-											modules.admin.domain.SecurityLog.DOCUMENT_NAME)
+									.newDocumentQuery(AdminDocument.SECURITY_LOG)
 									.beanResults()
 									.size();
 
@@ -431,8 +423,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		assertEquals(2, StateUtil.getSessionCount(user.getId()));
 		assertTrue(StateUtil.checkSession(user.getId(), currentSession));
 		int afterLogCount = CORE.getPersistence()
-								.newDocumentQuery(modules.admin.domain.SecurityLog.MODULE_NAME,
-										modules.admin.domain.SecurityLog.DOCUMENT_NAME)
+								.newDocumentQuery(AdminDocument.SECURITY_LOG)
 								.beanResults()
 								.size();
 		assertTrue(afterLogCount > beforeLogCount);
@@ -480,8 +471,7 @@ class WebUtilH2Test extends AbstractH2Test {
 	@Test
 	void requestPasswordResetReturnsWithoutSendingMailWhenGeoIPBlocksRequest() throws Exception {
 		String email = "blocked-reset-" + System.nanoTime() + "@skyve.org";
-		UserExtension user = CORE.getPersistence().retrieve(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME,
+		UserExtension user = CORE.getPersistence().retrieve(AdminDocument.USER,
 				USER);
 		assertNotNull(user);
 		user.getContact().setEmail1(email);
@@ -543,8 +533,7 @@ class WebUtilH2Test extends AbstractH2Test {
 
 	private static void ensurePasswordResetExpiryMinutes(int minutes) throws Exception {
 		if (updatePasswordResetExpiryMinutes(minutes) == 0) {
-			ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME,
-					Configuration.DOCUMENT_NAME);
+			ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONFIGURATION);
 			configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
 			configuration.getStartup().setMailPort(Integer.valueOf(25));
 			configuration.setPasswordMinLength(Integer.valueOf(ConfigurationExtension.PASSWORD_DEFAULT_MIN_LENGTH));

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -34,6 +35,16 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 */
 	public DynamicPersistentBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
+	}
+
+	/**
+	 * Creates a new DynamicPersistentBean instance for the referenced document; a typed shortcut for
+	 * {@link #DynamicPersistentBean(String, String, Map)}.
+	 * @param document the compile-time document reference
+	 * @param properties the properties
+	 */
+	public DynamicPersistentBean(@Nonnull ModuleDocument document, @Nonnull Map<String, Object> properties) {
+		this(document.moduleName(), document.documentName(), properties);
 	}
 
 	/**

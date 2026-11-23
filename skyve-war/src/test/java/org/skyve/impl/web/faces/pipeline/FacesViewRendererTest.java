@@ -95,6 +95,8 @@ import org.skyve.web.UserAgentType;
 
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
+import modules.admin.domain.AdminDocument;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 class FacesViewRendererTest extends AbstractSkyveTest {
@@ -1875,22 +1877,22 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 
 	@Test
 	void renderRealMetadataEditViews() {
-		assertRealMetadataViewRenders("admin", "JobSchedule", "external");
-		assertRealMetadataViewRenders("admin", "ReportTemplate", "external");
-		assertRealMetadataViewRenders("admin", "Startup", "external");
-		assertRealMetadataViewRenders("admin", "Communication", "external");
-		assertRealMetadataViewRenders("kitchensink", "KitchenSink", "external");
+		assertRealMetadataViewRenders(AdminDocument.JOB_SCHEDULE, "external");
+		assertRealMetadataViewRenders(AdminDocument.REPORT_TEMPLATE, "external");
+		assertRealMetadataViewRenders(AdminDocument.STARTUP, "external");
+		assertRealMetadataViewRenders(AdminDocument.COMMUNICATION, "external");
+		assertRealMetadataViewRenders(KitchensinkDocument.KITCHEN_SINK, "external");
 	}
 
-	private void assertRealMetadataViewRenders(String moduleName, String documentName, String uxui) {
-		org.skyve.metadata.module.Module module = c.getModule(moduleName);
-		org.skyve.metadata.model.document.Document document = module.getDocument(c, documentName);
+	private void assertRealMetadataViewRenders(org.skyve.metadata.model.document.ModuleDocument rendered, String uxui) {
+		org.skyve.metadata.module.Module module = rendered.toModule(c);
+		org.skyve.metadata.model.document.Document document = rendered.toDocument(c);
 		org.skyve.metadata.view.View view = document.getView(uxui, c, ViewType.edit.toString());
 
 		FacesViewRenderer renderer = createRenderer(module, document, view, uxui);
 		renderer.visit();
 
-		assertNotNull(renderer.getFacesView(), moduleName + "." + documentName);
+		assertNotNull(renderer.getFacesView(), rendered.moduleName() + "." + rendered.documentName());
 	}
 
 	// ---- helpers ----

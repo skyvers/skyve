@@ -1,5 +1,6 @@
 package modules.kitchensink.RerenderFixture.actions;
 
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.kitchensink.domain.RerenderFixture;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class ShowRerenderCountTest extends AbstractActionTest<RerenderFixture, S
 	protected RerenderFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(RerenderFixture.MODULE_NAME, RerenderFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.RERENDER_FIXTURE);
 	}
 }

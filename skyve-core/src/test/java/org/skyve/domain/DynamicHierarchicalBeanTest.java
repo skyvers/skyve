@@ -2,12 +2,16 @@ package org.skyve.domain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class DynamicHierarchicalBeanTest {
 
@@ -46,5 +50,15 @@ class DynamicHierarchicalBeanTest {
 		DynamicHierarchicalBean bean = new DynamicHierarchicalBean("mod", "Doc", mapWithParentKey());
 		// getBizParentId() is null so getParent() should return null without calling CORE
 		assertNull(bean.getParent());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorSetsTheReferencedModuleAndDocument() {
+		Map<String, Object> properties = new HashMap<>();
+		DynamicHierarchicalBean bean = new DynamicHierarchicalBean(TestDocument.CONTACT, properties);
+		assertAll(() -> assertEquals("admin", bean.getBizModule()),
+					() -> assertEquals("Contact", bean.getBizDocument()),
+					() -> assertSame(properties, bean.getMap()));
 	}
 }

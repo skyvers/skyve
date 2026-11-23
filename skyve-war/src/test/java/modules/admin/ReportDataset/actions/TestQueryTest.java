@@ -23,6 +23,7 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -115,7 +116,7 @@ class TestQueryTest extends AbstractH2Test {
 	@Test
 	void executeWithValidBizQLStoresBeanBizKeyInResults() throws Exception {
 		AllAttributesPersistent saved = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		saved.setText("test-query-bizql");
 		saved = CORE.getPersistence().save(saved);
 		ReportDatasetExtension bean = ReportDataset.newInstance();

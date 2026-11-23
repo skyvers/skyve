@@ -14,6 +14,6 @@ public class ListAttributesTest extends AbstractDomainTest<ListAttributes> {
 	protected ListAttributes getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ListAttributes.MODULE_NAME, ListAttributes.DOCUMENT_NAME);
+			.build(KitchensinkDocument.LIST_ATTRIBUTES);
 	}
 }

@@ -336,7 +336,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 
 	public static AllAttributesPersistent newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.ALL_ATTRIBUTES_PERSISTENT.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

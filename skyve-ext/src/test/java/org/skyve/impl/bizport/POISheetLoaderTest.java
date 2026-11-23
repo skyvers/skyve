@@ -31,6 +31,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
@@ -172,6 +173,27 @@ class POISheetLoaderTest {
 		assertThat(invokeCellTypeDescription(cell(CellType.FORMULA, CellType.BOOLEAN)), is("Rich Text Formula"));
 	}
 
+	@Test
+	void typedConstructorsLoadIntoTheReferencedDocument() throws Exception {
+		Customer customer = customer(null);
+		bindPersistenceWithCustomer(customer);
+		Document order = customer.getModule("sales").getDocument(customer, "Order");
+		byte[] bytes = workbookBytes(row -> row.createCell(0).setCellValue("first"));
+
+		POISheetLoader sheetLoader = new POISheetLoader(new ByteArrayInputStream(bytes), 0, SalesDocument.ORDER, new UploadException());
+		POISheetLoader simple = new POISheetLoader(AbstractDataFileLoader.LoaderActivityType.FIND,
+				new ByteArrayInputStream(bytes),
+				0,
+				new UploadException(),
+				SalesDocument.ORDER);
+
+		assertThat(sheetLoader.moduleName, is("sales"));
+		assertThat(sheetLoader.documentName, is("Order"));
+		assertThat(sheetLoader.document, is(order));
+		assertThat(simple.document, is(order));
+		assertThat(activityType(simple), is(AbstractDataFileLoader.LoaderActivityType.FIND));
+	}
+
 	private static POISheetLoader loader(byte[] workbookBytes) throws Exception {
 		return new POISheetLoader(new ByteArrayInputStream(workbookBytes), 0, "sales", "Order", new UploadException());
 	}
@@ -245,5 +267,20 @@ class POISheetLoaderTest {
 	@FunctionalInterface
 	private interface RowConfigurer {
 		void configure(Row row);
+	}
+
+	/** References sales.Order, as a generated document enum does. */
+	private enum SalesDocument implements ModuleDocument {
+		ORDER;
+
+		@Override
+		public String moduleName() {
+			return "sales";
+		}
+
+		@Override
+		public String documentName() {
+			return "Order";
+		}
 	}
 }

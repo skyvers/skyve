@@ -2,6 +2,8 @@ package org.skyve.domain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -9,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class DynamicChildBeanTest {
 
@@ -56,5 +59,15 @@ class DynamicChildBeanTest {
 		DynamicChildBean bean = new DynamicChildBean("mod", "Line", mapWithChildKeys());
 		bean.setBizOrdinal(Integer.valueOf(3));
 		assertThat(bean.getBizOrdinal(), is(Integer.valueOf(3)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorSetsTheReferencedModuleAndDocument() {
+		Map<String, Object> properties = new HashMap<>();
+		DynamicChildBean bean = new DynamicChildBean(TestDocument.CONTACT, properties);
+		assertAll(() -> assertEquals("admin", bean.getBizModule()),
+					() -> assertEquals("Contact", bean.getBizDocument()),
+					() -> assertSame(properties, bean.getMap()));
 	}
 }

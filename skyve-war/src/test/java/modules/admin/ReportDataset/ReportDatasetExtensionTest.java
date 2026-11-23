@@ -37,6 +37,7 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -484,7 +485,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 
 	private static AllAttributesPersistent saveAllAttributes(String text, int integer, long longInteger, DateOnly date) {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText(text);
 		bean.setNormalInteger(Integer.valueOf(integer));
 		bean.setLongInteger(Long.valueOf(longInteger));

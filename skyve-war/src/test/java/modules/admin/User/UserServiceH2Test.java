@@ -24,9 +24,9 @@ import org.skyve.util.test.SkyveFixture;
 import jakarta.inject.Inject;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
-import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 import org.skyve.domain.messages.ValidationException;
@@ -91,11 +91,11 @@ class UserServiceH2Test extends AbstractH2Test {
 	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
 	void createAdminUserFromContactWithGroupShouldFailIfNoValidHomeModuleName() {
 		// given
-		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		contact = db.build(AdminDocument.CONTACT);
 
 		String homeModuleName = "homeModuleName";
 
-		GroupExtension group = db.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = db.build(AdminDocument.GROUP);
 		group.setName("Admin");
 		group = CORE.getPersistence().save(group);
 
@@ -111,9 +111,9 @@ class UserServiceH2Test extends AbstractH2Test {
 	@SuppressWarnings({"java:S1854", "null"}) // Persistence.save() may return a different instance; assignment captured intentionally
 	void createAdminUserFromContactWithGroupShould() {
 		// given
-		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		contact = db.build(AdminDocument.CONTACT);
 
-		GroupExtension group = db.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = db.build(AdminDocument.GROUP);
 		group.setName("TestGroup");
 		group = CORE.getPersistence().save(group);
 
@@ -121,7 +121,7 @@ class UserServiceH2Test extends AbstractH2Test {
 		userService.createAdminUserFromContactWithGroup(contact, "TestGroup", Contact.MODULE_NAME, false);
 
 		// then
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.USER);
 		q.getFilter().addEquals(UserProxy.userNamePropertyName, contact.getEmail1());
 		UserExtension result = q.beanResult();
 		assertNotNull(result);
@@ -132,7 +132,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void validateGroupsAddsErrorWhenActiveUserHasNoRolesOrGroups() {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.setInactive(Boolean.FALSE);
 		user.getRoles().clear();
 		user.getGroups().clear();
@@ -144,7 +144,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void validateGroupsNoErrorWhenUserIsInactive() {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.setInactive(Boolean.TRUE);
 		user.getRoles().clear();
 		user.getGroups().clear();
@@ -156,7 +156,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void validateUserContactAddsErrorsForMissingContactDetails() {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.setContact(null);
 		ValidationException e = new ValidationException();
 		userService.validateUserContact(user, e);
@@ -176,7 +176,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void validateUserNameAndPasswordAddsErrorsForMissingAndMismatchedValues() throws Exception {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.setUserName(null);
 		ValidationException e = new ValidationException();
 		userService.validateUserNameAndPassword(user, e);
@@ -209,7 +209,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void evictUserProxyDoesNotThrowForNewBean() {
-		UserExtension user = Assertions.assertDoesNotThrow(() -> db.build(User.MODULE_NAME, User.DOCUMENT_NAME));
+		UserExtension user = Assertions.assertDoesNotThrow(() -> db.build(AdminDocument.USER));
 		// Just verify the method doesn't throw
 		userService.evictUserProxy(user);
 	}
@@ -222,7 +222,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void nextFromConfirmContactThrowsValidationException() {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.setWizardState(modules.admin.domain.User.WizardState.confirmContact);
 
 		assertThrows(ValidationException.class, () -> userService.next(user));
@@ -230,7 +230,7 @@ class UserServiceH2Test extends AbstractH2Test {
 
 	@Test
 	void nextFromCreateContactSetsUserNameAndAdvancesWizard() throws Exception {
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		ContactExtension wizardContact = Contact.newInstance();
 		wizardContact.setName("Wizard Contact");
 		wizardContact.setEmail1("wizard-" + System.nanoTime() + "@example.com");

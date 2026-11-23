@@ -14,6 +14,6 @@ public class OrderedGridFixtureTest extends AbstractDomainTest<OrderedGridFixtur
 	protected OrderedGridFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(OrderedGridFixture.MODULE_NAME, OrderedGridFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.ORDERED_GRID_FIXTURE);
 	}
 }

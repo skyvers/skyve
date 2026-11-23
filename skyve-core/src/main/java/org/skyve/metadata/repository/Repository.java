@@ -5,6 +5,7 @@ import java.io.File;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
@@ -78,6 +79,18 @@ public interface Repository {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		return getDataFactory(customer, d);
+	}
+
+	/**
+	 * Returns the data factory for the referenced document, or {@code null} if there is none; a
+	 * typed shortcut for {@link #getDataFactory(Customer, String, String)}.
+	 *
+	 * @param customer    the customer context; must not be {@code null}
+	 * @param document    the compile-time document reference; must not be {@code null}
+	 * @return the data factory instance, or {@code null}
+	 */
+	default @Nullable Object getDataFactory(@Nonnull Customer customer, @Nonnull ModuleDocument document) {
+		return getDataFactory(customer, document.moduleName(), document.documentName());
 	}
 	
 	/**

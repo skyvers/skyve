@@ -5,6 +5,7 @@ import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ReportTemplate;
 
 /**
@@ -27,7 +28,7 @@ public class ReportTemplateFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static ReportTemplateExtension crudInstance() {
-		ReportTemplateExtension bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(AdminDocument.REPORT_TEMPLATE);
 		bean.setScheduled(Boolean.FALSE);
 		return bean;
 	}

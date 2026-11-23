@@ -18,6 +18,8 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
+import modules.admin.domain.AdminDocument;
+
 class InMemoryFilterTest extends AbstractSkyveTest {
 
 	@Test
@@ -27,27 +29,27 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 
 		Map<String, Object> map = new TreeMap<>();
 		map.put("name", "Ted");
-		DynamicBean bean = new DynamicBean("admin", "Contact", map);
+		DynamicBean bean = new DynamicBean(AdminDocument.CONTACT, map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Fred");
-		bean = new DynamicBean("admin", "Contact", map);
+		bean = new DynamicBean(AdminDocument.CONTACT, map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Jed");
-		bean = new DynamicBean("admin", "Contact", map);
+		bean = new DynamicBean(AdminDocument.CONTACT, map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Ned");
-		bean = new DynamicBean("admin", "Contact", map);
+		bean = new DynamicBean(AdminDocument.CONTACT, map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", null);
-		bean = new DynamicBean("admin", "Contact", map);
+		bean = new DynamicBean(AdminDocument.CONTACT, map);
 		beans.add(bean);
 
 		InMemoryFilter f = new InMemoryFilter();
@@ -106,7 +108,7 @@ class InMemoryFilterTest extends AbstractSkyveTest {
 		List<Bean> beans = new ArrayList<>(1);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(binding, value);
-		beans.add(new DynamicBean("admin", "Contact", map));
+		beans.add(new DynamicBean(AdminDocument.CONTACT, map));
 		return beans;
 	}
 

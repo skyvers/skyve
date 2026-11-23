@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
@@ -52,7 +53,7 @@ public class AuditService {
 	 * @return the database audit record, or {@code null} if no live row exists
 	 */
 	public Audit retrieveFromRdbms(String bizId) {
-		return persistence.retrieve(Audit.MODULE_NAME, Audit.DOCUMENT_NAME, bizId);
+		return persistence.retrieve(AdminDocument.AUDIT, bizId);
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class AuditService {
 
 		Persistence p = CORE.getPersistence();
 
-		DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(AdminDocument.AUDIT);
 		q.addBoundProjection(Bean.DOCUMENT_ID);
 		q.addBoundProjection(Bean.BIZ_KEY);
 		q.addBoundProjection(Audit.millisPropertyName);
@@ -308,6 +309,6 @@ public class AuditService {
 	public Optional<ArchiveDocConfig> auditDocConfig() {
 
 		return Util.getArchiveConfig()
-				.findArchiveDocConfig(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+				.findArchiveDocConfig(AdminDocument.AUDIT);
 	}
 }

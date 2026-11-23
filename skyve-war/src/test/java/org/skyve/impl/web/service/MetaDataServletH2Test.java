@@ -21,12 +21,15 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.RequestUxUiSelection;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.admin.domain.AdminDocument;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 @SuppressWarnings("java:S1192") // Repeated values are deliberate metadata rendering fixtures.
@@ -40,24 +43,24 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void viewRendersRealEditViewMetadata() throws Exception {
-		assertViewRenders("admin", "JobSchedule");
-		assertViewRenders("admin", "ReportTemplate");
-		assertViewRenders("admin", "Startup");
-		assertViewRenders("admin", "UserAccount");
-		assertViewRenders("admin", "MonitoringDashboard");
-		assertViewRenders("admin", "ControlPanel");
-		assertViewRenders("admin", "Tag");
-		assertViewRenders("admin", "Communication");
-		assertViewRenders("admin", "ImportExport");
-		assertViewRenders("admin", "DataMaintenance");
-		assertViewRenders("admin", "User");
-		assertViewRenders("admin", "UserList");
-		assertViewRenders("kitchensink", "KitchenSink");
+		assertViewRenders(AdminDocument.JOB_SCHEDULE);
+		assertViewRenders(AdminDocument.REPORT_TEMPLATE);
+		assertViewRenders(AdminDocument.STARTUP);
+		assertViewRenders(AdminDocument.USER_ACCOUNT);
+		assertViewRenders(AdminDocument.MONITORING_DASHBOARD);
+		assertViewRenders(AdminDocument.CONTROL_PANEL);
+		assertViewRenders(AdminDocument.TAG);
+		assertViewRenders(AdminDocument.COMMUNICATION);
+		assertViewRenders(AdminDocument.IMPORT_EXPORT);
+		assertViewRenders(AdminDocument.DATA_MAINTENANCE);
+		assertViewRenders(AdminDocument.USER);
+		assertViewRenders(AdminDocument.USER_LIST);
+		assertViewRenders(KitchensinkDocument.KITCHEN_SINK);
 	}
 
 	@Test
 	void viewRendersContentUploadMetadata() throws Exception {
-		String body = invokeView(u, UXUI, "kitchensink", "KitchenSink", false);
+		String body = invokeView(u, UXUI, KitchensinkDocument.KITCHEN_SINK, false);
 
 		assertTrue(body.contains("\"type\":\"content\""), body);
 		assertTrue(body.contains("\"binding\":\"contentLink\""), body);
@@ -69,7 +72,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void viewRendersBoilerplateEscapeMetadataWithExpandedDefaults() throws Exception {
-		String body = invokeView(u, UXUI, "kitchensink", "EscapingFixture", false);
+		String body = invokeView(u, UXUI, KitchensinkDocument.ESCAPING_FIXTURE, false);
 
 		assertTrue(body.contains("\"title\":\"Escaping fixture: <i>view title</i>\",\"escapeTitle\":false"), body);
 		assertTrue(body.contains("\"title\":\"Escaped <i>tab title</i>\",\"escapeTitle\":true"), body);
@@ -94,7 +97,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void viewRendersWithForcedTopFormLabels() throws Exception {
-		String body = invokeView(u, UXUI, "admin", "JobSchedule", true);
+		String body = invokeView(u, UXUI, AdminDocument.JOB_SCHEDULE, true);
 
 		assertTrue(body.contains("\"type\":\"view\""), body);
 		assertTrue(body.contains("\"name\":\"edit\""), body);
@@ -102,7 +105,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void viewRendersDesktopEditViewMetadata() throws Exception {
-		String body = invokeView(u, "desktop", "admin", "JobSchedule", false);
+		String body = invokeView(u, "desktop", AdminDocument.JOB_SCHEDULE, false);
 
 		assertTrue(body.contains("\"type\":\"view\""), body);
 		assertTrue(body.contains("\"name\":\"edit\""), body);
@@ -114,7 +117,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, AdminDocument.JOB_SCHEDULE), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
@@ -124,7 +127,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 	void directMetadataRequestUsesValidatedCarriedEmulationForAccessAndRendering() throws Exception {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
-		MutableRequest carried = authenticatedCarriedViewRequest(u, "phone", "admin", "JobSchedule");
+		MutableRequest carried = authenticatedCarriedViewRequest(u, "phone", AdminDocument.JOB_SCHEDULE);
 
 		invokeServletMethod("doGet", carried.request(), response);
 
@@ -139,7 +142,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule", true), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, AdminDocument.JOB_SCHEDULE, true), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
@@ -176,7 +179,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doPost", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
+		invokeServletMethod("doPost", authenticatedViewRequest(u, AdminDocument.JOB_SCHEDULE), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
@@ -187,22 +190,23 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 
-		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "MissingDocument"), response);
+		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "MissingDocument", false), response);
 
 		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
 		assertTrue(body.toString().contains("\"contained\":[]"), body.toString());
 		assertTrue(body.toString().contains("\"title\":\"MissingDocument\""), body.toString());
 	}
 
-	private void assertViewRenders(String moduleName, String documentName) throws Exception {
-		String body = invokeView(u, UXUI, moduleName, documentName, false);
+	private void assertViewRenders(ModuleDocument rendered) throws Exception {
+		String body = invokeView(u, UXUI, rendered, false);
+		String name = rendered.moduleName() + '.' + rendered.documentName();
 
-		assertTrue(body.contains("\"type\":\"view\""), moduleName + '.' + documentName + ": " + body);
-		assertTrue(body.contains("\"name\":\"edit\""), moduleName + '.' + documentName + ": " + body);
+		assertTrue(body.contains("\"type\":\"view\""), name + ": " + body);
+		assertTrue(body.contains("\"name\":\"edit\""), name + ": " + body);
 	}
 
 	@SuppressWarnings("java:S3011") // Reflection exercises the private servlet rendering seam.
-	private static String invokeView(User user, String uxui, String moduleName, String documentName, boolean topLabels)
+	private static String invokeView(User user, String uxui, ModuleDocument rendered, boolean topLabels)
 			throws Exception {
 		Method view = metaDataServletClass().getDeclaredMethod("view",
 				User.class,
@@ -212,7 +216,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 				boolean.class);
 		view.setAccessible(true);
 		try {
-			return view.invoke(null, user, uxui, moduleName, documentName, Boolean.valueOf(topLabels)).toString();
+			return view.invoke(null, user, uxui, rendered.moduleName(), rendered.documentName(), Boolean.valueOf(topLabels)).toString();
 		} catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof Exception exception) {
@@ -251,8 +255,12 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		return response;
 	}
 
-	private static HttpServletRequest authenticatedViewRequest(User user, String moduleName, String documentName) {
-		return authenticatedViewRequest(user, moduleName, documentName, false);
+	private static HttpServletRequest authenticatedViewRequest(User user, ModuleDocument requested) {
+		return authenticatedViewRequest(user, requested, false);
+	}
+
+	private static HttpServletRequest authenticatedViewRequest(User user, ModuleDocument requested, boolean topLabels) {
+		return authenticatedViewRequest(user, requested.moduleName(), requested.documentName(), topLabels);
 	}
 
 	private static HttpServletRequest authenticatedViewRequest(User user,
@@ -296,8 +304,7 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 
 	private static MutableRequest authenticatedCarriedViewRequest(User user,
 			String carriedType,
-			String moduleName,
-			String documentName) {
+			ModuleDocument requested) {
 		HttpSession session = mock(HttpSession.class);
 		when(session.getId()).thenReturn("metadata-carried-session-" + System.nanoTime());
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
@@ -313,8 +320,8 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 		when(request.getAttribute(any())).thenAnswer(invocation -> attributes.get(invocation.getArgument(0)));
 		when(session.getAttribute(AbstractWebContext.EMULATED_USER_AGENT_TYPE_SESSION_ATTRIBUTE_NAME))
 				.thenReturn(org.skyve.web.UserAgentType.valueOf(carriedType));
-		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(moduleName);
-		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(documentName);
+		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(requested.moduleName());
+		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(requested.documentName());
 		when(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME)).thenReturn(null);
 		org.mockito.Mockito.doAnswer(invocation -> {
 			attributes.put(invocation.getArgument(0), invocation.getArgument(1));

@@ -16,9 +16,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.SelfRegistrationActivation.Result;
-import modules.admin.domain.User;
 import util.AbstractH2Test;
 
 /**
@@ -93,7 +93,7 @@ class SelfRegistrationActivationExpiryH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension registered(DateTime codeCreated) {
 		String unique = "expiry-" + UUID.randomUUID();
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName(unique + "@example.com");
 		user.getContact().setName(unique);
 		user.getContact().setEmail1(unique + "@example.com");
@@ -113,7 +113,7 @@ class SelfRegistrationActivationExpiryH2Test extends AbstractH2Test {
 		ConfigurationExtension configuration = Configuration.newInstance();
 		if (!configuration.isPersisted()) {
 			configuration = new DataBuilder().fixture(FixtureType.crud)
-					.build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
+					.build(AdminDocument.CONFIGURATION);
 		}
 		configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
 		configuration.getStartup().setMailPort(Integer.valueOf(25));

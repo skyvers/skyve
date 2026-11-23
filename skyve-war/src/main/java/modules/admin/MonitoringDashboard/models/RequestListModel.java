@@ -25,6 +25,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.util.monitoring.RequestMeasurements;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Generic;
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.Period;
@@ -166,8 +167,8 @@ public class RequestListModel extends InMemoryListModel<MonitoringDashboard> {
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		// Set driving document
-		Module module = customer.getModule(Generic.MODULE_NAME);
-		Document document = module.getDocument(customer, Generic.DOCUMENT_NAME);
+		Module module = AdminDocument.GENERIC.toModule(customer);
+		Document document = AdminDocument.GENERIC.toDocument(customer);
 		setDrivingDocument(module, document);
 
 		// Add columns

@@ -24,7 +24,7 @@ of hand-building fixtures in each test.
 - **H2 tests** must use `DataBuilder` or factory fixtures for all domain object creation.
 - **Mockito-only tests** must mock Skyve documents; avoid calling `newInstance()` unless strictly required.
 - **For CDI-managed classes in H2 tests (actions/services/bizlets/etc.), prefer `@Inject` over `new`.** Constructing with `new` bypasses CDI wiring and any future injected dependencies.
-- Use `db.build(<MODULE>, <DOC>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
+- Use `db.build(<Module>Document.<DOCUMENT>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
 
 ### Minimal example
 ```java
@@ -38,8 +38,8 @@ class ExampleH2Test extends AbstractH2Test {
 
   @Test
   void createsValidDomainInstances() {
-    Account acc = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
-    DocumentQuery q = CORE.getPersistence().newDocumentQuery(Account.MODULE_NAME, Account.DOCUMENT_NAME);
+    Account acc = CORE.getPersistence().save(db.build(SalesDocument.ACCOUNT));
+    DocumentQuery q = CORE.getPersistence().newDocumentQuery(SalesDocument.ACCOUNT);
     q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
     assertThat(q.scalarResult(Number.class).intValue(), is(1));
   }
@@ -51,10 +51,13 @@ class ExampleH2Test extends AbstractH2Test {
     ```java
     DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
     ```
-  - Build instances using module/document names:
+  - Build instances using the module's generated document enum (`<Module>Document`, see
+    [typed-metadata-references.md](../typed-metadata-references.md)):
     ```java
-    Account account = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
+    Account account = CORE.getPersistence().save(db.build(SalesDocument.ACCOUNT));
     ```
+  - When a test mocks `Persistence`, stub the form the code under test calls; see
+    [Testing with mocks](../typed-metadata-references.md#testing-with-mocks).
   - This ensures values comply with masks, validators and relationships without
     needing custom private helper methods everywhere.
 
@@ -456,10 +459,7 @@ public class MyTests extends AbstractSkyveTestDispose {
 
         // act
         AllAttributesPersistent saved = p.save(bean);
-        AllAttributesPersistent retrieved = p.retrieve(
-                AllAttributesPersistent.MODULE_NAME,
-                AllAttributesPersistent.DOCUMENT_NAME,
-                saved.getBizId());
+        AllAttributesPersistent retrieved = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, saved.getBizId());
 
         // assert
         Assert.assertNotNull(retrieved);

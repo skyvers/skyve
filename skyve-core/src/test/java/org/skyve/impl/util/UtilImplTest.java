@@ -35,6 +35,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("boxing")
@@ -257,6 +258,20 @@ class UtilImplTest {
 		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(), null, ArchiveSchedule.DEFUALT);
 		Optional<ArchiveDocConfig> result = config.findArchiveDocConfig("admin", "NonExistent");
 		assertFalse(result.isPresent());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testFindArchiveDocConfigByDocumentReference() {
+		ArchiveDocConfig docConfig = new ArchiveDocConfig("admin", "Contact", "archive", 30);
+		ArchiveConfig config = new ArchiveConfig(10, 100, List.of(docConfig), null, ArchiveSchedule.DEFUALT);
+		assertEquals(Optional.of(docConfig), config.findArchiveDocConfig(TestDocument.CONTACT));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedArchiveDocConfigEqualsTheStringForm() {
+		assertEquals(new ArchiveDocConfig("admin", "Contact", "archive", 30), new ArchiveDocConfig(TestDocument.CONTACT, "archive", 30));
 	}
 
 	@Test

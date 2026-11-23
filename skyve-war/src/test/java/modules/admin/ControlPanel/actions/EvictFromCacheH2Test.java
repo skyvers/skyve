@@ -12,7 +12,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
-import modules.admin.domain.ControlPanel;
+import modules.admin.domain.AdminDocument;
 import util.AbstractH2Test;
 
 /**
@@ -31,7 +31,7 @@ class EvictFromCacheH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		controlPanel = db.build(AdminDocument.CONTROL_PANEL);
 		action = new EvictFromCache();
 	}
 

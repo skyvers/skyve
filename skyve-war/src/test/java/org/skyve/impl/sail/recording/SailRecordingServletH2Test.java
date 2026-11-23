@@ -31,6 +31,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.admin.domain.AdminDocument;
 import modules.test.AbstractSkyveTest;
 
 /**
@@ -214,7 +215,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		long suffix = System.nanoTime();
 		modules.admin.Group.GroupExtension group = new org.skyve.util.DataBuilder().fixture(org.skyve.util.test.SkyveFixture.FixtureType.crud)
-																.build(modules.admin.domain.Group.MODULE_NAME, modules.admin.domain.Group.DOCUMENT_NAME);
+																.build(AdminDocument.GROUP);
 		group.setName("SAIL group " + suffix);
 		group.getRoles().clear();
 		modules.admin.domain.GroupRole groupRole = modules.admin.domain.GroupRole.newInstance();
@@ -223,7 +224,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		group = persistence.save(group);
 
 		modules.admin.User.UserExtension user = new org.skyve.util.DataBuilder().fixture(org.skyve.util.test.SkyveFixture.FixtureType.crud)
-																.build(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+																.build(AdminDocument.USER);
 		user.setUserName("sail.grouped." + suffix);
 		user.getGroups().clear();
 		user.getRoles().clear();

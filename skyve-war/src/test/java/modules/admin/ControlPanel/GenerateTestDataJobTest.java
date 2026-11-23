@@ -16,6 +16,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
 import modules.admin.Tag.TagExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Tag;
 import util.AbstractH2Test;
 
@@ -39,7 +40,7 @@ class GenerateTestDataJobTest extends AbstractH2Test {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
-		when(persistence.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.TAG)).thenReturn(query);
 		when(query.getFilter()).thenReturn(filter);
 		when(query.beanResult()).thenReturn(existing);
 
@@ -56,7 +57,7 @@ class GenerateTestDataJobTest extends AbstractH2Test {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
-		when(persistence.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.TAG)).thenReturn(query);
 		when(query.getFilter()).thenReturn(filter);
 		when(query.beanResult()).thenReturn(null);
 		when(persistence.save(any(Tag.class))).thenAnswer(invocation -> invocation.getArgument(0));

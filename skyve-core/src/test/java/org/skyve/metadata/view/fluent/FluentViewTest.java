@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class FluentViewTest {
 
@@ -450,5 +452,23 @@ class FluentViewTest {
 		impl.getParameters().add(new FluentViewParameter().fromBinding("field1").get());
 		FluentView v = new FluentView().from((org.skyve.metadata.view.View) impl);
 		assertNotNull(v.findParameter("field1"));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void typedReportAccessMethodsMatchTheStringForms() {
+		FluentView v = new FluentView();
+		FluentViewReportAccess contacts = new FluentViewReportAccess().moduleName("admin").documentName("Contact").reportName("rContacts");
+		FluentViewReportAccess other = new FluentViewReportAccess().moduleName("admin").documentName("Contact").reportName("rOther");
+		v.addReportAccess(contacts);
+		v.addReportAccess(other);
+
+		FluentViewReportAccess found = v.findReportAccess(TestDocument.CONTACT, "rContacts");
+		FluentView removed = v.removeReportAccess(TestDocument.CONTACT, "rContacts");
+
+		assertAll(() -> assertSame(contacts.get(), found.get()),
+					() -> assertSame(v, removed),
+					() -> assertNull(v.findReportAccess(TestDocument.CONTACT, "rContacts")),
+					() -> assertSame(other.get(), v.findReportAccess(TestDocument.CONTACT, "rOther").get()));
 	}
 }

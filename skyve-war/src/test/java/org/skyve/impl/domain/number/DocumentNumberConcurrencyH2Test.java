@@ -34,6 +34,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.kitchensink.domain.LookupDescription;
 import util.AbstractH2TestTruncate;
 
@@ -92,7 +93,7 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 
 		DocumentNumberGenerator generator = new DocumentNumberGenerator();
 		UniqueConstraintViolationException e = assertThrows(UniqueConstraintViolationException.class,
-				() -> generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, "pending"));
+				() -> generator.next(KitchensinkDocument.LOOKUP_DESCRIPTION, "pending"));
 		assertAll(() -> assertEquals(UNIQUE_SEQUENCE, e.getConstraintName()),
 					() -> assertNull(e.getCause(), "raised in Java, so it was retried once before being thrown"));
 	}
@@ -121,7 +122,7 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 
 		DocumentNumberGenerator generator = new DocumentNumberGenerator();
 		UniqueConstraintViolationException e = assertThrows(UniqueConstraintViolationException.class,
-				() -> generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, sequence));
+				() -> generator.next(KitchensinkDocument.LOOKUP_DESCRIPTION, sequence));
 		assertAll(() -> assertEquals(UNIQUE_SEQUENCE, e.getConstraintName()),
 					() -> assertNotNull(e.getCause(), "the insert's failure, so the first attempt's violation, not a retry's"));
 	}
@@ -216,7 +217,7 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 		try {
 			ready.countDown();
 			start.await();
-			String result = generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, sequence);
+			String result = generator.next(KitchensinkDocument.LOOKUP_DESCRIPTION, sequence);
 			persistence.commit(true);
 			committed = true;
 			return result;

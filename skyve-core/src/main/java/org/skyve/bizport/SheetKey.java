@@ -1,5 +1,7 @@
 package org.skyve.bizport;
 
+import org.skyve.metadata.model.document.ModuleDocument;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -27,6 +29,15 @@ public final class SheetKey implements Comparable<SheetKey> {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 	}
+
+	/**
+	 * Creates a key for a document sheet; a typed shortcut for {@link #SheetKey(String, String)}.
+	 *
+	 * @param document the compile-time document reference; must not be {@code null}
+	 */
+	public SheetKey(@Nonnull ModuleDocument document) {
+		this(document.moduleName(), document.documentName());
+	}
 	
 	/**
 	 * Creates a key for a collection sheet.
@@ -39,6 +50,16 @@ public final class SheetKey implements Comparable<SheetKey> {
 		this.moduleName = drivingModuleName;
 		this.documentName = drivingDocumentName;
 		this.collectionBinding = collectionBinding;
+	}
+
+	/**
+	 * Creates a key for a collection sheet; a typed shortcut for {@link #SheetKey(String, String, String)}.
+	 *
+	 * @param document the compile-time document reference of the owning document; must not be {@code null}
+	 * @param collectionBinding the collection attribute binding on the owning document; must not be {@code null}
+	 */
+	public SheetKey(@Nonnull ModuleDocument document, @Nonnull String collectionBinding) {
+		this(document.moduleName(), document.documentName(), collectionBinding);
 	}
 
 	/**

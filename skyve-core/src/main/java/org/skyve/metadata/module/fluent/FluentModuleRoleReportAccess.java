@@ -3,6 +3,7 @@ package org.skyve.metadata.module.fluent;
 import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleReportUserAccessMetaData;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -39,6 +40,16 @@ public class FluentModuleRoleReportAccess extends
 		reportName(reportName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
+	}
+
+	/**
+	 * Returns a FluentModuleRoleReportAccess from a runtime metadata; a typed shortcut for
+	 * {@link #from(String, String, String, Set)}.
+	 */
+	protected @Nonnull FluentModuleRoleReportAccess from(@Nonnull ModuleDocument document,
+															@Nonnull String reportName,
+															@Nonnull Set<String> uxuis) {
+		return from(document.moduleName(), document.documentName(), reportName, uxuis);
 	}
 
 	/**

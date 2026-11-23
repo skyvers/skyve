@@ -12,6 +12,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
+import modules.test.domain.TestDocument;
 
 /**
  * Additional H2-backed tests for {@link DataBuilder} covering the API surface
@@ -26,7 +27,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	void fixtureStringBuildsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture("crud")
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -51,7 +52,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 	@Test
 	void factoryBuildStringStringReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
-				.factoryBuild(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.factoryBuild(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -76,7 +77,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.persistent(false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -85,7 +86,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.persistent(true)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -94,7 +95,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.transients(false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -103,7 +104,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.view(false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -112,7 +113,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.domain(false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -121,7 +122,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.deprecated(false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -132,7 +133,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -143,7 +144,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 				.required(true)
 				.optional(true)
 				.depth(1)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -152,7 +153,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.required(true, false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -163,7 +164,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 				.required(true, true)
 				.optional(false, true)
 				.depth(1)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -174,7 +175,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.type(AttributeType.bool, false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 		// boolean attribute excluded — should be null/false default
 		assertNotEquals(Boolean.TRUE, bean.getBooleanFlag());
@@ -185,7 +186,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.type(AttributeType.text, false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 		assertNull(bean.getText());
 	}
@@ -197,7 +198,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.name(AllAttributesPersistent.textPropertyName, false)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 		assertNull(bean.getText());
 	}
@@ -213,7 +214,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 				.depth(2)
 				.depth(AllAttributesPersistent.aggregatedCollectionPropertyName, 1)
 				.cardinality(AllAttributesPersistent.aggregatedCollectionPropertyName, 3)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 		assertNotNull(bean.getAggregatedCollection());
 		assertEquals(3, bean.getAggregatedCollection().size());
@@ -224,7 +225,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.depth(0)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -233,7 +234,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.depth(AllAttributesPersistent.aggregatedCollectionPropertyName, 0)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 	}
 
@@ -244,7 +245,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 		DataBuilder.setTrace(true);
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		DataBuilder.setTrace(false);
 		assertNotNull(bean);
 	}
@@ -258,7 +259,7 @@ class DataBuilderExtendedH2Test extends AbstractSkyveTest {
 				.required(true, true)
 				.optional(true, true)
 				.depth(1)
-				.build(AllAttributesRequiredPersistent.MODULE_NAME, AllAttributesRequiredPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_REQUIRED_PERSISTENT);
 		assertNotNull(bean);
 	}
 }

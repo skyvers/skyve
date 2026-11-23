@@ -17,7 +17,7 @@ class ContentDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesContent() {
 		Content bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Content.MODULE_NAME, Content.DOCUMENT_NAME);
+				.build(AdminDocument.CONTENT);
 		assertNotNull(bean);
 	}
 

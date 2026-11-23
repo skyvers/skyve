@@ -41,12 +41,18 @@ class PersistenceTest {
 		doReturn(documentQuery).when(p).newDocumentQuery("admin", "Contact");
 		doReturn(namedQuery).when(p).newNamedDocumentQuery("admin", "qContacts");
 		doReturn(bizQL).when(p).newNamedBizQL("admin", "bContacts");
+		SQL documentSQL = mock(SQL.class);
 		doReturn(sql).when(p).newNamedSQL("admin", "sContacts");
+		doReturn(documentSQL).when(p).newSQL("admin", "Contact", "select 1");
+		SQL namedDocumentSQL = mock(SQL.class);
+		doReturn(namedDocumentSQL).when(p).newNamedSQL("admin", "Contact", "sContacts");
 
 		assertAll(() -> assertSame(documentQuery, p.newDocumentQuery(TestDocument.CONTACT)),
 					() -> assertSame(namedQuery, p.newNamedDocumentQuery(TestQuery.Q_CONTACTS)),
 					() -> assertSame(bizQL, p.newNamedBizQL(TestBizQL.B_CONTACTS)),
-					() -> assertSame(sql, p.newNamedSQL(TestSQL.S_CONTACTS)));
+					() -> assertSame(sql, p.newNamedSQL(TestSQL.S_CONTACTS)),
+					() -> assertSame(documentSQL, p.newSQL(TestDocument.CONTACT, "select 1")),
+					() -> assertSame(namedDocumentSQL, p.newNamedSQL(TestDocument.CONTACT, "sContacts")));
 	}
 
 	@Test

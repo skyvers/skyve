@@ -1,7 +1,7 @@
 package modules.admin.Tag.actions;
 
 import modules.admin.Tag.TagExtension;
-import modules.admin.domain.Tag;
+import modules.admin.domain.AdminDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -21,6 +21,6 @@ public class CopyTagToUserTest extends AbstractActionTest<TagExtension, CopyTagT
 	protected TagExtension getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			.build(AdminDocument.TAG);
 	}
 }

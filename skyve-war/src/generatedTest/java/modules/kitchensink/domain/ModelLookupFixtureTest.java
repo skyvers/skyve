@@ -14,6 +14,6 @@ public class ModelLookupFixtureTest extends AbstractDomainTest<ModelLookupFixtur
 	protected ModelLookupFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 	}
 }

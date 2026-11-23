@@ -14,6 +14,6 @@ public class ActionsFixtureTest extends AbstractDomainTest<ActionsFixture> {
 	protected ActionsFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.ACTIONS_FIXTURE);
 	}
 }

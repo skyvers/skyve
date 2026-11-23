@@ -16,7 +16,7 @@ class UserRoleDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserRole bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+				.build(AdminDocument.USER_ROLE);
 		assertNotNull(bean);
 	}
 

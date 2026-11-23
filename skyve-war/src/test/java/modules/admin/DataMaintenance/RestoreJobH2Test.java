@@ -27,12 +27,12 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.ContentRestoreOption;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
-import modules.admin.domain.User;
 import util.AbstractH2TestDispose;
 
 /**
@@ -99,7 +99,7 @@ class RestoreJobH2Test extends AbstractH2TestDispose {
 		p.commit(false);
 		p.begin();
 		p.evictAllCached();
-		Contact cached = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, contact.getBizId());
+		Contact cached = p.retrieve(AdminDocument.CONTACT, contact.getBizId());
 		assertNotNull(cached);
 		assertTrue(p.sharedCacheBean(cached), "the contact is in the shared cache before the restore");
 
@@ -107,7 +107,7 @@ class RestoreJobH2Test extends AbstractH2TestDispose {
 
 		p.begin(); // the restore's reindex commits
 		p.evictAllCached(); // a new request starts with an empty session
-		Contact restored = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, contact.getBizId());
+		Contact restored = p.retrieve(AdminDocument.CONTACT, contact.getBizId());
 		assertNotNull(restored);
 		assertEquals(backedUpVersion, restored.getBizVersion(), "the restored version, not the cached one");
 		assertNull(restored.getMobile(), "the restored mobile, not the cached one");
@@ -222,7 +222,7 @@ class RestoreJobH2Test extends AbstractH2TestDispose {
 	}
 
 	private static UserExtension adminUser(Persistence p) {
-		UserExtension result = p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, USER);
+		UserExtension result = p.retrieve(AdminDocument.USER, USER);
 		assertNotNull(result);
 		return result;
 	}

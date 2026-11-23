@@ -14,10 +14,8 @@ import modules.admin.Startup.StartupBizlet;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
-import modules.admin.domain.Configuration;
-import modules.admin.domain.Group;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.GroupRole;
-import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -36,7 +34,7 @@ class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 	@Test
 	void retrievePublicUserNameReturnsConfiguredPublicUserName() {
 		String expectedUserName = "public." + System.nanoTime();
-		UserExtension publicUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension publicUser = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		publicUser.setUserName(expectedUserName);
 		publicUser = CORE.getPersistence().save(publicUser);
 		saveConfiguration(publicUser);
@@ -65,7 +63,7 @@ class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 	void retrieveUserLoadsLegacyIdForUserWithGroupRoleOnly() {
 		long suffix = System.nanoTime();
 		String userName = "legacy.group." + suffix;
-		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.GROUP);
 		group.setName("legacy-group-" + suffix);
 		group.getRoles().clear();
 		GroupRole role = GroupRole.newInstance();
@@ -98,7 +96,7 @@ class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 	}
 
 	private static UserExtension user(String userName, String legacyId) {
-		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		result.setUserName(userName);
 		result.setInactive(Boolean.FALSE);
 		result.setLegacyId(legacyId);
@@ -115,8 +113,7 @@ class LocalDataStoreRepositoryH2Test extends AbstractH2Test {
 	}
 
 	private static ConfigurationExtension saveConfiguration(UserExtension publicUser) {
-		ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME,
-				Configuration.DOCUMENT_NAME);
+		ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONFIGURATION);
 		configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
 		configuration.getStartup().setMailPort(Integer.valueOf(25));
 		configuration.setPublicUser(publicUser);

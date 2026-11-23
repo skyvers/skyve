@@ -183,7 +183,7 @@ here.
   - Maven plugin goals take command-line properties.
   - Generated action tests support injection.
 - **Testing:**
-  - JUnit 4 is gone.
+  - JUnit 4 test are gone but the Skyve test base class still exists.
   - There is a JaCoCo coverage profile.
   - Deployed integration tests can be reused. See [Deployed Integration Testing](deployed-integration-testing.md).
 - **SAIL:**
@@ -222,30 +222,31 @@ Work through this list. Each item links to the detail.
      `<Document>Override`.
    - Customer domain generation always runs.
    - `Module.getDocument` throws `MetaDataException`.
+   - The admin module and generated code call the typed overloads, so a test that mocks
+     `Persistence` must stub those. See [Testing with mocks](typed-metadata-references.md#testing-with-mocks).
    - See [Typed metadata: Upgrading](typed-metadata-references.md#upgrading).
 5. **Templates and theming:** a copy of `templates/external/` is ignored, and the request
    selection APIs have been removed. See [The `external` family](#the-external-layout-family-is-gone)
    and [Theme Resolution](theme-resolution.md#downstream-descriptor-migration).
-6. **Remove any `ThumbnailFilter` mapping** from `web.xml`, or the app won't start.
-7. **Check list filters and converters:**
+6. **Check list filters and converters:**
    - Lists through associations can show more rows.
    - Three `nullOr...` operators now compare as named.
    - Number parsing is strict and English.
    - See [Converters and list filters](#converters-and-list-filters).
-8. **Check `yearlyBackupRetention`.** `YEARLY_` backups are now culled to it.
-9. **SmartClient:**
+7. **Check `yearlyBackupRetention`.** `YEARLY_` backups are now culled to it.
+8. **SmartClient:**
    - Inline New and grid action links now run server code and validation that they skipped
      before.
    - `SmartClientDataGridFieldDefinition.defaultValueJavascriptExpression` is gone.
    - See [SmartClient behaviour](#smartclient-behaviour).
-10. **Remember me:** signing out no longer signs out a user's other devices. An app with its
+9. **Remember me:** signing out no longer signs out a user's other devices. An app with its
     own remember-me configuration keeps the old behaviour.
     See [Remember me and signing out](#remember-me-and-signing-out).
-11. **Thumbnails:** they are never enlarged past the image's own size, and the browser
+10. **Thumbnails:** they are never enlarged past the image's own size, and the browser
     caches content for a day. See [Thumbnails](#thumbnails).
-12. **Test your reports** on JasperReports 7, and drop any JVM `--add-opens` switches you
+11. **Test your reports** on JasperReports 7, and drop any JVM `--add-opens` switches you
     added for proxies.
-13. **SAIL:**
+12. **SAIL:**
     - A script that passed while signed out now fails.
     - A `<call>` that throws `TestAbortedException` is skipped, not failed.
     - Device profiles have moved.

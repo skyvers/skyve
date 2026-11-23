@@ -16,7 +16,7 @@ class SystemDashboardDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		SystemDashboard bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(SystemDashboard.MODULE_NAME, SystemDashboard.DOCUMENT_NAME);
+				.build(AdminDocument.SYSTEM_DASHBOARD);
 		assertNotNull(bean);
 	}
 

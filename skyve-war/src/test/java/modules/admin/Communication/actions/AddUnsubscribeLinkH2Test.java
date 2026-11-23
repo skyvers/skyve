@@ -10,6 +10,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import util.AbstractH2Test;
 
@@ -30,7 +31,7 @@ class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteAddsLinkToNullBody() throws Exception {
 		// setup the test data
-		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication communication = db.build(AdminDocument.COMMUNICATION);
 		communication.setBody(null);
 
 		// call the method under test
@@ -45,7 +46,7 @@ class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteAppendsLinkToExistingBody() throws Exception {
 		// setup the test data
-		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication communication = db.build(AdminDocument.COMMUNICATION);
 		String originalBody = "<p>Hello, this is a test communication.</p>";
 		communication.setBody(originalBody);
 
@@ -62,7 +63,7 @@ class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteDoesNotAddDuplicateLink() throws Exception {
 		// setup the test data
-		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication communication = db.build(AdminDocument.COMMUNICATION);
 		String bodyWithLink = "<p>Test body</p>" + AddUnsubscribeLink.UNSUBSCRIBE_LINK;
 		communication.setBody(bodyWithLink);
 
@@ -78,7 +79,7 @@ class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteDoesNotAddDuplicateLinkCaseInsensitive() throws Exception {
 		// setup the test data
-		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication communication = db.build(AdminDocument.COMMUNICATION);
 		// Link with different case
 		String bodyWithLink = "<p>Test body</p><A HREF=\"{unsubscribeUrl}\">UNSUBSCRIBE</A>";
 		communication.setBody(bodyWithLink);
@@ -95,7 +96,7 @@ class AddUnsubscribeLinkH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteAddsLinkToEmptyStringBody() throws Exception {
 		// setup the test data
-		Communication communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication communication = db.build(AdminDocument.COMMUNICATION);
 		communication.setBody("");
 
 		// call the method under test

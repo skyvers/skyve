@@ -99,7 +99,7 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 
 	public static MappedExtensionJoinedStrategyExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.MAPPED_EXTENSION_JOINED_STRATEGY.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

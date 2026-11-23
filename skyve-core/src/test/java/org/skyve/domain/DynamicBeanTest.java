@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class DynamicBeanTest {
 
@@ -25,6 +26,14 @@ class DynamicBeanTest {
 		DynamicBean b = new DynamicBean("admin", "User", new HashMap<>());
 		assertThat(b.getBizModule(), is("admin"));
 		assertThat(b.getBizDocument(), is("User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorSetsTheReferencedModuleAndDocument() {
+		DynamicBean b = new DynamicBean(TestDocument.CONTACT, new HashMap<>());
+		assertThat(b.getBizModule(), is("admin"));
+		assertThat(b.getBizDocument(), is("Contact"));
 	}
 
 	@Test

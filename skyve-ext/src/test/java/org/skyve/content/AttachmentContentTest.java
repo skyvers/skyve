@@ -1,5 +1,6 @@
 package org.skyve.content;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,6 +17,7 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class AttachmentContentTest {
@@ -369,4 +371,31 @@ class AttachmentContentTest {
                         assertEquals("hello.txt", restored.getFileName());
                 }
         }
+
+	@Test
+	void typedConstructorStoresTheReferencedModuleAndDocument() {
+		AttachmentContent ac = new AttachmentContent("cust", SalesDocument.ORDER, "dg", "uid", "bid", "photo");
+		AttachmentContent expected = new AttachmentContent("cust", "sales", "Order", "dg", "uid", "bid", "photo");
+		assertAll(() -> assertEquals(expected.getBizCustomer(), ac.getBizCustomer()),
+					() -> assertEquals(expected.getBizModule(), ac.getBizModule()),
+					() -> assertEquals(expected.getBizDocument(), ac.getBizDocument()),
+					() -> assertEquals(expected.getBizDataGroupId(), ac.getBizDataGroupId()),
+					() -> assertEquals(expected.getBizUserId(), ac.getBizUserId()),
+					() -> assertEquals(expected.getBizId(), ac.getBizId()),
+					() -> assertEquals(expected.getAttributeName(), ac.getAttributeName()));
+	}
+
+	private enum SalesDocument implements ModuleDocument {
+		ORDER;
+
+		@Override
+		public String moduleName() {
+			return "sales";
+		}
+
+		@Override
+		public String documentName() {
+			return "Order";
+		}
+	}
 }

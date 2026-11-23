@@ -1,6 +1,7 @@
 package modules.kitchensink.DialogsFixture.actions;
 
 import modules.kitchensink.domain.DialogsFixture;
+import modules.kitchensink.domain.KitchensinkDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -20,6 +21,6 @@ public class AskEveryRunTest extends AbstractActionTest<DialogsFixture, AskEvery
 	protected DialogsFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.DIALOGS_FIXTURE);
 	}
 }

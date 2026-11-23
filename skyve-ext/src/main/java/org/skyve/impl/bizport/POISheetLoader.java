@@ -17,6 +17,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -36,7 +37,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	/**
 	 * For untyped (non Bean) access to data file values
 	 *
-	 * DOES NOT SUPPORT HIERARCHICHAL UPLOAD
+	 * DOES NOT SUPPORT HIERARCHICAL UPLOAD
 	 *
 	 * @param file
 	 * @param sheetIndex
@@ -70,7 +71,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	/**
 	 * Simple constructor - assumes most common usage as defaults
 	 *
-	 * DOES NOT SUPPORT HIERARCHICHAL UPLOAD
+	 * DOES NOT SUPPORT HIERARCHICAL UPLOAD
 	 *
 	 * @param moduleName
 	 *            - the module
@@ -84,6 +85,41 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		this(fileInputStream, sheetIndex, moduleName, documentName, exception);
 		this.setActivityType(activityType);
+	}
+
+	/**
+	 * For untyped (non Bean) access to data file values of the referenced document; a typed shortcut for
+	 * {@link #POISheetLoader(InputStream, int, String, String, UploadException)}.
+	 *
+	 * DOES NOT SUPPORT HIERARCHICAL UPLOAD
+	 *
+	 * @param fileInputStream	the workbook content
+	 * @param sheetIndex	the index of the sheet to load
+	 * @param document	the compile-time reference to the document to load into
+	 * @param exception	collects the problems found while loading
+	 * @throws Exception	if the workbook can't be read
+	 */
+	public POISheetLoader(@Nonnull InputStream fileInputStream, int sheetIndex, @Nonnull ModuleDocument document, @Nonnull UploadException exception)
+			throws Exception {
+		this(fileInputStream, sheetIndex, document.moduleName(), document.documentName(), exception);
+	}
+
+	/**
+	 * Simple constructor for the referenced document; a typed shortcut for
+	 * {@link #POISheetLoader(LoaderActivityType, InputStream, int, UploadException, String, String)}.
+	 *
+	 * DOES NOT SUPPORT HIERARCHICAL UPLOAD
+	 *
+	 * @param activityType	what to do with each row
+	 * @param fileInputStream	the workbook content
+	 * @param sheetIndex	the index of the sheet to load
+	 * @param exception	collects the problems found while loading
+	 * @param document	the compile-time reference to the document to load into
+	 * @throws Exception	if the workbook can't be read
+	 */
+	public POISheetLoader(@Nonnull LoaderActivityType activityType, @Nonnull InputStream fileInputStream, int sheetIndex, @Nonnull UploadException exception,
+			@Nonnull ModuleDocument document) throws Exception {
+		this(activityType, fileInputStream, sheetIndex, exception, document.moduleName(), document.documentName());
 	}
 
 

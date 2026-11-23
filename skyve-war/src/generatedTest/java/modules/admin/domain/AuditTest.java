@@ -14,6 +14,6 @@ public class AuditTest extends AbstractDomainTest<Audit> {
 	protected Audit getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+			.build(AdminDocument.AUDIT);
 	}
 }

@@ -14,6 +14,6 @@ public class MailLogTest extends AbstractDomainTest<MailLog> {
 	protected MailLog getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME);
+			.build(AdminDocument.MAIL_LOG);
 	}
 }

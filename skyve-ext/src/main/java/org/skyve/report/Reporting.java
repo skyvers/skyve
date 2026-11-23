@@ -13,6 +13,7 @@ import org.skyve.impl.util.SystemObserver;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.user.User;
 import org.skyve.util.MailAttachment;
 
@@ -145,6 +146,23 @@ public interface Reporting extends SystemObserver {
 																@Nonnull String reportName,
 																@Nonnull Map<String, Object> parameters)
 	throws Exception;
+
+	/**
+	 * Returns a mail attachment from a Jasper report as a PDF; a typed shortcut for
+	 * {@link #getMailAttachmentFromJasperReport(String, String, String, Map)}.
+	 * 
+	 * @param document the compile-time reference to the report-owning document
+	 * @param reportName report template name
+	 * @param parameters report parameter map
+	 * @return rendered PDF attachment
+	 * @throws Exception if report execution or attachment creation fails
+	 */
+	default @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull ModuleDocument document,
+																		@Nonnull String reportName,
+																		@Nonnull Map<String, Object> parameters)
+	throws Exception {
+		return getMailAttachmentFromJasperReport(document.moduleName(), document.documentName(), reportName, parameters);
+	}
 
 	/**
 	 * Returns a mail attachment from a Jasper report as a PDF

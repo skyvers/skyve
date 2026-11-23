@@ -219,7 +219,7 @@ public class UploadFixture extends AbstractTransientBean {
 
 	public static UploadFixture newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return KitchensinkDocument.UPLOAD_FIXTURE.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

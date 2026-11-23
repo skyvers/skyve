@@ -19,7 +19,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.actions.GeneratePassword;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -125,7 +125,7 @@ class UserPasswordAdminH2Test extends AbstractH2Test {
 	}
 
 	private static UserExtension newUser(String prefix) {
-		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		result.setUserName("admin.pw." + prefix + "." + System.nanoTime());
 		result.setInactive(Boolean.FALSE);
 		result.setPasswordExpired(Boolean.FALSE);

@@ -34,6 +34,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 @SuppressWarnings({ "java:S1989", "java:S5960" }) // Servlet exceptions and assertions are exercised by the test harness.
 class SmartClientCompleteServletH2Test extends AbstractSkyveTest {
@@ -45,7 +46,7 @@ class SmartClientCompleteServletH2Test extends AbstractSkyveTest {
 	@Test
 	void doGetReturnsSuccessfulSuggestResponseForPersistentTextAttribute() throws Exception {
 		AllAttributesPersistent context = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		RequestBuilder request = newRequest(u)
 				.withConversation(context)
 				.param(AbstractWebContext.CONTEXT_NAME, null)

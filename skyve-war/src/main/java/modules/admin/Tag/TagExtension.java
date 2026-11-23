@@ -5,6 +5,7 @@ import org.skyve.domain.Bean;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Tag;
 import modules.admin.domain.Tagged;
 
@@ -53,7 +54,7 @@ public class TagExtension extends Tag {
 		long result = 0;
 
 		try {
-			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+			DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.TAGGED);
 			q.getFilter().addEquals(Tagged.tagPropertyName, this);
 
 			// optional filter for specified module.document

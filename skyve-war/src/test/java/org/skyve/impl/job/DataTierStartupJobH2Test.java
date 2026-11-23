@@ -31,6 +31,7 @@ import org.skyve.persistence.DocumentQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpSession;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 import util.AbstractH2TestTruncate;
@@ -152,8 +153,7 @@ class DataTierStartupJobH2Test extends AbstractH2TestTruncate {
 		}
 		persistence.begin();
 
-		DocumentQuery query = persistence.newDocumentQuery(modules.admin.domain.User.MODULE_NAME,
-				modules.admin.domain.User.DOCUMENT_NAME);
+		DocumentQuery query = persistence.newDocumentQuery(AdminDocument.USER);
 		query.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, bootstrapUserName);
 		return query.beanResult() != null;
 	}
@@ -230,8 +230,7 @@ class DataTierStartupJobH2Test extends AbstractH2TestTruncate {
 			CONTENT_STARTED.set(RecordingContentManager.STARTED.get());
 
 			DocumentQuery query = CORE.getPersistence()
-					.newDocumentQuery(modules.admin.domain.User.MODULE_NAME,
-							modules.admin.domain.User.DOCUMENT_NAME);
+					.newDocumentQuery(AdminDocument.USER);
 			query.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, EXPECTED_BOOTSTRAP_USER_NAME.get());
 			BOOTSTRAP_USER_VISIBLE.set(query.beanResult() != null);
 

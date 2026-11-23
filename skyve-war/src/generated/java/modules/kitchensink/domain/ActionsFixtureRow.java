@@ -96,7 +96,7 @@ public class ActionsFixtureRow extends AbstractPersistentBean implements ChildBe
 
 	public static ActionsFixtureRow newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return KitchensinkDocument.ACTIONS_FIXTURE_ROW.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

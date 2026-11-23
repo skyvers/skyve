@@ -44,6 +44,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 
 /**
@@ -195,8 +196,7 @@ abstract class InternalBaseH2Test {
 	 */
 	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension createAdminUser(SuperUser superUser) {
-		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME,
-				User.DOCUMENT_NAME);
+		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		adminUser.setUserName(superUser.getName());
 		adminUser.setPassword(EXT.hashPassword(PASSWORD));
 		adminUser.setPasswordHistory(null);

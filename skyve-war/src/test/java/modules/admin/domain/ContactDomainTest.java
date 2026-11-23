@@ -18,7 +18,7 @@ class ContactDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesContact() {
 		Contact bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+				.build(AdminDocument.CONTACT);
 		assertNotNull(bean);
 	}
 

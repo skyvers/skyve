@@ -9,6 +9,7 @@ import modules.admin.Tag.actions.BulkDocumentAction;
 import modules.admin.Tag.actions.PerformCombination;
 import modules.admin.Tag.actions.PrepareExplanation;
 import modules.admin.Tag.actions.TagAll;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Tag;
 
@@ -24,7 +25,7 @@ public class TagFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static TagExtension crudInstance() {
-		TagExtension tag = new DataBuilder().factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		TagExtension tag = new DataBuilder().factoryBuild(AdminDocument.TAG);
 
 		tag.setUploadModuleName(Contact.MODULE_NAME);
 		tag.setUploadDocumentName(Contact.DOCUMENT_NAME);

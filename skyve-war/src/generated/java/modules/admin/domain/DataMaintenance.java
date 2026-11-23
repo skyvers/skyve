@@ -740,7 +740,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean implements 
 
 	public static DataMaintenanceExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.DATA_MAINTENANCE.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

@@ -25,7 +25,7 @@ class StartupDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesStartupBean() {
 		Startup bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+				.build(AdminDocument.STARTUP);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

@@ -11,6 +11,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Snapshot;
 
 /**
@@ -39,7 +40,7 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 					bean.setOrdinal(Integer.valueOf(0));
 				} else {
 					Persistence p = CORE.getPersistence();
-					DocumentQuery q = p.newDocumentQuery(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+					DocumentQuery q = p.newDocumentQuery(AdminDocument.SNAPSHOT);
 					q.addAggregateProjection(AggregateFunction.Max, Snapshot.ordinalPropertyName, "maxOrdinal");
 					DocumentFilter f = q.getFilter();
 					f.addEquals(Snapshot.moduleNamePropertyName, moduleName);

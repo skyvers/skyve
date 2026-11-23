@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 
@@ -311,6 +312,14 @@ public class FluentModuleRole {
 	}
 
 	/**
+	 * Finds the report access with the specified document and report name in this module role's list of accesses;
+	 * a typed shortcut for {@link #findReportAccess(String, String, String)}.
+	 */
+	public @Nullable FluentModuleRoleReportAccess findReportAccess(final @Nonnull ModuleDocument document, final @Nonnull String reportName) {
+		return findReportAccess(document.moduleName(), document.documentName(), reportName);
+	}
+
+	/**
 	 * Removes the {@link ModuleRoleReportUserAccessMetaData} with the specified
 	 * module name, document name and report name if one is defined for this module role.
 	 */
@@ -320,6 +329,15 @@ public class FluentModuleRole {
 											mrr.getDocumentName().equals(documentName) &&
 											mrr.getReportName().equals(reportName));
 		return this;
+	}
+
+	/**
+	 * Removes the {@link ModuleRoleReportUserAccessMetaData} with the specified
+	 * document and report name if one is defined for this module role;
+	 * a typed shortcut for {@link #removeReportAccess(String, String, String)}.
+	 */
+	public @Nonnull FluentModuleRole removeReportAccess(final @Nonnull ModuleDocument document, final @Nonnull String reportName) {
+		return removeReportAccess(document.moduleName(), document.documentName(), reportName);
 	}
 
 	/**

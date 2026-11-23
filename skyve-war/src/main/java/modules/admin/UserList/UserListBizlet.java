@@ -11,6 +11,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 import modules.admin.domain.UserList;
 
@@ -38,7 +39,7 @@ public class UserListBizlet extends Bizlet<UserList> {
 			return result;
 		}
 		else if (UserList.userInvitationGroupsPropertyName.equals(attributeName)) {
-			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+			DocumentQuery query = persistence.newDocumentQuery(AdminDocument.GROUP);
 			query.addBoundOrdering(Group.namePropertyName, SortDirection.ascending);
 			List<Group> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());

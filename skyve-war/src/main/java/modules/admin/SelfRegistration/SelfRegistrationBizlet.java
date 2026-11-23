@@ -9,6 +9,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 
 /**
@@ -53,7 +54,7 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 	 */
 	private static void validateUniqueEmail(final String emailAddress, final ValidationException e) {
 		CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
-			DocumentQuery qUnique = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+			DocumentQuery qUnique = CORE.getPersistence().newDocumentQuery(AdminDocument.USER);
 			qUnique.getFilter().addEquals(User.userNamePropertyName, emailAddress);
 			UserExtension existingUser = qUnique.beanResult();
 

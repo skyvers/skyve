@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.domain.number.DocumentNumberAutonomousTransactionGenerator;
 import org.skyve.impl.domain.number.DocumentNumberGenerator;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DocumentNumber;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 class DocumentNumberTests extends AbstractSkyveTestDispose {
 
@@ -29,44 +31,44 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 
 	@Test
 	void testDefaultGetNumberReturnsNextNumber() {
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("2", dN.getDocumentNumber());
 
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("3", dN.getDocumentNumber());
 
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("4", dN.getDocumentNumber());
 
 	}
 
 	@Test
 	void testAutonomousGetNumberReturnsNextNumber() {
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("2", dN.getDocumentNumber());
 
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("3", dN.getDocumentNumber());
 
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.evictAllCached();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("4", dN.getDocumentNumber());
 	}
 
@@ -74,24 +76,24 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	void testDefaultRollbackDoesNotCommit() {
 		p.evictAllCached();
 
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("1", dN.getDocumentNumber());
 
 		p.begin();
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("1", dN.getDocumentNumber());
 
 		p.begin();
-		generator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		generator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("1", dN.getDocumentNumber());
 	}
 
@@ -99,26 +101,26 @@ class DocumentNumberTests extends AbstractSkyveTestDispose {
 	void testAutonomousNextNumberRollbackIncrements() {
 		p.evictAllCached();
 
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("2", dN.getDocumentNumber());
 
 		p.evictAllCached();
 		p.begin();
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("3", dN.getDocumentNumber());
 
 		p.evictAllCached();
 		p.begin();
-		autonomousGenerator.next(null, AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME,
+		autonomousGenerator.next(null, TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.textPropertyName, 1);
 		p.rollback();
-		dN = p.retrieve(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME, dN.getBizId());
+		dN = p.retrieve(AdminDocument.DOCUMENT_NUMBER, dN.getBizId());
 		Assertions.assertEquals("4", dN.getDocumentNumber());
 	}
 }

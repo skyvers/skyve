@@ -13,9 +13,9 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -64,7 +64,7 @@ class SelfRegistrationBizletH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension savedUser(String prefix, Boolean activated) {
 		String unique = prefix + "-" + UUID.randomUUID();
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName(unique + "@example.com");
 		user.getContact().setEmail1(unique + "@example.com");
 		user.getContact().setName(unique);

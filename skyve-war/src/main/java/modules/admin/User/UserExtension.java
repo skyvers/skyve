@@ -24,8 +24,8 @@ import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.Util;
 
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
-import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
@@ -150,7 +150,7 @@ public class UserExtension extends User {
 			return null;
 		}
 		StringBuilder urlBuilder = new StringBuilder();
-		urlBuilder.append(Util.getDocumentUrl(SelfRegistrationActivation.MODULE_NAME, SelfRegistrationActivation.DOCUMENT_NAME))
+		urlBuilder.append(Util.getDocumentUrl(AdminDocument.SELF_REGISTRATION_ACTIVATION))
 				.append("&code=")
 				.append(this.getActivationCode());
 		return urlBuilder.toString();
@@ -197,7 +197,7 @@ public class UserExtension extends User {
 	 * @return A user proxy representing this user
 	 */
 	public UserProxyExtension toUserProxy() {
-		return CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, getBizId());
+		return CORE.getPersistence().retrieve(AdminDocument.USER_PROXY, getBizId());
 	}
 
 	/**

@@ -11,6 +11,7 @@ import java.io.ObjectStreamException;
 import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.util.FileUtil;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
@@ -53,6 +54,28 @@ public class AttachmentContent extends Content {
 			throw new IllegalArgumentException("No complex/compound bindings allowed in AttachmentContent - use the correct Document and attribute combination");
 		}
 		this.attributeName = attributeName;
+	}
+
+	/**
+	 * Creates attachment content for a content attribute of a bean of the referenced document; a typed shortcut for
+	 * {@link #AttachmentContent(String, String, String, String, String, String, String)}.
+	 * Pass the constant of the document's owning module, such as {@code AdminDocument.CONTACT}:
+	 * the names are stored as given, as the bean's {@code bizModule} and {@code bizDocument} would be.
+	 *
+	 * @param bizCustomer The customer that owns the bean
+	 * @param document The compile-time document reference
+	 * @param bizDataGroupId The data group that owns the bean, or null
+	 * @param bizUserId The user that owns the bean, or null
+	 * @param bizId The bizId of the bean
+	 * @param attributeName The content attribute name (no compound bindings)
+	 */
+	public AttachmentContent(@Nullable String bizCustomer,
+								@Nonnull ModuleDocument document,
+								@Nullable String bizDataGroupId,
+								@Nullable String bizUserId,
+								@Nonnull String bizId,
+								@Nonnull String attributeName) {
+		this(bizCustomer, document.moduleName(), document.documentName(), bizDataGroupId, bizUserId, bizId, attributeName);
 	}
 
 	/**

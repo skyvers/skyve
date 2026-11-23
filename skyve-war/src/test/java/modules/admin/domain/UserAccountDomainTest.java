@@ -17,7 +17,7 @@ class UserAccountDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserAccount bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserAccount.MODULE_NAME, UserAccount.DOCUMENT_NAME);
+				.build(AdminDocument.USER_ACCOUNT);
 		assertNotNull(bean);
 	}
 

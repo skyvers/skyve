@@ -64,8 +64,8 @@ import customers.test.modules.test.domain.TestRole;
 import modules.admin.Group.GroupExtension;
 import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminRole;
-import modules.admin.domain.User;
 import modules.test.OverrideEnumExtended.OverrideEnumExtendedExtension;
 import modules.test.OverrideExtended.OverrideExtendedExtension;
 import modules.test.OverrideExtended.OverrideExtendedFactory;
@@ -540,7 +540,7 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 		long suffix = System.nanoTime();
 		String userName = "test.manager." + suffix;
 		GroupExtension group = ModulesUtil.configureGroup("Test managers " + suffix, TestCustomerRole.TEST_MANAGER);
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName(userName);
 		user.setInactive(Boolean.FALSE);
 		user.getRoles().clear();

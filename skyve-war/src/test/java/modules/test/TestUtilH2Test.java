@@ -12,6 +12,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
+import modules.test.domain.TestDocument;
 
 /**
  * H2-backed tests for {@link TestUtil} methods that need a live Skyve session.
@@ -44,7 +45,7 @@ class TestUtilH2Test extends AbstractSkyveTest {
 	void updateAttributeTextAttributeChangesValue() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 
 		// Find the 'text' attribute from the document
@@ -62,7 +63,7 @@ class TestUtilH2Test extends AbstractSkyveTest {
 	void updateAttributeWithModuleDocumentDoesNotThrow() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 
 		Attribute textAttr = aapd.getAttributes().stream()
@@ -80,7 +81,7 @@ class TestUtilH2Test extends AbstractSkyveTest {
 	void updateAttributeNullAttributeReturnsOriginalBean() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(bean);
 
 		AllAttributesPersistent result = TestUtil.updateAttribute(bean, null);

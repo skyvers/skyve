@@ -7,6 +7,7 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -75,6 +76,18 @@ public interface OnDemandRepository {
 	@Nullable DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 
 	/**
+	 * Loads and returns the document metadata for the referenced document; a typed shortcut for
+	 * {@link #loadDocument(String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default document
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @return the parsed document metadata, or {@code null} when no document is available
+	 */
+	default @Nullable DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull ModuleDocument document) {
+		return loadDocument(customerName, document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Loads and returns the view metadata for {@code viewName} on the given document,
 	 * optionally scoped to a specific UX/UI variant.
 	 *
@@ -89,6 +102,22 @@ public interface OnDemandRepository {
 	@Nullable ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName);
 
 	/**
+	 * Loads and returns the view metadata for {@code viewName} on the given document,
+	 * optionally scoped to a specific UX/UI variant; a typed shortcut for
+	 * {@link #loadView(String, String, String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default view
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @param uxui         the UX/UI variant such as {@code "desktop"} or {@code "responsive"},
+	 *                     or {@code null} for the default variant
+	 * @param viewName     the view name; must not be {@code null}
+	 * @return the parsed view metadata, or {@code null} when no view is available
+	 */
+	default @Nullable ViewMetaData loadView(@Nullable String customerName, @Nonnull ModuleDocument document, @Nullable String uxui, @Nonnull String viewName) {
+		return loadView(customerName, document.moduleName(), document.documentName(), uxui, viewName);
+	}
+
+	/**
 	 * Loads and returns the action metadata for {@code actionName} on the given document.
 	 *
 	 * @param customerName the customer name, or {@code null} for the default action
@@ -100,6 +129,19 @@ public interface OnDemandRepository {
 	@Nullable ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName);
 
 	/**
+	 * Loads and returns the action metadata for {@code actionName} on the given document; a typed shortcut for
+	 * {@link #loadMetaDataAction(String, String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default action
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @param actionName   the action name; must not be {@code null}
+	 * @return the parsed action metadata, or {@code null} when no action is available
+	 */
+	default @Nullable ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull ModuleDocument document, @Nonnull String actionName) {
+		return loadMetaDataAction(customerName, document.moduleName(), document.documentName(), actionName);
+	}
+
+	/**
 	 * Loads and returns the bizlet metadata for the given document.
 	 *
 	 * @param customerName the customer name, or {@code null} for the default bizlet
@@ -108,6 +150,18 @@ public interface OnDemandRepository {
 	 * @return the parsed bizlet metadata, or {@code null} when no bizlet is available
 	 */
 	@Nullable BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
+
+	/**
+	 * Loads and returns the bizlet metadata for the given document; a typed shortcut for
+	 * {@link #loadMetaDataBizlet(String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default bizlet
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @return the parsed bizlet metadata, or {@code null} when no bizlet is available
+	 */
+	default @Nullable BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull ModuleDocument document) {
+		return loadMetaDataBizlet(customerName, document.moduleName(), document.documentName());
+	}
 
 	/**
 	 * Returns the last-modified timestamp of the router source, in milliseconds since
@@ -148,6 +202,19 @@ public interface OnDemandRepository {
 	long documentLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 
 	/**
+	 * Returns the last-modified timestamp of the document source for
+	 * the referenced document, in milliseconds since the epoch; a typed shortcut for
+	 * {@link #documentLastModifiedMillis(String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default document
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
+	 */
+	default long documentLastModifiedMillis(@Nullable String customerName, @Nonnull ModuleDocument document) {
+		return documentLastModifiedMillis(customerName, document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Returns the last-modified timestamp of the view source for {@code viewName}
 	 * on the given document, in milliseconds since the epoch.
 	 *
@@ -159,6 +226,21 @@ public interface OnDemandRepository {
 	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long viewLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName);
+
+	/**
+	 * Returns the last-modified timestamp of the view source for {@code viewName}
+	 * on the given document, in milliseconds since the epoch; a typed shortcut for
+	 * {@link #viewLastModifiedMillis(String, String, String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default view
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @param uxui         the UX/UI variant, or {@code null} for the default variant
+	 * @param viewName     the view name; must not be {@code null}
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
+	 */
+	default long viewLastModifiedMillis(@Nullable String customerName, @Nonnull ModuleDocument document, @Nullable String uxui, @Nonnull String viewName) {
+		return viewLastModifiedMillis(customerName, document.moduleName(), document.documentName(), uxui, viewName);
+	}
 
 	/**
 	 * Returns the last-modified timestamp of the action source for
@@ -173,6 +255,20 @@ public interface OnDemandRepository {
 	long metaDataActionLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName);
 
 	/**
+	 * Returns the last-modified timestamp of the action source for
+	 * {@code actionName} on the given document, in milliseconds since the epoch; a typed shortcut for
+	 * {@link #metaDataActionLastModifiedMillis(String, String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default action
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @param actionName   the action name; must not be {@code null}
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
+	 */
+	default long metaDataActionLastModifiedMillis(@Nullable String customerName, @Nonnull ModuleDocument document, @Nonnull String actionName) {
+		return metaDataActionLastModifiedMillis(customerName, document.moduleName(), document.documentName(), actionName);
+	}
+
+	/**
 	 * Returns the last-modified timestamp of the bizlet source for the given
 	 * document, in milliseconds since the epoch.
 	 *
@@ -182,4 +278,17 @@ public interface OnDemandRepository {
 	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
 	 */
 	long metaDataBizletLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
+
+	/**
+	 * Returns the last-modified timestamp of the bizlet source for the given
+	 * document, in milliseconds since the epoch; a typed shortcut for
+	 * {@link #metaDataBizletLastModifiedMillis(String, String, String)}.
+	 *
+	 * @param customerName the customer name, or {@code null} for the default bizlet
+	 * @param document     the compile-time document reference; must not be {@code null}
+	 * @return last-modified time, or {@code Long.MIN_VALUE} if not available
+	 */
+	default long metaDataBizletLastModifiedMillis(@Nullable String customerName, @Nonnull ModuleDocument document) {
+		return metaDataBizletLastModifiedMillis(customerName, document.moduleName(), document.documentName());
+	}
 }

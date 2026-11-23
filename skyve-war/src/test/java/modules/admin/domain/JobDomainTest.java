@@ -17,7 +17,7 @@ class JobDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		Job bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+				.build(AdminDocument.JOB);
 		assertNotNull(bean);
 	}
 

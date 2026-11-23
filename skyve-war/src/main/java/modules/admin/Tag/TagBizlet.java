@@ -19,6 +19,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.Jobs.JobsBizlet;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Tag;
 import modules.admin.domain.Tag.FilterAction;
 import modules.admin.domain.Tag.FilterOperator;
@@ -80,7 +81,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 		if (Tag.operandTagPropertyName.equals(attributeName)) {
 			// look for OTHER tags
-			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			DocumentQuery q = pers.newDocumentQuery(AdminDocument.TAG);
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, bean.getBizId());
 			q.addBoundOrdering(Tag.namePropertyName);
 

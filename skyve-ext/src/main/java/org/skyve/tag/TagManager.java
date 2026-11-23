@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.persistence.AutoClosingIterable;
 
 import jakarta.annotation.Nonnull;
@@ -61,6 +62,26 @@ public interface TagManager {
 	throws Exception;
 
 	/**
+	 * Tag 1 bean; a typed shortcut for {@link #tag(String, String, String, String)}.
+	 * Pass the constant of the document's owning module, such as {@code AdminDocument.CONTACT}:
+	 * the names are stored as given, and {@link #untag(String, Bean)} matches the bean's own module.
+	 * 
+	 * @param tagId
+	 *            Tag the bean against this tag.
+	 * @param document
+	 *            The compile-time document reference of the bean to be tagged.
+	 * @param taggedBizId
+	 *            The bizId of the bean to be tagged.
+	 * @throws Exception
+	 */
+	default void tag(@Nonnull String tagId,
+						@Nonnull ModuleDocument document,
+						@Nonnull String taggedBizId)
+	throws Exception {
+		tag(tagId, document.moduleName(), document.documentName(), taggedBizId);
+	}
+
+	/**
 	 * Remove the bean from this tag.
 	 * 
 	 * @param tagId
@@ -89,6 +110,26 @@ public interface TagManager {
 				@Nonnull String taggedDocumentName,
 				@Nonnull String taggedBizId)
 	throws Exception;
+
+	/**
+	 * Remove the bean from this tag; a typed shortcut for {@link #untag(String, String, String, String)}.
+	 * Pass the constant of the document's owning module, such as {@code AdminDocument.CONTACT}:
+	 * the names are matched as given against those stored when the bean was tagged.
+	 * 
+	 * @param tagId
+	 *            The tag.
+	 * @param document
+	 *            The compile-time document reference of the bean to be untagged.
+	 * @param taggedBizId
+	 *            The bizId of the bean to be untagged.
+	 * @throws Exception
+	 */
+	default void untag(@Nonnull String tagId,
+						@Nonnull ModuleDocument document,
+						@Nonnull String taggedBizId)
+	throws Exception {
+		untag(tagId, document.moduleName(), document.documentName(), taggedBizId);
+	}
 
 	/**
 	 * Create a tag.

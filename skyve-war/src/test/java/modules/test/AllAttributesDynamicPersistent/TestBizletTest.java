@@ -11,13 +11,15 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 
+import modules.test.domain.TestDocument;
+
 @SuppressWarnings({ "static-method", "java:S1130" })
 class TestBizletTest {
 
 	private static final TestBizlet bizlet = new TestBizlet();
 
 	private static DynamicPersistentBean newBean() {
-		return new DynamicPersistentBean("test", "AllAttributesDynamicPersistent", new HashMap<>());
+		return new DynamicPersistentBean(TestDocument.ALL_ATTRIBUTES_DYNAMIC_PERSISTENT, new HashMap<>());
 	}
 
 	@Test

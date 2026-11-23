@@ -15,11 +15,12 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
-import modules.admin.domain.UserLoginRecord;
 
 @SuppressWarnings("static-method")
 class RDBMSAuditInterceptorTest {
@@ -30,10 +31,10 @@ class RDBMSAuditInterceptorTest {
 		return (ThreadLocal<AbstractPersistence>) field.get(null);
 	}
 
-	private static Document document(String moduleName, String documentName) {
+	private static Document document(ModuleDocument reference) {
 		Document result = mock(Document.class);
-		when(result.getOwningModuleName()).thenReturn(moduleName);
-		when(result.getName()).thenReturn(documentName);
+		when(result.getOwningModuleName()).thenReturn(reference.moduleName());
+		when(result.getName()).thenReturn(reference.documentName());
 		return result;
 	}
 
@@ -66,8 +67,8 @@ class RDBMSAuditInterceptorTest {
 		RDBMSAuditInterceptor interceptor = new RDBMSAuditInterceptor();
 		PersistentBean bean = bean("login-1", Boolean.FALSE);
 
-		boolean veto = interceptor.beforeSave(document(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME), bean);
-		interceptor.afterSave(document(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME), bean);
+		boolean veto = interceptor.beforeSave(document(AdminDocument.USER_LOGIN_RECORD), bean);
+		interceptor.afterSave(document(AdminDocument.USER_LOGIN_RECORD), bean);
 
 		assertFalse(veto);
 	}
@@ -78,9 +79,9 @@ class RDBMSAuditInterceptorTest {
 		PersistentBean bean = bean("bean-1", Boolean.TRUE);
 		AbstractPersistence persistence = bindNonAuditedPersistence();
 		try {
-			boolean veto = interceptor.beforeSave(document("admin", "DataGroup"), bean);
-			interceptor.afterSave(document("admin", "DataGroup"), bean);
-			interceptor.afterSave(document("admin", "DataGroup"), bean);
+			boolean veto = interceptor.beforeSave(document(AdminDocument.DATA_GROUP), bean);
+			interceptor.afterSave(document(AdminDocument.DATA_GROUP), bean);
+			interceptor.afterSave(document(AdminDocument.DATA_GROUP), bean);
 
 			assertFalse(veto);
 			verify(persistence).getUser();
@@ -94,7 +95,7 @@ class RDBMSAuditInterceptorTest {
 	@Test
 	void afterDeleteSkipsAuditRecords() {
 		RDBMSAuditInterceptor interceptor = new RDBMSAuditInterceptor();
-		assertDoesNotThrow(() -> interceptor.afterDelete(document("admin", Audit.DOCUMENT_NAME), new Audit()));
+		assertDoesNotThrow(() -> interceptor.afterDelete(document(AdminDocument.AUDIT), new Audit()));
 	}
 
 	@Test
@@ -103,7 +104,7 @@ class RDBMSAuditInterceptorTest {
 		PersistentBean bean = bean("bean-2", Boolean.FALSE);
 		AbstractPersistence persistence = bindNonAuditedPersistence();
 		try {
-			interceptor.afterDelete(document("admin", "DataGroup"), bean);
+			interceptor.afterDelete(document(AdminDocument.DATA_GROUP), bean);
 
 			verify(persistence).getUser();
 			verify(persistence, never()).upsertBeanTuple(org.mockito.ArgumentMatchers.any(Audit.class));

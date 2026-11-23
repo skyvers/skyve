@@ -10,8 +10,7 @@ import modules.admin.User.actions.GeneratePassword;
 import modules.admin.User.actions.New;
 import modules.admin.User.actions.Next;
 import modules.admin.User.actions.ResendActivation;
-import modules.admin.domain.Contact;
-import modules.admin.domain.Group;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 
 /**
@@ -29,16 +28,16 @@ public class UserFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static UserExtension crudInstance() {
-		UserExtension user = new DataBuilder().factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().factoryBuild(AdminDocument.USER);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);
 		user.setNewPassword(null);
 
-		user.setContact(new DataBuilder().build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
+		user.setContact(new DataBuilder().build(AdminDocument.CONTACT));
 
 		user.getGroups()
 				.add(new DataBuilder()
-						.build(Group.MODULE_NAME, Group.DOCUMENT_NAME));
+						.build(AdminDocument.GROUP));
 
 		return user;
 	}

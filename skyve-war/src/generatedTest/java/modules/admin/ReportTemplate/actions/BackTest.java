@@ -1,7 +1,7 @@
 package modules.admin.ReportTemplate.actions;
 
 import modules.admin.ReportTemplate.ReportTemplateExtension;
-import modules.admin.domain.ReportTemplate;
+import modules.admin.domain.AdminDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -21,6 +21,6 @@ public class BackTest extends AbstractActionTest<ReportTemplateExtension, Back> 
 	protected ReportTemplateExtension getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+			.build(AdminDocument.REPORT_TEMPLATE);
 	}
 }

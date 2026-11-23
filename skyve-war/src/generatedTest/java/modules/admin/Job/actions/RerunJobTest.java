@@ -1,5 +1,6 @@
 package modules.admin.Job.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Job;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class RerunJobTest extends AbstractActionTest<Job, RerunJob> {
 	protected Job getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+			.build(AdminDocument.JOB);
 	}
 }

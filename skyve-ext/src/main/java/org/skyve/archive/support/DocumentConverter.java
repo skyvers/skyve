@@ -7,6 +7,7 @@ import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -52,6 +53,18 @@ public interface DocumentConverter {
      * @return
      */
     public boolean handles(@Nonnull String module, @Nonnull String document);
+
+    /**
+     * Does this converter handle the given document? A typed shortcut for
+     * {@link #handles(String, String)}. Pass the constant of the document's owning module, such as
+     * {@code AdminDocument.AUDIT}: converters match the names as given.
+     *
+     * @param document The compile-time document reference
+     * @return true if this converter handles the referenced document
+     */
+    public default boolean handles(@Nonnull ModuleDocument document) {
+        return handles(document.moduleName(), document.documentName());
+    }
 
     /**
      * Prepare an exported bean before it is written to an archive file.

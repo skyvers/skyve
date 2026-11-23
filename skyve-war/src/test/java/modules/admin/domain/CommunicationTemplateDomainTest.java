@@ -16,7 +16,7 @@ class CommunicationTemplateDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesCommunicationTemplate() {
 		CommunicationTemplate bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(CommunicationTemplate.MODULE_NAME, CommunicationTemplate.DOCUMENT_NAME);
+				.build(AdminDocument.COMMUNICATION_TEMPLATE);
 		assertNotNull(bean);
 	}
 

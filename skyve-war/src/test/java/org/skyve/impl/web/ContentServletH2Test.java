@@ -24,6 +24,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import modules.kitchensink.domain.KitchenSink;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 class ContentServletH2Test extends AbstractSkyveTest {
@@ -159,8 +160,7 @@ class ContentServletH2Test extends AbstractSkyveTest {
 
 	private AttachmentContent putAttachment(byte[] bytes, String markup) throws Exception {
 		AttachmentContent attachment = new AttachmentContent(c.getName(),
-				KitchenSink.MODULE_NAME,
-				KitchenSink.DOCUMENT_NAME,
+				KitchensinkDocument.KITCHEN_SINK,
 				null,
 				u.getId(),
 				"bizId",

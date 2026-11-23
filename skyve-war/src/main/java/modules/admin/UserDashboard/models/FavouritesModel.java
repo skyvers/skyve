@@ -8,6 +8,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ReferenceListModel;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Generic;
 import modules.admin.domain.UserDashboard;
 
@@ -23,7 +24,7 @@ public class FavouritesModel extends ReferenceListModel<Generic> {
 	 * @throws Exception If model initialisation fails.
 	 */
 	public FavouritesModel() throws Exception {
-		super(Generic.MODULE_NAME, Generic.DOCUMENT_NAME, UserDashboard.favouritesPropertyName);
+		super(AdminDocument.GENERIC, UserDashboard.favouritesPropertyName);
 	}
 
 	/**

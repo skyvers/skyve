@@ -22,6 +22,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.Jobs.JobsBizlet;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import modules.admin.domain.CommunicationTemplate;
 import modules.admin.domain.Tag;
@@ -144,7 +145,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		if (Communication.tagPropertyName.equals(attributeName)) {
 
 			// look for OTHER tags
-			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			DocumentQuery q = pers.newDocumentQuery(AdminDocument.TAG);
 			q.addBoundOrdering(Tag.namePropertyName);
 
 			List<Tag> tags = q.beanResults();
@@ -152,7 +153,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 				result.add(new DomainValue(t.getBizId(), t.getName()));
 			}
 		} else if (Communication.templatePropertyName.equals(attributeName)) {
-			DocumentQuery q = pers.newDocumentQuery(CommunicationTemplate.MODULE_NAME, CommunicationTemplate.DOCUMENT_NAME);
+			DocumentQuery q = pers.newDocumentQuery(AdminDocument.COMMUNICATION_TEMPLATE);
 			List<CommunicationTemplate> templates = q.beanResults();
 			result.addAll(templates.stream()
 					.map(t -> new DomainValue(t.getBizId(), t.getBizKey()))
@@ -174,8 +175,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			Persistence pers = CORE.getPersistence();
 			User user = pers.getUser();
 			Customer customer = user.getCustomer();
-			Module module = customer.getModule(Communication.MODULE_NAME);
-			Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
+			Document document = AdminDocument.COMMUNICATION.toDocument(customer);
 
 			StringBuilder sb = new StringBuilder(64);
 			@SuppressWarnings("null")

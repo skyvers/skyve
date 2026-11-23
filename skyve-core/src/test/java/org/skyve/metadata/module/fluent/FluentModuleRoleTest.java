@@ -5,10 +5,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Collections;
 import java.util.Set;
@@ -21,6 +23,7 @@ import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.UserAccess;
 
@@ -897,5 +900,25 @@ class FluentModuleRoleTest {
 
 		assertNotNull(result.findPrivilege("Contact"));
 		assertFalse(result.findPrivilege("Contact").get().getContentRestrictions().isEmpty());
+	}
+
+	@Test
+	@SuppressWarnings("null") // a null here fails the test
+	void typedReportAccessMethodsMatchTheStringForms() {
+		FluentModuleRoleReportAccess contacts = new FluentModuleRoleReportAccess();
+		contacts.moduleName("admin").documentName("Contact").reportName("rContacts");
+		FluentModuleRoleReportAccess other = new FluentModuleRoleReportAccess();
+		other.moduleName("admin").documentName("Contact").reportName("rOther");
+		fluent.addReportAccess(contacts);
+		fluent.addReportAccess(other);
+
+		FluentModuleRoleReportAccess found = fluent.findReportAccess(TestDocument.CONTACT, "rContacts");
+		FluentModuleRole removed = fluent.removeReportAccess(TestDocument.CONTACT, "rContacts");
+
+		assertAll(() -> assertSame(contacts.get(), found.get()),
+					() -> assertNull(fluent.findReportAccess(TestDocument.CONTACT, "rMissing")),
+					() -> assertSame(fluent, removed),
+					() -> assertEquals(1, fluent.get().getAccesses().size()),
+					() -> assertThat(fluent.get().getAccesses(), hasItem(other.get())));
 	}
 }

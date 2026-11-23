@@ -17,7 +17,9 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.document.ModuleDocument;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.Content;
@@ -36,7 +38,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 
 	@Test
 	void createTileForInsertUsesCreateActionTextAndIcon() throws Exception {
-		Tile tile = createTile(Operation.insert, User.MODULE_NAME, User.DOCUMENT_NAME, null, "Suggested for creation");
+		Tile tile = createTile(Operation.insert, AdminDocument.USER, null, "Suggested for creation");
 
 		assertNotNull(tile);
 		assertThat(tile.getOperation(), is(Tile.Operation.insert.toString()));
@@ -47,7 +49,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 
 	@Test
 	void createTileForUpdateUsesPersistentUpdateAction() throws Exception {
-		Tile tile = createTile(Operation.update, User.MODULE_NAME, User.DOCUMENT_NAME, null, "Recent by me");
+		Tile tile = createTile(Operation.update, AdminDocument.USER, null, "Recent by me");
 
 		assertNotNull(tile);
 		assertThat(tile.getOperation(), is(Tile.Operation.update.toString()));
@@ -57,7 +59,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 
 	@Test
 	void createTileForDeleteUsesDeleteAction() throws Exception {
-		Tile tile = createTile(Operation.delete, User.MODULE_NAME, User.DOCUMENT_NAME, null, "Delete test");
+		Tile tile = createTile(Operation.delete, AdminDocument.USER, null, "Delete test");
 
 		assertNotNull(tile);
 		assertThat(tile.getOperation(), is(Tile.Operation.delete.toString()));
@@ -67,7 +69,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 
 	@Test
 	void createTileForNonPersistentUpdateUsesViewAction() throws Exception {
-		Tile tile = createTile(Operation.update, Content.MODULE_NAME, Content.DOCUMENT_NAME, null, "View content");
+		Tile tile = createTile(Operation.update, AdminDocument.CONTENT, null, "View content");
 
 		assertNotNull(tile);
 		assertThat(tile.getOperation(), is(Tile.Operation.view.toString()));
@@ -80,7 +82,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 		Content content = Content.newInstance();
 		content.setContent("content-id-123");
 
-		Tile tile = createTile(Operation.update, Content.MODULE_NAME, Content.DOCUMENT_NAME, content, "Recent content");
+		Tile tile = createTile(Operation.update, AdminDocument.CONTENT, content, "Recent content");
 
 		assertNotNull(tile);
 		assertThat(tile.getTitle(), containsString("View  Content - modules.admin.domain.Content@"));
@@ -106,7 +108,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 
 	@Test
 	void checkModuleDocumentCanBeReadReturnsTrueForKnownReadableDocument() throws Exception {
-		assertTrue(checkModuleDocumentCanBeRead(User.MODULE_NAME, User.DOCUMENT_NAME));
+		assertTrue(checkModuleDocumentCanBeRead(AdminDocument.USER));
 	}
 
 	@Test
@@ -120,7 +122,7 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 		UserDashboardExtension dashboard = new UserDashboardExtension();
 		List<org.skyve.domain.Bean> audits = List.of(
 				auditProjection(100L, "missing", "Missing"),
-				auditProjection(200L, User.MODULE_NAME, User.DOCUMENT_NAME));
+				auditProjection(200L, AdminDocument.USER));
 
 		createTilesRecent(dashboard, audits, Operation.insert, 2, "Recently created");
 
@@ -129,6 +131,11 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 		assertTrue(tiles.stream().allMatch(tile -> Tile.Operation.insert.toString().equals(tile.getOperation())));
 		assertTrue(tiles.stream().allMatch(tile -> tile.toMarkup().contains("Recently created")));
 		assertTrue(tiles.stream().anyMatch(tile -> tile.getTitle().contains("User")));
+	}
+
+	private static Tile createTile(Operation operation, ModuleDocument document, org.skyve.domain.Bean bean, String reason)
+	throws Exception {
+		return createTile(operation, document.moduleName(), document.documentName(), bean, reason);
 	}
 
 	private static Tile createTile(Operation operation, String moduleName, String documentName, org.skyve.domain.Bean bean,
@@ -183,12 +190,20 @@ class UserDashboardExtensionTest extends AbstractH2Test {
 		return (Set<Tile>) field.get(dashboard);
 	}
 
+	private static Audit auditProjection(long timestamp, ModuleDocument document) {
+		return auditProjection(timestamp, document.moduleName(), document.documentName());
+	}
+
 	private static Audit auditProjection(long timestamp, String moduleName, String documentName) {
 		Audit audit = Audit.newInstance();
 		audit.setTimestamp(new Timestamp(timestamp));
 		audit.setAuditModuleName(moduleName);
 		audit.setAuditDocumentName(documentName);
 		return audit;
+	}
+
+	private static boolean checkModuleDocumentCanBeRead(ModuleDocument document) throws Exception {
+		return checkModuleDocumentCanBeRead(document.moduleName(), document.documentName());
 	}
 
 	private static boolean checkModuleDocumentCanBeRead(String moduleName, String documentName) throws Exception {

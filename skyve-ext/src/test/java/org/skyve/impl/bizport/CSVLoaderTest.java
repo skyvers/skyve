@@ -24,6 +24,7 @@ import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
@@ -87,6 +88,20 @@ class CSVLoaderTest {
 		assertThrows(DomainException.class, () -> loader.getDateFieldValue(0));
 	}
 
+	@Test
+	void typedConstructorLoadsIntoTheReferencedDocument() throws Exception {
+		Customer customer = customer();
+		bindPersistenceWithCustomer(customer);
+		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL,
+				new ByteArrayInputStream("name\nAlice\n".getBytes(StandardCharsets.UTF_8)),
+				new UploadException(),
+				SalesDocument.ORDER);
+
+		assertThat(loader.moduleName, is("sales"));
+		assertThat(loader.documentName, is("Order"));
+		assertThat(loader.document, is(customer.getModule("sales").getDocument(customer, "Order")));
+	}
+
 	private static CSVLoader csv(String contents) {
 		return new CSVLoader(LoaderActivityType.CREATE_ALL,
 				new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)),
@@ -122,5 +137,20 @@ class CSVLoaderTest {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
+	}
+
+	/** References sales.Order, as a generated document enum does. */
+	private enum SalesDocument implements ModuleDocument {
+		ORDER;
+
+		@Override
+		public String moduleName() {
+			return "sales";
+		}
+
+		@Override
+		public String documentName() {
+			return "Order";
+		}
 	}
 }

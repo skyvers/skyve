@@ -20,7 +20,7 @@ class SelfRegistrationDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesSelfRegistration() {
 		SelfRegistration bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(SelfRegistration.MODULE_NAME, SelfRegistration.DOCUMENT_NAME);
+				.build(AdminDocument.SELF_REGISTRATION);
 		assertNotNull(bean);
 	}
 

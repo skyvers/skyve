@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import modules.kitchensink.domain.DialogsFixture;
 import modules.kitchensink.domain.DialogsFixtureRow;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 /**
@@ -357,7 +358,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	private int count() {
 		Persistence persistence = freshPersistence();
 		try {
-			Number result = persistence.newDocumentQuery(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME)
+			Number result = persistence.newDocumentQuery(KitchensinkDocument.DIALOGS_FIXTURE)
 											.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "count")
 											.scalarResult(Number.class);
 			assertNotNull(result);
@@ -374,7 +375,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	private DialogsFixture retrieveOnly() {
 		Persistence persistence = freshPersistence();
 		try {
-			DialogsFixture result = persistence.newDocumentQuery(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME).beanResult();
+			DialogsFixture result = persistence.newDocumentQuery(KitchensinkDocument.DIALOGS_FIXTURE).beanResult();
 			assertNotNull(result);
 			return result;
 		}

@@ -1,5 +1,6 @@
 package modules.admin.ReportTemplate.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ReportTemplate;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class AddUserToEmailTest extends AbstractActionTest<ReportTemplate, AddUs
 	protected ReportTemplate getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+			.build(AdminDocument.REPORT_TEMPLATE);
 	}
 }

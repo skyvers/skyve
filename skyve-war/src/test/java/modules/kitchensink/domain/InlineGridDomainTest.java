@@ -23,7 +23,7 @@ class InlineGridDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		InlineGrid bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(InlineGrid.MODULE_NAME, InlineGrid.DOCUMENT_NAME);
+				.build(KitchensinkDocument.INLINE_GRID);
 		assertNotNull(bean);
 	}
 

@@ -25,6 +25,7 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -33,11 +34,13 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.web.SortParameter;
 
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.kitchensink.domain.LookupDescription;
 import modules.kitchensink.domain.ModelLookupFixture;
 import modules.test.domain.AllAttributesEmbedded;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
+import modules.test.domain.TestDocument;
 import util.AbstractH2Test;
 
 /**
@@ -115,7 +118,7 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		persistence.save(fixture("AF n", null));
 		persistence.flush();
 
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		SortParameterImpl sort = new SortParameterImpl();
 		sort.setBy(DESCRIPTION);
@@ -145,7 +148,7 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 
 		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean, {" +
 						LookupDescription.MODULE_NAME + '.' + LookupDescription.DOCUMENT_NAME + "} as other";
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, from);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "alpha"), f -> f.addNull(DESCRIPTION));
 		Page page = model.fetch();
 		Set<String> names = new TreeSet<>();
@@ -175,7 +178,7 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 
 		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean inner join bean." +
 						ModelLookupFixture.selectionPropertyName + " as s";
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, from);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		assertEquals(Set.of("AF b"), fetch(model, ModelLookupFixture.namePropertyName));
 		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
@@ -199,12 +202,12 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 
 		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean left outer join bean." +
 						ModelLookupFixture.selectionPropertyName + " as s with s." + LookupDescription.descriptionPropertyName + " = 'alpha'";
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, from);
 		model.getFilter().addEquals(DESCRIPTION, "beta");
 		assertEquals(Set.of(), fetch(model, ModelLookupFixture.namePropertyName));
 		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
 
-		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, from);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		Page page = model.fetch();
 		assertEquals(Set.of("AF n"), names(page, ModelLookupFixture.namePropertyName));
@@ -231,7 +234,7 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 
 		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean left outer join bean." +
 						ModelLookupFixture.selectionPropertyName + " as s with s." + LookupDescription.descriptionPropertyName + " = 'alpha'";
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, from);
 		matchAny(model,
 					f -> f.addEquals(DESCRIPTION, "beta"),
 					f -> f.addEquals(ModelLookupFixture.singleSelectionPropertyName + '.' + LookupDescription.descriptionPropertyName, "beta"),
@@ -259,22 +262,22 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 
 		// the rows first, as they are the same with the join
 		String selectionBizId = ModelLookupFixture.selectionPropertyName + '.' + Bean.DOCUMENT_ID;
-		DocumentQueryListModel<Bean> matchAny = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> matchAny = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		matchAny(matchAny, f -> f.addEquals(selectionBizId, beta.getBizId()), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		Page page = matchAny.fetch();
 		assertEquals(Set.of("AF b", "AF n"), names(page, ModelLookupFixture.namePropertyName));
 		assertEquals(2L, page.getTotalRows());
 
-		DocumentQueryListModel<Bean> notEquals = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> notEquals = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		notEquals.getFilter().addNotEquals(selectionBizId, alpha.getBizId());
 		assertEquals(Set.of("AF b"), fetch(notEquals, ModelLookupFixture.namePropertyName));
 
-		DocumentQueryListModel<Bean> isNull = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> isNull = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		isNull.getFilter().addNull(selectionBizId);
 		assertEquals(Set.of("AF n"), fetch(isNull, ModelLookupFixture.namePropertyName));
 
 		// the association's own attribute is on its table, so it is joined
-		DocumentQueryListModel<Bean> description = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> description = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		matchAny(description, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		assertEquals(Set.of("AF b", "AF n"), fetch(description, ModelLookupFixture.namePropertyName));
 
@@ -444,7 +447,7 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		persistence.save(withoutEmbedded);
 		persistence.flush();
 
-		DocumentQueryListModel<Bean> model = defaultQueryModel(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		matchAny(model,
 					f -> f.addEquals(AllAttributesPersistent.embeddedAssociationPropertyName + '.' + AllAttributesEmbedded.textPropertyName, "inside"),
 					f -> f.addEquals(AllAttributesPersistent.textPropertyName, "without"));
@@ -473,32 +476,32 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	private static Set<String> fixtures(FilterParameter parameter) throws Exception {
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		model.addParameters(model.getDrivingDocument(), List.of(parameter), null);
 		return fetch(model, ModelLookupFixture.namePropertyName);
 	}
 
 	private static Set<String> fixtures(Consumer<Filter> filtering) throws Exception {
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(KitchensinkDocument.MODEL_LOOKUP_FIXTURE);
 		filtering.accept(model.getFilter());
 		return fetch(model, ModelLookupFixture.namePropertyName);
 	}
 
 	private static Set<String> inverses(Consumer<Filter> filtering) throws Exception {
-		DocumentQueryListModel<Bean> model = defaultQueryModel(InverseOneToOnePersistent.MODULE_NAME, InverseOneToOnePersistent.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = defaultQueryModel(TestDocument.INVERSE_ONE_TO_ONE_PERSISTENT);
 		filtering.accept(model.getFilter());
 		return fetch(model, Bean.DOCUMENT_ID);
 	}
 
-	private static DocumentQueryListModel<Bean> defaultQueryModel(String moduleName, String documentName) {
-		return defaultQueryModel(moduleName, documentName, null);
+	private static DocumentQueryListModel<Bean> defaultQueryModel(ModuleDocument queried) {
+		return defaultQueryModel(queried, null);
 	}
 
 	/** The document's default query, from the given from clause if there is one. */
-	private static DocumentQueryListModel<Bean> defaultQueryModel(String moduleName, String documentName, String from) {
+	private static DocumentQueryListModel<Bean> defaultQueryModel(ModuleDocument queried, String from) {
 		Customer customer = CORE.getCustomer();
-		Module module = customer.getModule(moduleName);
-		Document document = module.getDocument(customer, documentName);
+		Module module = queried.toModule(customer);
+		Document document = queried.toDocument(customer);
 		MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 		if (from != null) {
 			((MetaDataQueryDefinitionImpl) query).setFromClause(from);

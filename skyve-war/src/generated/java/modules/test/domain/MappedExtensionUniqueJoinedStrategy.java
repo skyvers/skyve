@@ -48,7 +48,7 @@ public class MappedExtensionUniqueJoinedStrategy extends MappedBase {
 
 	public static MappedExtensionUniqueJoinedStrategy newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.MAPPED_EXTENSION_UNIQUE_JOINED_STRATEGY.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

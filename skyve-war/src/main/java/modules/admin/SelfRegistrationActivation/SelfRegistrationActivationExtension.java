@@ -8,6 +8,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
@@ -30,7 +31,7 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 	public UserExtension activateUser(String activationCode) {
 		// temporarily escalate access to query and save users
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
-			DocumentQuery userQuery = p.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+			DocumentQuery userQuery = p.newDocumentQuery(AdminDocument.USER);
 			userQuery.getFilter().addEquals(User.activationCodePropertyName, activationCode);
 
 			UserExtension result = userQuery.beanResult();

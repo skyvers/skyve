@@ -201,7 +201,7 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 
 	public static InlineGrid newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return KitchensinkDocument.INLINE_GRID.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

@@ -11,6 +11,7 @@ import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.MailLog.MailLogService;
+import modules.admin.domain.AdminDocument;
 
 @SuppressWarnings("static-method")
 class MailLogListExtensionTest {
@@ -25,7 +26,7 @@ class MailLogListExtensionTest {
 	void testShowArchivedTrueWhenMailLogArchivingConfigured() throws Exception {
 		UtilImpl.ARCHIVE_CONFIG = new UtilImpl.ArchiveConfig(300,
 												100,
-												java.util.List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig("admin", "MailLog", "maillog-archive", 30)),
+												java.util.List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig(AdminDocument.MAIL_LOG, "maillog-archive", 30)),
 												ArchivedDocumentCacheConfig.DEFAULT,
 												UtilImpl.ArchiveConfig.ArchiveSchedule.DEFUALT);
 

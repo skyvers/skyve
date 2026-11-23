@@ -10,6 +10,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.Snapshot.SnapshotService;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Snapshot;
 import modules.admin.domain.Snapshots;
 
@@ -67,7 +68,7 @@ public class SnapshotsBizlet extends Bizlet<Snapshots> {
 		} else if (Snapshots.queryNamePropertyName.equals(source)) {
 			List<Snapshot> snapshotsToReorder = bean.getSnapshotsToReorder();
 			snapshotsToReorder.clear();
-			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+			DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.SNAPSHOT);
 			DocumentFilter f = q.getFilter();
 			f.addEquals(Snapshot.moduleNamePropertyName, bean.getModuleName());
 			f.addEquals(Snapshot.queryNamePropertyName, bean.getQueryName());

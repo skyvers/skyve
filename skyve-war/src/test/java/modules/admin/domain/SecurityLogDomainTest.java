@@ -16,7 +16,7 @@ class SecurityLogDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		SecurityLog bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(SecurityLog.MODULE_NAME, SecurityLog.DOCUMENT_NAME);
+				.build(AdminDocument.SECURITY_LOG);
 		assertNotNull(bean);
 	}
 

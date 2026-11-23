@@ -14,6 +14,6 @@ public class DialogsFixtureTest extends AbstractDomainTest<DialogsFixture> {
 	protected DialogsFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.DIALOGS_FIXTURE);
 	}
 }

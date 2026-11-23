@@ -27,6 +27,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.FileUtil;
 
 import modules.admin.HeapDumpList.util.HeapDumpUtil;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DownloadFolder;
 import modules.admin.domain.HeapDumpList;
 
@@ -48,7 +49,7 @@ public class HeapDumpsModel extends ListModel<HeapDumpList> {
 	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
-		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
+		drivingDocument = AdminDocument.DOWNLOAD_FOLDER.toDocument(customer);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
@@ -240,7 +241,7 @@ public class HeapDumpsModel extends ListModel<HeapDumpList> {
 				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 				properties.put(Bean.BIZ_KEY, backupName);
 				properties.put(DownloadFolder.namePropertyName, backupName);
-				rows.add(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+				rows.add(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 
 				if (i >= end) {
 					break;
@@ -256,7 +257,7 @@ public class HeapDumpsModel extends ListModel<HeapDumpList> {
 
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-		page.setSummary(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+		page.setSummary(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 		
 		return page;
 	}

@@ -18,12 +18,14 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Job.JobExtension;
 import modules.admin.Job.JobFactory;
 import modules.admin.Tag.TagExtension;
 import modules.admin.Tag.TagFactory;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Job;
 import modules.admin.domain.Tag;
@@ -44,7 +46,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		db = new DataBuilder();
 
 		// use factoryBuild to ignore anything in the UserFactory
-		User result1 = db.optional(true, true).factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User result1 = db.optional(true, true).factoryBuild(AdminDocument.USER);
 
 		// validate the test data
 		assertNull(getFieldValue(db, "cardinalities"), "cardinality should be null initially");
@@ -53,7 +55,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 
 		// call the method under test
 		db.cardinality(User.groupsPropertyName, expectedCardinality);
-		User result2 = db.factoryBuild(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User result2 = db.factoryBuild(AdminDocument.USER);
 
 		// verify the result
 		java.util.Map<String, Integer> cardinalities = getFieldValue(db, "cardinalities");
@@ -68,7 +70,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		// call the method under test
-		Contact result = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact result = db.build(AdminDocument.CONTACT);
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -85,7 +87,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
 		// call the method under test
-		Contact result = db.factoryBuild(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact result = db.factoryBuild(AdminDocument.CONTACT);
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -100,7 +102,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 	void testNameConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
-		Contact result1 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact result1 = db.build(AdminDocument.CONTACT);
 
 		// validate the test data
 		assertNull(getFieldValue(db, "names"), "name should be null initially");
@@ -108,7 +110,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 
 		// call the method under test
 		db.name(Contact.email1PropertyName, false);
-		Contact result2 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact result2 = db.build(AdminDocument.CONTACT);
 
 		// verify the result
 		java.util.Map<String, Boolean> types = getFieldValue(db, "names");
@@ -121,7 +123,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 		// setup the test data
 		db = new DataBuilder();
 		// use factoryBuild to ignore the TagFactory, whose own DataBuilder has no type configuration
-		Tag result1 = db.factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag result1 = db.factoryBuild(AdminDocument.TAG);
 
 		// validate the test data
 		assertNull(getFieldValue(db, "types"), "type should be null initially");
@@ -129,7 +131,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 
 		// call the method under test
 		db.type(AttributeType.bool, false);
-		Tag result2 = db.factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag result2 = db.factoryBuild(AdminDocument.TAG);
 
 		// verify the result
 		java.util.Map<AttributeType, Boolean> types = getFieldValue(db, "types");
@@ -145,7 +147,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void testTagFactoryBuildsTheCrudFixture() {
 		StringBuilder trace = new StringBuilder();
-		Tag result = tracedCrudBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, trace);
+		Tag result = tracedCrudBuild(AdminDocument.TAG, trace);
 
 		assertAll(() -> assertTrue(trace.indexOf("Invoking method " + TagFactory.class.getName() + "::crudInstance for fixture crud") >= 0, trace::toString),
 					() -> assertInstanceOf(TagExtension.class, result),
@@ -161,7 +163,7 @@ class DataBuilderH2Test extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void testJobFactoryBuildsTheCrudFixture() {
 		StringBuilder trace = new StringBuilder();
-		Job result = tracedCrudBuild(Job.MODULE_NAME, Job.DOCUMENT_NAME, trace);
+		Job result = tracedCrudBuild(AdminDocument.JOB, trace);
 
 		assertAll(() -> assertTrue(trace.indexOf("Invoking method " + JobFactory.class.getName() + "::crudInstance for fixture crud") >= 0, trace::toString),
 					() -> assertInstanceOf(JobExtension.class, result));
@@ -172,13 +174,13 @@ class DataBuilderH2Test extends AbstractH2Test {
 	 *
 	 * @param trace	Receives what the trace printed.
 	 */
-	private static <T extends Bean> T tracedCrudBuild(String moduleName, String documentName, StringBuilder trace) {
+	private static <T extends Bean> T tracedCrudBuild(ModuleDocument document, StringBuilder trace) {
 		PrintStream out = System.out;
 		ByteArrayOutputStream traced = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(traced, true, StandardCharsets.UTF_8));
 		DataBuilder.setTrace(true);
 		try {
-			return new DataBuilder().fixture(FixtureType.crud).build(moduleName, documentName);
+			return new DataBuilder().fixture(FixtureType.crud).build(document);
 		}
 		finally {
 			DataBuilder.setTrace(false);

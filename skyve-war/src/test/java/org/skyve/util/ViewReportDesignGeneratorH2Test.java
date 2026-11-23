@@ -10,12 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ViewReportDesignGenerator;
+import org.skyve.metadata.model.document.ModuleDocument;
 
-import modules.admin.domain.JobSchedule;
-import modules.admin.domain.ReportParameter;
-import modules.admin.domain.Snapshot;
-import modules.test.domain.ArcOneToMany;
-import modules.test.domain.ArcOneToOne;
+import modules.admin.domain.AdminDocument;
+import modules.test.domain.TestDocument;
 
 import util.AbstractH2Test;
 
@@ -31,10 +29,10 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	// --- helpers ---
 
-	private static DesignSpecification viewSpec(String module, String document) {
+	private static DesignSpecification viewSpec(ModuleDocument document) {
 		DesignSpecification spec = new DesignSpecification();
-		spec.setModuleName(module);
-		spec.setDocumentName(document);
+		spec.setModuleName(document.moduleName());
+		spec.setDocumentName(document.documentName());
 		spec.setUxui("external");
 		spec.setMode(DesignSpecification.Mode.bean);
 		spec.setName("test");
@@ -57,7 +55,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForArcOneToOneAddsParameters() {
-		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_ONE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		assertTrue(result.getParameters().stream().anyMatch(p -> "SUBREPORT_DIR".equals(p.getName())),
@@ -69,7 +67,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignForArcOneToOneAddsStandardBands() {
-		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_ONE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		assertFalse(result.getBands().isEmpty(), "expected at least one band");
@@ -81,7 +79,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForArcOneToOneProducesJrxml() throws Exception {
-		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_ONE);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
@@ -95,7 +93,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignForSnapshotAddsDetailBandsFromForm() {
-		DesignSpecification spec = viewSpec(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.SNAPSHOT);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		// Snapshot has a form with combo and textArea widgets — visitor should produce detail bands
@@ -106,7 +104,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForSnapshotProducesJrxml() throws Exception {
-		DesignSpecification spec = viewSpec(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.SNAPSHOT);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
@@ -119,7 +117,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForArcOneToManyAddsDetailBandsForDataGrid() {
-		DesignSpecification spec = viewSpec(ArcOneToMany.MODULE_NAME, ArcOneToMany.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_MANY);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		// ArcOneToMany has a dataGrid binding="arcs" — visitor should produce at least one detail band
@@ -131,7 +129,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForJobScheduleAddsParametersAndBands() {
-		DesignSpecification spec = viewSpec(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.JOB_SCHEDULE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		assertFalse(result.getBands().isEmpty(), "expected bands from JobSchedule view");
@@ -141,7 +139,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForJobScheduleProducesJrxml() throws Exception {
-		DesignSpecification spec = viewSpec(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.JOB_SCHEDULE);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
@@ -154,7 +152,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForReportParameterAddsParametersAndBands() {
-		DesignSpecification spec = viewSpec(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.REPORT_PARAMETER);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		assertFalse(result.getBands().isEmpty(), "expected bands from ReportParameter view");
@@ -164,7 +162,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignForReportParameterProducesJrxml() throws Exception {
-		DesignSpecification spec = viewSpec(ReportParameter.MODULE_NAME, ReportParameter.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(AdminDocument.REPORT_PARAMETER);
 		new ViewReportDesignGenerator().populateDesign(spec);
 
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
@@ -176,7 +174,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	@Test
 	void populateDesignWithReportTypeAndSectionBorderAddsBorderElementToTitleBand() {
-		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_ONE);
 		spec.setSectionBorderTop(Boolean.TRUE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
@@ -193,7 +191,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
-		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
+		DesignSpecification spec = viewSpec(TestDocument.ARC_ONE_TO_ONE);
 		spec.setIncludePageNumbers(Boolean.TRUE);
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 

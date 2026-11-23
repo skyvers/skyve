@@ -43,6 +43,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.WebContext;
 
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
 import util.AbstractH2Test;
@@ -75,7 +76,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
 
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.DATA_MAINTENANCE);
 		webContext = new MockWebContext();
 	}
 
@@ -301,7 +302,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 		bean.setAuditTimestampStart(start);
 		bean.setAuditTimestampEnd(end);
 		bean.setAuditUser(auditUser);
-		when(persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.AUDIT)).thenReturn(query);
 		when(query.getFilter()).thenReturn(filter);
 
 		DocumentQuery result = TruncateAuditLog.getAuditQuery(persistence, bean);
@@ -320,7 +321,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);
-		when(persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.AUDIT)).thenReturn(query);
 		when(query.getFilter()).thenReturn(filter);
 		when(query.addAggregateProjection(AggregateFunction.Count, org.skyve.domain.Bean.DOCUMENT_ID, "CountOfAudits"))
 				.thenReturn(query);

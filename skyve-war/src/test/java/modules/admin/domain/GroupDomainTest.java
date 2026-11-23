@@ -17,7 +17,7 @@ class GroupDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		Group bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+				.build(AdminDocument.GROUP);
 		assertNotNull(bean);
 	}
 

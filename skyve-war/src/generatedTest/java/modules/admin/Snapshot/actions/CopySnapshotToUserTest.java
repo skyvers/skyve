@@ -1,5 +1,6 @@
 package modules.admin.Snapshot.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Snapshot;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class CopySnapshotToUserTest extends AbstractActionTest<Snapshot, CopySna
 	protected Snapshot getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+			.build(AdminDocument.SNAPSHOT);
 	}
 }

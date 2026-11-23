@@ -15,8 +15,8 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import jakarta.inject.Inject;
 import modules.admin.Communication.CommunicationExtension;
 import modules.admin.Tag.TagExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Tag;
 import util.AbstractH2Test;
 
 /**
@@ -35,8 +35,8 @@ class SendNowH2Test extends AbstractH2Test {
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
-		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		tag = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		communication = db.build(AdminDocument.COMMUNICATION);
+		tag = db.build(AdminDocument.TAG);
 	}
 
 	@Test

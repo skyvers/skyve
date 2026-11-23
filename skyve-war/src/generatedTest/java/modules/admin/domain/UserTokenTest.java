@@ -14,6 +14,6 @@ public class UserTokenTest extends AbstractDomainTest<UserToken> {
 	protected UserToken getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(UserToken.MODULE_NAME, UserToken.DOCUMENT_NAME);
+			.build(AdminDocument.USER_TOKEN);
 	}
 }

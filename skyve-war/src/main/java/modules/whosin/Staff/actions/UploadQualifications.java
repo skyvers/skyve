@@ -12,10 +12,12 @@ import org.skyve.impl.bizport.CSVLoader;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.web.WebContext;
 
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.StaffQualification;
+import modules.whosin.domain.WhosinDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -40,8 +42,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 			try (InputStream is = upload.getInputStream()) {
 				int sheetIndex = 0;
 				QualificationLoader pl = newPOISheetLoader(LoaderActivityType.CREATE_ALL, is, sheetIndex, exception,
-						StaffQualification.MODULE_NAME, 
-						StaffQualification.DOCUMENT_NAME);
+						WhosinDocument.STAFF_QUALIFICATION);
 				
 				pl.addFields(StaffQualification.namePropertyName, 
 				StaffQualification.typePropertyName,
@@ -58,8 +59,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 		} else if (upload.getFileName().endsWith(MimeType.csv.getStandardFileSuffix())) {
 			try (InputStream is = upload.getInputStream()) {
 				QualificationLoader dl = newCSVLoader(LoaderActivityType.CREATE_ALL, is, exception,
-						StaffQualification.MODULE_NAME, 
-						StaffQualification.DOCUMENT_NAME,
+						WhosinDocument.STAFF_QUALIFICATION,
 						StaffQualification.namePropertyName, 
 						StaffQualification.typePropertyName,
 						StaffQualification.issuingOrganisationPropertyName, 
@@ -87,20 +87,18 @@ public class UploadQualifications extends UploadAction<Staff> {
 			@Nonnull InputStream is,
 			int sheetIndex,
 			@Nonnull UploadException exception,
-			@Nonnull String moduleName,
-			@Nonnull String documentName)
+			@Nonnull ModuleDocument document)
 	throws Exception {
-		return new POISheetQualificationLoader(new POISheetLoader(activityType, is, sheetIndex, exception, moduleName, documentName));
+		return new POISheetQualificationLoader(new POISheetLoader(activityType, is, sheetIndex, exception, document));
 	}
 
 	@SuppressWarnings("static-method") // test seam
 	protected @Nonnull QualificationLoader newCSVLoader(@Nonnull LoaderActivityType activityType,
 			@Nonnull InputStream is,
 			@Nonnull UploadException exception,
-			@Nonnull String moduleName,
-			@Nonnull String documentName,
+			@Nonnull ModuleDocument document,
 			@Nonnull String... bindings) {
-		return new CSVQualificationLoader(new CSVLoader(activityType, is, exception, moduleName, documentName, bindings));
+		return new CSVQualificationLoader(new CSVLoader(activityType, is, exception, document, bindings));
 	}
 
 	protected interface QualificationLoader {

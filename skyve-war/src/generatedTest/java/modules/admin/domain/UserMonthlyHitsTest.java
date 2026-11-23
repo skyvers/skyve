@@ -14,6 +14,6 @@ public class UserMonthlyHitsTest extends AbstractDomainTest<UserMonthlyHits> {
 	protected UserMonthlyHits getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(UserMonthlyHits.MODULE_NAME, UserMonthlyHits.DOCUMENT_NAME);
+			.build(AdminDocument.USER_MONTHLY_HITS);
 	}
 }

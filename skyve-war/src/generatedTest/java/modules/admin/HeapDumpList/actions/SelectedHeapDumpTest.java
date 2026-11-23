@@ -1,5 +1,6 @@
 package modules.admin.HeapDumpList.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.HeapDumpList;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class SelectedHeapDumpTest extends AbstractActionTest<HeapDumpList, Selec
 	protected HeapDumpList getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(HeapDumpList.MODULE_NAME, HeapDumpList.DOCUMENT_NAME);
+			.build(AdminDocument.HEAP_DUMP_LIST);
 	}
 }

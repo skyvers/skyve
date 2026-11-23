@@ -1,5 +1,6 @@
 package modules.admin.Snapshots.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Snapshots;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class ReorderTest extends AbstractActionTest<Snapshots, Reorder> {
 	protected Snapshots getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Snapshots.MODULE_NAME, Snapshots.DOCUMENT_NAME);
+			.build(AdminDocument.SNAPSHOTS);
 	}
 }

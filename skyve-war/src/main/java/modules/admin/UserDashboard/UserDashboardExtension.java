@@ -29,10 +29,10 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.Generic;
-import modules.admin.domain.Job;
 import modules.admin.domain.UserDashboard;
 
 /**
@@ -67,8 +67,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	@SuppressWarnings("static-method")
 	public boolean canReadJobs() {
-		Module module = CORE.getCustomer().getModule(Job.MODULE_NAME);
-		Document document = module.getDocument(CORE.getCustomer(), Job.DOCUMENT_NAME);
+		Document document = AdminDocument.JOB.toDocument();
 
 		return CORE.getUser().canReadDocument(document);
 	}
@@ -158,7 +157,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	private List<Bean> popularUpdates(UserExtension filterUser) {
 
-		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery q = persistence.newDocumentQuery(AdminDocument.AUDIT);
 		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
@@ -186,7 +185,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return Projected insert audit rows ordered by recency.
 	 */
 	private List<Bean> recentInsertDocuments(UserExtension filterUser) {
-		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery q = persistence.newDocumentQuery(AdminDocument.AUDIT);
 		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addEquals(Audit.operationPropertyName, Operation.insert);
 		q.getFilter().addNotEquals(Audit.auditModuleNamePropertyName, Audit.MODULE_NAME);
@@ -494,7 +493,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	private List<Bean> recentUpdates(UserExtension filterUser) {
 
-		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery q = persistence.newDocumentQuery(AdminDocument.AUDIT);
 		q.getFilter().addGreaterThan(Audit.millisPropertyName, twoWeeksAgo());
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {

@@ -1010,6 +1010,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// if this is not an excluded module, generate tests
 				if ((excludedModules == null) || 
 						(! Arrays.asList(excludedModules).contains(moduleName))) {
+					String documentConstant = documentEnumConstant(module, document);
 					// check if this document is annotated to skip domain tests
 					File factoryFile = new File(new StringBuilder(256).append(srcPath)
 																		.append(modulePath)
@@ -1044,7 +1045,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							else {
 								// generate the domain test
 								StringBuilder testFileContents = new StringBuilder(2048);
-								generateDomainTest(testFileContents, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
+								generateDomainTest(testFileContents, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName, documentConstant);
 								testFileContents.trimToSize();
 								if (write) {
 									generation.put(testFilePath, testFileContents);
@@ -1062,7 +1063,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 
 					// generate action tests
-					generateActionTests(moduleName, packagePath, modulePath, document, documentName, annotation);
+					generateActionTests(moduleName, packagePath, modulePath, document, documentName, documentConstant, annotation);
 				}
 			}
 		}.visit(null, module);
@@ -1167,12 +1168,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		final String moduleName = module.getName();
 
-		// Dodge document class names in the same generated package - e.g. a module could declare a
-		// document named <Module>Role
-		StringBuilder enumName = new StringBuilder(64).append(BindUtil.toJavaTypeIdentifier(moduleName)).append(kindSuffix);
-		while (documentNamedLike(module, enumName.toString()) != null) {
-			enumName.append(kindSuffix);
-		}
+		String enumName = metadataEnumName(module, kindSuffix);
 
 		StringBuilder javadoc = new StringBuilder(256);
 		javadoc.append(" * Compile-time references to the ").append(kindPlural).append(" declared in the ")
@@ -1186,7 +1182,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		generateMetadataEnum(packagePath,
-								enumName.toString(),
+								enumName,
 								javadoc,
 								interfaceClassName,
 								"Module",
@@ -1320,6 +1316,37 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (write) {
 			generation.put(Paths.get(generatedSrcPath, packagePath, enumName + ".java"), contents);
 		}
+	}
+
+	/**
+	 * Returns the simple name of a module's generated metadata enum of a kind, such as <code>AdminDocument</code>.
+	 * The name dodges document class names in the same generated package - e.g. a module could declare a
+	 * document named <code>&lt;Module&gt;Role</code> - by repeating the suffix.
+	 *
+	 * @param module	The module - vanilla, or a customer's override.
+	 * @param kindSuffix	The enum class name suffix, such as "Document".
+	 * @return	The enum's simple class name.
+	 */
+	private static @Nonnull String metadataEnumName(@Nonnull Module module, @Nonnull String kindSuffix) {
+		StringBuilder result = new StringBuilder(64).append(BindUtil.toJavaTypeIdentifier(module.getName())).append(kindSuffix);
+		while (documentNamedLike(module, result.toString()) != null) {
+			result.append(kindSuffix);
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Returns the generated document enum constant of a document, such as <code>AdminDocument.CONTACT</code>, for
+	 * generated code in the document's domain package to address it by. A class is generated only in its owning
+	 * module's domain package, and a customer's class only for a module the customer overrides, so that package
+	 * always has the module's document enum listing the document.
+	 *
+	 * @param module	The document's module - vanilla, or the customer's override.
+	 * @param document	The document.
+	 * @return	The enum's simple class name and constant.
+	 */
+	private static @Nonnull String documentEnumConstant(@Nonnull Module module, @Nonnull Document document) {
+		return metadataEnumName(module, "Document") + '.' + BindUtil.toJavaStaticIdentifier(document.getName());
 	}
 
 	/**
@@ -4297,6 +4324,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										final @Nonnull String modulePath,
 										@Nonnull Document document,
 										@Nonnull String documentName,
+										@Nonnull String documentConstant,
 										@Nullable SkyveFactory annotation) {
 		final String actionPath = ProvidedRepository.MODULES_NAMESPACE + moduleName + File.separator + documentName + File.separator + "actions";
 		final Path actionTestPath = Paths.get(generatedTestPath + actionPath);
@@ -4380,6 +4408,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									actionPath.replaceAll("\\\\|\\/", "."),
 									packagePath.replaceAll("\\\\|\\/", "."),
 									documentName,
+									documentConstant,
 									actionName,
 									useExtensionDocument);
 				actionFileContents.trimToSize();
@@ -4398,11 +4427,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	@SuppressWarnings("java:S107") // the action test names its module, packages, document, enum constant and action
 	private void generateActionTest(@Nonnull StringBuilder contents,
 										@Nonnull String modulePath,
 										@Nonnull String actionPath,
 										@Nonnull String domainPath,
 										@Nonnull String documentName,
+										@Nonnull String documentConstant,
 										@Nonnull String actionName,
 										boolean useExtensionDocument) {
 		if (debug) {
@@ -4419,8 +4450,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add("org.skyve.util.DataBuilder");
 		imports.add("org.skyve.util.test.SkyveFixture.FixtureType");
 
-		// import the domain class
-		imports.add(new StringBuilder(256).append(domainPath).append('.').append(documentName).toString());
+		// import the domain class unless only the extension is used, and the module's document enum the test builds its bean by
+		if (! useExtensionDocument) {
+			imports.add(new StringBuilder(256).append(domainPath).append('.').append(documentName).toString());
+		}
+		imports.add(domainPath + '.' + documentConstant.substring(0, documentConstant.indexOf('.')));
 
 		// customise imports if this is not a base class
 		if (useExtensionDocument) {
@@ -4461,16 +4495,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append(useExtensionDocument ? "Extension" : "").append(" getBean() throws Exception {");
 		contents.append("\n\t\t").append("return new DataBuilder()");
 		contents.append("\n\t\t\t.fixture(FixtureType.crud)");
-		contents.append("\n\t\t\t.build(").append(documentName).append(".MODULE_NAME, ");
-		contents.append(documentName).append(".DOCUMENT_NAME);");
+		contents.append("\n\t\t\t.build(").append(documentConstant).append(");");
 		contents.append("\n\t").append("}");
 		contents.append("\n}");
 	}
 
+
 	private void generateDomainTest(@Nonnull StringBuilder contents,
 										@SuppressWarnings("unused") @Nonnull String modulePath,
 										@Nonnull String packagePath,
-										@Nonnull String documentName) {
+										@Nonnull String documentName,
+										@Nonnull String documentConstant) {
 		if (debug) {
 			System.out.println(new StringBuilder(256).append("Generate domain test class for ")
 														.append(packagePath)
@@ -4506,8 +4541,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
 		contents.append("\n\t\t").append("return new DataBuilder()");
 		contents.append("\n\t\t\t.fixture(FixtureType.crud)");
-		contents.append("\n\t\t\t.build(").append(documentName).append(".MODULE_NAME, ");
-		contents.append(documentName).append(".DOCUMENT_NAME);").append("\n\t").append("}");
+		contents.append("\n\t\t\t.build(").append(documentConstant).append(");");
+		contents.append("\n\t").append("}");
 		contents.append("\n}");
 	}
 
@@ -4528,6 +4563,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		Persistent persistent = document.getPersistent();
 		contents.append("package ").append(packagePath).append(";\n\n");
+
+		// the generated code addresses its document by the module's document enum, in the same package
+		String documentConstant = documentEnumConstant(module, document);
 
 		Set<String> imports = new TreeSet<>();
 		StringBuilder statics = new StringBuilder(1024);
@@ -4608,7 +4646,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\tpublic static ").append(documentName).append(" newInstance() {\n");
 			}
 			methods.append("\t\ttry {\n");
-			methods.append("\t\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
+			methods.append("\t\t\treturn ").append(documentConstant).append(".toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());\n");
 			methods.append("\t\t}\n");
 			methods.append("\t\tcatch (RuntimeException e) {\n");
 			methods.append("\t\t\tthrow e;\n");
@@ -5099,7 +5137,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append(" result = null;\n\n");
 				methods.append("\t\tif (bizParentId != null) {\n");
 				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentConstant).append(");\n");
 				methods.append("\t\t\tq.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);\n");
 				methods.append("\t\t\tresult = q.retrieveBean();\n");
 				methods.append("\t\t}\n\n");
@@ -5115,7 +5153,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				methods.append("> getChildren() {\n");
 				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentConstant).append(");\n");
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());\n");
 				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n\n");

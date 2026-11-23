@@ -293,7 +293,7 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 
 	public static AllAttributesEmbedded newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.ALL_ATTRIBUTES_EMBEDDED.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

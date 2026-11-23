@@ -5,6 +5,7 @@ import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.CommunicationTemplate;
 
 /**
@@ -19,8 +20,7 @@ public class CommunicationTemplateFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static CommunicationTemplate crudInstance() {
-		CommunicationTemplate bean = new DataBuilder().factoryBuild(CommunicationTemplate.MODULE_NAME,
-				CommunicationTemplate.DOCUMENT_NAME);
+		CommunicationTemplate bean = new DataBuilder().factoryBuild(AdminDocument.COMMUNICATION_TEMPLATE);
 		bean.setTemplate("<span>some text</span>{body}<span>some other text</span>");
 
 		return bean;

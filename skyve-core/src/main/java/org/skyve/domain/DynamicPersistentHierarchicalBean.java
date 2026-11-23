@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
@@ -31,6 +32,16 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 */
 	public DynamicPersistentHierarchicalBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
+	}
+
+	/**
+	 * Creates a new DynamicPersistentHierarchicalBean instance for the referenced document; a typed shortcut for
+	 * {@link #DynamicPersistentHierarchicalBean(String, String, Map)}.
+	 * @param document the compile-time document reference
+	 * @param properties the properties
+	 */
+	public DynamicPersistentHierarchicalBean(@Nonnull ModuleDocument document, @Nonnull Map<String, Object> properties) {
+		this(document.moduleName(), document.documentName(), properties);
 	}
 
 	/**

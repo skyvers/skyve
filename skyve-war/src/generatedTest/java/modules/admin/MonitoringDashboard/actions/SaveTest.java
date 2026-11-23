@@ -1,5 +1,6 @@
 package modules.admin.MonitoringDashboard.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.MonitoringDashboard;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class SaveTest extends AbstractActionTest<MonitoringDashboard, Save> {
 	protected MonitoringDashboard getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME);
+			.build(AdminDocument.MONITORING_DASHBOARD);
 	}
 }

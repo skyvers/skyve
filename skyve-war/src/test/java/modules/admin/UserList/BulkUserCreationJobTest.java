@@ -17,6 +17,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
@@ -87,7 +88,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 	void createUserFromContactReturnsNullAndLogsWhenUserAlreadyExists() {
 		String email = "bulk-existing-" + UUID.randomUUID() + "@example.com";
 		DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
-		User existing = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User existing = db.build(AdminDocument.USER);
 		existing.setUserName(email);
 		existing.getContact().setEmail1(email);
 		CORE.getPersistence().save(existing);
@@ -159,7 +160,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 	}
 
 	private static GroupExtension savedGroup() {
-		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.GROUP);
 		group.setName("bulk-" + UUID.randomUUID().toString().substring(0, 8));
 		return CORE.getPersistence().save(group);
 	}

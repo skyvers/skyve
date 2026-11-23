@@ -14,6 +14,6 @@ public class UserLoginRecordTest extends AbstractDomainTest<UserLoginRecord> {
 	protected UserLoginRecord getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+			.build(AdminDocument.USER_LOGIN_RECORD);
 	}
 }

@@ -16,7 +16,7 @@ class UserTokenDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserToken bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserToken.MODULE_NAME, UserToken.DOCUMENT_NAME);
+				.build(AdminDocument.USER_TOKEN);
 		assertNotNull(bean);
 	}
 

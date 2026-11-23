@@ -2,13 +2,17 @@ package org.skyve.domain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 @SuppressWarnings("java:S8692") // system clock OK
 class DynamicPersistentBeanTest {
@@ -81,5 +85,15 @@ class DynamicPersistentBeanTest {
 		assertNull(bean.getBizTagged());
 		bean.setBizTagged(Boolean.TRUE);
 		assertThat(bean.getBizTagged(), is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorSetsTheReferencedModuleAndDocument() {
+		Map<String, Object> properties = new HashMap<>();
+		DynamicPersistentBean bean = new DynamicPersistentBean(TestDocument.CONTACT, properties);
+		assertAll(() -> assertEquals("admin", bean.getBizModule()),
+					() -> assertEquals("Contact", bean.getBizDocument()),
+					() -> assertSame(properties, bean.getMap()));
 	}
 }

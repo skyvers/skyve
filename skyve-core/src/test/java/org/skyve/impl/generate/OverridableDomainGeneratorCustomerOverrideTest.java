@@ -184,6 +184,14 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			Map<String, DocumentImpl> documents = overrides.get(customerName);
 			return (documents != null) && documents.containsKey(documentName);
 		}
+
+		/**
+		 * Whether the customer adds a document of its own, which only an override of the module can declare.
+		 */
+		boolean addsDocuments(String customerName) {
+			Map<String, DocumentImpl> documents = overrides.get(customerName);
+			return (documents != null) && (! vanilla.keySet().containsAll(documents.keySet()));
+		}
 	}
 
 	private static DocumentImpl document(String name, String persistentName, ExtensionStrategy strategy, String extendsName, String... attributeNames) {
@@ -346,6 +354,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			String key = invocation.getArgument(1);
 			String documentName = key.substring(key.lastIndexOf('/') + 1);
 			if (key.startsWith("modules/" + MODULE + '/') && fixture.overrides(customerName, documentName)) {
+				return "customers/" + customerName + '/' + key;
+			}
+			if (key.equals("modules/" + MODULE) && fixture.addsDocuments(customerName)) {
 				return "customers/" + customerName + '/' + key;
 			}
 			return key;

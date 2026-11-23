@@ -3,6 +3,7 @@ package org.skyve.util.monitoring;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -130,6 +131,17 @@ public class RequestKey {
 	 */
 	public static @Nonnull RequestKey documentListModel(@Nonnull String moduleName, @Nullable String documentName) {
 		return new RequestKey('M', moduleName, documentName, null);
+	}
+
+	/**
+	 * Creates a request key for document list-model retrieval; a typed shortcut for
+	 * {@link #documentListModel(String, String)}.
+	 *
+	 * @param document	the compile-time document reference
+	 * @return key encoded as model request type ({@code M})
+	 */
+	public static @Nonnull RequestKey documentListModel(@Nonnull ModuleDocument document) {
+		return documentListModel(document.moduleName(), document.documentName());
 	}
 
 	/**

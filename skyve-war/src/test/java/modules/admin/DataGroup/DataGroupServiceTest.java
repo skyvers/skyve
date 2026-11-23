@@ -18,6 +18,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataGroup;
 
 @SuppressWarnings("static-method")
@@ -39,7 +40,7 @@ class DataGroupServiceTest {
 	void getDataGroupDomainValuesUsesSuppliedPersistenceAndOrdersByName() throws Exception {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
-		when(persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.DATA_GROUP)).thenReturn(query);
 		when(query.beanResults()).thenReturn(List.of(dataGroup("dg-1", "Alpha"), dataGroup("dg-2", "Beta")));
 
 		List<DomainValue> values = new DataGroupService().getDataGroupDomainValues(persistence);
@@ -56,12 +57,12 @@ class DataGroupServiceTest {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		injectPersistence(service, persistence);
-		when(persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.DATA_GROUP)).thenReturn(query);
 		when(query.beanResults()).thenReturn(List.of());
 
 		List<DomainValue> values = service.getDataGroupDomainValues(null);
 
-		verify(persistence).newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+		verify(persistence).newDocumentQuery(AdminDocument.DATA_GROUP);
 		assertEquals(0, values.size());
 	}
 
@@ -86,7 +87,7 @@ class DataGroupServiceTest {
 		DataGroup dataGroup = dataGroup("dg-1", "Alpha");
 		injectPersistence(service, persistence);
 		when(bean.getBizDataGroupId()).thenReturn("dg-1");
-		when(persistence.retrieve(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME, "dg-1")).thenReturn(dataGroup);
+		when(persistence.retrieve(AdminDocument.DATA_GROUP, "dg-1")).thenReturn(dataGroup);
 
 		DataGroup result = service.getBeanDataGroup(bean);
 

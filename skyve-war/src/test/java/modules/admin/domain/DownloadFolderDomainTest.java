@@ -16,7 +16,7 @@ class DownloadFolderDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		DownloadFolder bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME);
+				.build(AdminDocument.DOWNLOAD_FOLDER);
 		assertNotNull(bean);
 	}
 

@@ -12,6 +12,7 @@ import org.skyve.metadata.Ordering;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -135,6 +136,18 @@ public class Binder {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Validates message expressions against the referenced document; a typed shortcut for
+	 * {@link #validateMessage(String, String, String...)}.
+	 *
+	 * @param message	message text that may contain {@code {...}} expressions
+	 * @param document	compile-time reference to the document used for expression validation context
+	 * @return {@code null} when valid, otherwise a human-readable validation error
+	 */
+	public static @Nullable String validateMessage(@Nonnull String message, @Nonnull ModuleDocument document) {
+		return validateMessage(message, document.moduleName(), document.documentName());
 	}
 
 	/**

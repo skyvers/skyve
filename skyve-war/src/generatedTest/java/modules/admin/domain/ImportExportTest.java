@@ -14,6 +14,6 @@ public class ImportExportTest extends AbstractDomainTest<ImportExport> {
 	protected ImportExport getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ImportExport.MODULE_NAME, ImportExport.DOCUMENT_NAME);
+			.build(AdminDocument.IMPORT_EXPORT);
 	}
 }

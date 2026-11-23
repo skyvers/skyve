@@ -20,7 +20,7 @@ class ImportExportColumnDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		ImportExportColumn bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ImportExportColumn.MODULE_NAME, ImportExportColumn.DOCUMENT_NAME);
+				.build(AdminDocument.IMPORT_EXPORT_COLUMN);
 		assertNotNull(bean);
 	}
 

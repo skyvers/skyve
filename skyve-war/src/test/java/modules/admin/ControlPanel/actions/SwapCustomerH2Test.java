@@ -25,6 +25,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.inject.Inject;
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel;
 import util.AbstractH2Test;
 
@@ -42,7 +43,7 @@ class SwapCustomerH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		controlPanel = db.build(AdminDocument.CONTROL_PANEL);
 	}
 
 	@SuppressWarnings("boxing")

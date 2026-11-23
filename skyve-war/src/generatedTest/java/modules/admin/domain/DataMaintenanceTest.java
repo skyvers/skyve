@@ -14,6 +14,6 @@ public class DataMaintenanceTest extends AbstractDomainTest<DataMaintenance> {
 	protected DataMaintenance getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+			.build(AdminDocument.DATA_MAINTENANCE);
 	}
 }

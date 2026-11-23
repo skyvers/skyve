@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -26,9 +27,11 @@ import modules.admin.Group.GroupExtension;
 import modules.admin.ModulesUtil.DayOfWeek;
 import modules.admin.ModulesUtil.OccurrencePeriod;
 import modules.admin.ModulesUtil.OccurenceFrequency;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminRole;
 import modules.admin.domain.GroupRole;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 import util.AbstractH2Test;
 
 @SuppressWarnings({ "deprecation", "java:S8692" }) // system clock OK
@@ -482,7 +485,7 @@ class ModulesUtilTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
 	void getPersistentIdentifierReturnsTableNameForPersistentDocument() {
-		String result = ModulesUtil.getPersistentIdentifier("admin", "User");
+		String result = ModulesUtil.getPersistentIdentifier(AdminDocument.USER);
 		assertNotNull(result);
 		assertTrue(result.contains("USR_User") || !result.isEmpty());
 	}
@@ -491,15 +494,29 @@ class ModulesUtilTest extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void getPersistentIdentifierReturnsNullForNonPersistentDocument() {
 		// AllAttributesPersistent is a persistent document so it should have a table name
-		String result = ModulesUtil.getPersistentIdentifier("test", "AllAttributesPersistent");
+		String result = ModulesUtil.getPersistentIdentifier(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		assertNotNull(result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void lookupBeanReturnsNullWhenNoMatchFound() {
-		org.skyve.domain.Bean result = ModulesUtil.lookupBean("admin", "User", "userName", "nonexistent_user_xyz_99999");
+		org.skyve.domain.Bean result = ModulesUtil.lookupBean(AdminDocument.USER, "userName", "nonexistent_user_xyz_99999");
 		assertNull(result);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedOverloadsMatchTheStringForms() {
+		assertAll(() -> assertEquals(ModulesUtil.getPersistentIdentifier("admin", "User"), ModulesUtil.getPersistentIdentifier(AdminDocument.USER)),
+					() -> assertEquals(ModulesUtil.getPersistentIdentifier("test", "AllAttributesPersistent"),
+										ModulesUtil.getPersistentIdentifier(TestDocument.ALL_ATTRIBUTES_PERSISTENT)),
+					() -> assertNull(ModulesUtil.lookupBean(AdminDocument.USER, "userName", "nonexistent_user_xyz_99999")),
+					() -> {
+						org.skyve.domain.Bean typed = ModulesUtil.lookupBean(AdminDocument.USER, "userName", USER);
+						assertNotNull(typed);
+						assertEquals(ModulesUtil.lookupBean("admin", "User", "userName", USER), typed);
+					});
 	}
 
 	@Test

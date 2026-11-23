@@ -13,6 +13,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 
 import jakarta.annotation.Nonnull;
@@ -63,6 +64,16 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		
 		values.put(Bean.MODULE_KEY, bizModule);
 		values.put(Bean.DOCUMENT_KEY, bizDocument);
+	}
+
+	/**
+	 * Creates a new DynamicBean instance for the referenced document; a typed shortcut for
+	 * {@link #DynamicBean(String, String, Map)}.
+	 * @param document the compile-time document reference
+	 * @param properties the properties
+	 */
+	public DynamicBean(@Nonnull ModuleDocument document, @Nonnull Map<String, Object> properties) {
+		this(document.moduleName(), document.documentName(), properties);
 	}
 
 	/**

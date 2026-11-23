@@ -14,6 +14,6 @@ public class LookupDescriptionTest extends AbstractDomainTest<LookupDescription>
 	protected LookupDescription getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME);
+			.build(KitchensinkDocument.LOOKUP_DESCRIPTION);
 	}
 }

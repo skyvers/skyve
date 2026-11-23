@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewReportUserAccessMetaData;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -35,6 +36,14 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 		reportName(reportName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
+	}
+
+	/**
+	 * Returns a FluentViewReportAccess from a runtime metadata; a typed shortcut for
+	 * {@link #from(String, String, String, Set)}.
+	 */
+	protected @Nonnull FluentViewReportAccess from(@Nonnull ModuleDocument document, @Nonnull String reportName, @Nonnull Set<String> uxuis) {
+		return from(document.moduleName(), document.documentName(), reportName, uxuis);
 	}
 
 	/**

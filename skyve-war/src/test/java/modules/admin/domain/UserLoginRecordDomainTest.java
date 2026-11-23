@@ -20,7 +20,7 @@ class UserLoginRecordDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserLoginRecord bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+				.build(AdminDocument.USER_LOGIN_RECORD);
 		assertNotNull(bean);
 	}
 

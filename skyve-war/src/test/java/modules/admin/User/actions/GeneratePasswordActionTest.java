@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
 
@@ -15,7 +16,7 @@ class GeneratePasswordActionTest extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void testExecuteGeneratesNewPassword() throws Exception {
 		// setup the test data
-		User user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);
 		user.setPasswordExpired(Boolean.FALSE);

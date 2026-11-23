@@ -20,6 +20,7 @@ import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
@@ -38,10 +39,10 @@ class CheckTest extends AbstractH2Test {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		searchToken = "check" + UUID.randomUUID().toString().replace("-", "");
 
-		user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user1 = db.build(AdminDocument.USER);
 		nameUniquely(user1, searchToken + "1", "Check 1");
 		user1.getContact().setEmail1(searchToken + "1@check.com");
-		user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		user2 = db.build(AdminDocument.USER);
 		nameUniquely(user2, searchToken + "2", "Check 2");
 		user2.getContact().setEmail1(searchToken + "2@check.com");
 

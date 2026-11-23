@@ -9,6 +9,7 @@ import org.skyve.util.Binder;
 
 import modules.whosin.domain.MyStatus;
 import modules.whosin.domain.Staff;
+import modules.whosin.domain.WhosinDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -28,7 +29,7 @@ public class MyStatusBizlet extends Bizlet<MyStatus> {
 		
 		//get the contact corresponding to the currently logged in user
 		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		DocumentQuery q = pers.newDocumentQuery(WhosinDocument.STAFF);
 		q.getFilter().addEquals(Binder.createCompoundBinding(Staff.contactPropertyName,Bean.DOCUMENT_ID), pers.getUser().getContactId());
 		
 		Staff staff = q.beanResult();

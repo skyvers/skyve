@@ -27,7 +27,7 @@ class GenericAdminDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesGenericBean() {
 		Generic bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Generic.MODULE_NAME, Generic.DOCUMENT_NAME);
+				.build(AdminDocument.GENERIC);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

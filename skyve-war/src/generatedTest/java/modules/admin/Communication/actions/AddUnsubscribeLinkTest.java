@@ -1,5 +1,6 @@
 package modules.admin.Communication.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class AddUnsubscribeLinkTest extends AbstractActionTest<Communication, Ad
 	protected Communication getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+			.build(AdminDocument.COMMUNICATION);
 	}
 }

@@ -169,7 +169,7 @@ For exports, you can use compound expressions using bindings and literals, for e
 
 	public static ImportExportColumn newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.IMPORT_EXPORT_COLUMN.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

@@ -17,7 +17,7 @@ class GroupRoleDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		GroupRole bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(GroupRole.MODULE_NAME, GroupRole.DOCUMENT_NAME);
+				.build(AdminDocument.GROUP_ROLE);
 		assertNotNull(bean);
 	}
 

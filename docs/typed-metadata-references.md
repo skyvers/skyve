@@ -47,22 +47,35 @@ Each of these sits beside the string form it replaces and calls it.
 
 | Type | Methods |
 |---|---|
-| `User` | `isInRole(ModuleRole)`, `getScope(ModuleDocument)` |
-| `Persistence` | `newDocumentQuery`, `retrieve` and `retrieveAndLock` with a `ModuleDocument`; `newNamedDocumentQuery(ModuleQuery)`, `newNamedBizQL(ModuleBizQL)`, `newNamedSQL(ModuleSQL)`; the shared cache methods (`sharedCacheBean`, `sharedCacheCollection`, `evictSharedCache*`) with a `ModuleDocument` |
-| `UserAccess` | `singular(ModuleDocument)`, `documentAggregate(ModuleDocument)`, `queryAggregate(ModuleQuery)` |
+| `User` | `isInRole(ModuleRole)`, `getScope(ModuleDocument)`, `canReadBean` and `canAccessContent` with a `ModuleDocument` |
+| `Persistence` | `newDocumentQuery`, `retrieve` and `retrieveAndLock` with a `ModuleDocument`; `newNamedDocumentQuery(ModuleQuery)`, `newNamedBizQL(ModuleBizQL)`, `newNamedSQL(ModuleSQL)`, `newSQL(ModuleDocument, String query)`, `newNamedSQL(ModuleDocument, String queryName)`; the shared cache methods (`sharedCacheBean`, `sharedCacheCollection`, `evictSharedCache*`) with a `ModuleDocument` |
+| `UserAccess` | `singular(ModuleDocument)`, `documentAggregate(ModuleDocument)`, `queryAggregate(ModuleQuery)`; `content`, `modelAggregate`, `previousComplete`, `report` and `dynamicImage` with `(ModuleDocument, String)` |
 | `DataBuilder` | `build(ModuleDocument)`, `factoryBuild(ModuleDocument)` |
 | `ChartBuilder` | `with(ModuleDocument)`, `withQuery(ModuleQuery)` |
 | `EXT` | `standardBizExport(ModuleDocument)` |
 | `NumberGenerator` | `next`, `nextInt` and `nextLong` with a `ModuleDocument` |
 | `SingletonCachedBizlet` | `clear(ModuleDocument)` |
 | `Tag` | `countDocument(ModuleDocument)` |
-| `Util` | `getDocumentUrl(ModuleDocument)`, `getDocumentUrl(ModuleDocument, String bizId)`, `getCompleteSuggestions(ModuleDocument, String, String)` |
+| `Util` | `getDocumentUrl(ModuleDocument)`, `getDocumentUrl(ModuleDocument, String bizId)`, `getCompleteSuggestions(ModuleDocument, String, String)`, `getDocumentAnchorUrl(ModuleDocument, String bizId, boolean, String)`, `getContentUrl(ModuleDocument, String binding, String contentId)`; `getContentImageUrl`, `getContentAnchorUrl`, `getContentAnchorWithImageUrl` and `getResourceUrl` with a `ModuleDocument` |
+| `SQLDataAccess` | `newSQL(ModuleDocument, String query)`, `newNamedSQL(ModuleDocument, String queryName)` |
 | `Binder` | `validateMessage(String, ModuleDocument)` |
-| `DynamicBean` | `DynamicBean(ModuleDocument, Map)` |
+| `DynamicBean` | `DynamicBean(ModuleDocument, Map)`, and the same constructor on its subclasses (`DynamicChildBean`, `DynamicHierarchicalBean`, `DynamicPersistentBean`, `DynamicPersistentChildBean`, `DynamicPersistentHierarchicalBean`, `ListModelRow`) |
+| `SheetKey` | `SheetKey(ModuleDocument)`, `SheetKey(ModuleDocument, String collectionBinding)` |
+| `Customer` | `getConstantDomainValues(Bizlet, ModuleDocument, Attribute)` |
+| `Repository` | `getDataFactory(Customer, ModuleDocument)` |
+| `OnDemandRepository` | `loadDocument`, `loadView`, `loadMetaDataAction`, `loadMetaDataBizlet` and the matching `*LastModifiedMillis` methods with a `ModuleDocument` after the customer name |
+| `FluentModuleRole`, `FluentView` | `findReportAccess` and `removeReportAccess` with `(ModuleDocument, String reportName)`; the protected `from(ModuleDocument, String, Set)` on `FluentModuleRoleReportAccess` and `FluentViewReportAccess` |
+| `RequestKey` | `documentListModel(ModuleDocument)` |
+| `DocumentConverter` | `handles(ModuleDocument)`, which matches the names as given, so pass the owning module's constant |
+| `AttachmentContent` | `AttachmentContent(String bizCustomer, ModuleDocument, String bizDataGroupId, String bizUserId, String bizId, String attributeName)`, which stores the names as given, so pass the owning module's constant |
+| `Reporting` | `getMailAttachmentFromJasperReport(ModuleDocument, String reportName, Map)` |
+| `TagManager` | `tag` and `untag` with `(String tagId, ModuleDocument, String taggedBizId)`, which store and match the names as given, so pass the owning module's constant (`untag(tagId, bean)` uses the bean's own module) |
+| `ModulesUtil` (deprecated, `skyve-war`) | `lookupBean(ModuleDocument, String, Object)`, `getPersistentIdentifier(ModuleDocument)` |
 | `ReferenceListModel` | the protected `ReferenceListModel(ModuleDocument, String)` constructor |
-| `UtilImpl.ArchiveConfig` | `findArchiveDocConfig(ModuleDocument)`, which matches the names written in the archive configuration, so a referenced document is found only if the configuration names the referencing module |
+| `CSVLoader`, `POISheetLoader` | constructors taking a `ModuleDocument` in place of the module and document names; `setDocumentContext(ModuleDocument)` on `AbstractDataFileLoader` |
+| `UtilImpl.ArchiveConfig` | `findArchiveDocConfig(ModuleDocument)`, which matches the names written in the archive configuration, so a referenced document is found only if the configuration names the referencing module; the `ArchiveDocConfig(ModuleDocument, String directory, int retainDeletedDocumentsDays)` constructor, which records the names as given, so pass the owning module's constant |
 
-They take the interfaces, not the generated enums. So your own implementation works too, such as an enum of your own or a test double. For a job, resolve it with `toJob()` and pass the `JobMetaData` to `JobScheduler`.
+They take the interfaces, not the generated enums. So your own implementation works too, such as an enum of your own or a test double. For a job, resolve it with `toJob()` and pass the `JobMetaData` to `JobScheduler`. `scheduledJobName()` is the name a job schedule stores for it, such as `admin.jBackup`.
 
 ## Customer overrides
 
@@ -161,14 +174,15 @@ Use the string forms when the name isn't fixed when the application is built:
 
 The typed overloads are `default` methods. A Mockito `mock(User.class)` doesn't run them: an unstubbed `isInRole(AdminRole.X)` returns `false`, even when `isInRole("admin", "X")` is stubbed. Stub the overload the code under test calls. With Skyve's Mockito setup, `mock(User.class, CALLS_REAL_METHODS)` can't run an interface's default methods. To exercise the delegation itself, mock an `abstract` class that implements the interface, with `CALLS_REAL_METHODS`.
 
-- **Bare `any()` can be ambiguous.** A typed overload with as many parameters as an existing one, such as `newDocumentQuery(ModuleDocument)` next to `newDocumentQuery(Document)`, makes a stub or verification with a bare `any()` ambiguous, so it no longer compiles. The same goes for `Util.getDocumentUrl(any())` (next to `getDocumentUrl(Bean)`) and `Binder.validateMessage(anyString(), any())` (next to `validateMessage(String, Document...)`). Name the type, as in `any(Document.class)` or `any(ModuleDocument.class)`.
+- **Bare `any()` can be ambiguous.** A typed overload with as many parameters as an existing one, such as `newDocumentQuery(ModuleDocument)` next to `newDocumentQuery(Document)`, makes a stub or verification with a bare `any()` ambiguous, so it no longer compiles. The same goes for `Util.getDocumentUrl(any())` (next to `getDocumentUrl(Bean)`), `Binder.validateMessage(anyString(), any())` (next to `validateMessage(String, Document...)`), `newSQL(any(), anyString())` on `Persistence` and `SQLDataAccess` (next to `newSQL(Document, String)`) and `Repository.getDataFactory(any(), any())` (next to `getDataFactory(Customer, Document)`). Name the type, as in `any(Document.class)` or `any(ModuleDocument.class)`.
 - **Enum classes and the repository.** `Enumeration.getImplementingType()` finds a generated enum through the bean class of its document, which the repository's `vtable` resolves. A test that installs no repository in `ProvidedRepositoryFactory` gets the enum of the vanilla domain class, as before, and a `MetaDataException` caused by a `ClassNotFoundException` if that class doesn't declare it. An enumeration that references another document's enumeration, with `documentRef` or `moduleRef`, still needs a repository to resolve the reference, and throws an `IllegalStateException` without one, as it always has. A test that installs a mocked repository must stub `vtable`, or an enum of a static document can't be found. `getImplementingType(Customer)` resolves for a given customer rather than the current user's.
 
 ## Upgrading
 
 Work through this list when you upgrade a project to this version.
 
-- **Regenerate the domain.** The generated classes and mappings change, so regenerate before you build.
+- **Regenerate the domain.** The generated classes and mappings change, so regenerate before you build. Generated classes and domain and action tests now address their own document through the module's document enum, as in `AdminDocument.CONTACT.toDocument(customer)` and `build(AdminDocument.CONTACT)`.
+- **Stub the typed form in tests that mock `Persistence`.** The admin module and generated code now call the typed overloads; see [Testing with mocks](#testing-with-mocks).
 - **Rename `*Ext` references.** The classes generated for customer overrides used to be named `<Document>Ext`. They are now `<Document>Vanilla` (the concrete vanilla class of a narrowed document, in `modules.<module>.domain`) and `<Document>Override` (a customer's override class, in `customers.<customer>.modules.<module>.domain`). Rename any hand-written references to the old classes, such as a customer extension's `extends` clause or a cast.
 - **Customer domain generation now always runs.** It used to run only when you had created `src/generated/java/customers/<customer>/modules/` yourself. Now a customer override of a persistent document gets `customers/<customer>/modules/orm.hbm.xml`, and its beans are persisted under the customer's entity name, such as `testtestOverrideAdds`, instead of the vanilla `testOverrideAdds`. So are the beans of every document the mapping copies because it is connected to an overridden one (see [Which documents the customer mapping maps](#which-documents-the-customer-mapping-maps)); list them from the `entity-name`s in the generated mapping. Review:
   - hand-written HQL and BizQL that names entities;

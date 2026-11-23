@@ -267,6 +267,26 @@ public interface User extends NamedMetaData {
 							@Nullable String beanBizCustomer,
 							@Nullable String beanBizDataGroupId,
 							@Nullable String beanBizUserId);
+
+	/**
+	 * Returns {@code true} if this user can read the given bean, considering both the
+	 * document-level permission scope and the bean's ownership attributes; a typed shortcut for
+	 * {@link #canReadBean(String, String, String, String, String, String)}.
+	 *
+	 * @param beanBizId           the bean's primary key
+	 * @param document            the compile-time document reference
+	 * @param beanBizCustomer     the customer that owns the bean
+	 * @param beanBizDataGroupId  the data group that owns the bean, or {@code null}
+	 * @param beanBizUserId       the user id that owns the bean, or {@code null}
+	 * @return {@code true} if the user may read this bean
+	 */
+	default boolean canReadBean(@Nonnull String beanBizId,
+									@Nonnull ModuleDocument document,
+									@Nullable String beanBizCustomer,
+									@Nullable String beanBizDataGroupId,
+									@Nullable String beanBizUserId) {
+		return canReadBean(beanBizId, document.moduleName(), document.documentName(), beanBizCustomer, beanBizDataGroupId, beanBizUserId);
+	}
 	
 	/**
 	 * Returns {@code true} if this user can search or view the given content attachment.
@@ -290,6 +310,31 @@ public interface User extends NamedMetaData {
 								@Nullable String bizDataGroupId,
 								@Nullable String bizUserId,
 								@Nonnull String attributeName);
+
+	/**
+	 * Returns {@code true} if this user can search or view the given content attachment;
+	 * a typed shortcut for
+	 * {@link #canAccessContent(String, String, String, String, String, String, String)}.
+	 *
+	 * <p>The check considers the document-level permission scope and the ownership
+	 * attributes of the bean that holds the content.
+	 *
+	 * @param bizId           the bean's primary key
+	 * @param document        the compile-time document reference
+	 * @param bizCustomer     the customer that owns the bean
+	 * @param bizDataGroupId  the data group that owns the bean, or {@code null}
+	 * @param bizUserId       the user id that owns the bean, or {@code null}
+	 * @param attributeName   the content attribute binding name
+	 * @return {@code true} if access to the content is allowed
+	 */
+	default boolean canAccessContent(@Nonnull String bizId,
+										@Nonnull ModuleDocument document,
+										@Nullable String bizCustomer,
+										@Nullable String bizDataGroupId,
+										@Nullable String bizUserId,
+										@Nonnull String attributeName) {
+		return canAccessContent(bizId, document.moduleName(), document.documentName(), bizCustomer, bizDataGroupId, bizUserId, attributeName);
+	}
 	
 	/**
 	 * Returns {@code true} if this user has any form of access to the given document

@@ -18,7 +18,7 @@ class DocumentCreatorDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		DocumentCreator bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(DocumentCreator.MODULE_NAME, DocumentCreator.DOCUMENT_NAME);
+				.build(AdminDocument.DOCUMENT_CREATOR);
 		assertNotNull(bean);
 	}
 

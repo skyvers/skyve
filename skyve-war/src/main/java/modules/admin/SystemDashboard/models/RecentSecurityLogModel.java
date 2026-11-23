@@ -15,6 +15,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.InMemoryListModel;
 import org.skyve.persistence.DocumentQuery;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.SecurityLog;
 import modules.admin.domain.SystemDashboard;
 
@@ -35,8 +36,8 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		// Set driving document
-		Module module = customer.getModule(SecurityLog.MODULE_NAME);
-		Document document = module.getDocument(customer, SecurityLog.DOCUMENT_NAME);
+		Module module = AdminDocument.SECURITY_LOG.toModule(customer);
+		Document document = AdminDocument.SECURITY_LOG.toDocument(customer);
 		setDrivingDocument(module, document);
 
 		// Add columns
@@ -93,7 +94,7 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 	@Override
 	public List<Bean> getRows() throws Exception {
 		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(SecurityLog.MODULE_NAME, SecurityLog.DOCUMENT_NAME);
+				.newDocumentQuery(AdminDocument.SECURITY_LOG);
 		q.addBoundOrdering(SecurityLog.timestampPropertyName, SortDirection.descending);
 		q.setMaxResults(5);
 		return q.beanResults();

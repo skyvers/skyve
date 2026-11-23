@@ -16,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Timestamp;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.MailLog;
 
 class MailLogDocumentConverterTest {
@@ -25,8 +26,8 @@ class MailLogDocumentConverterTest {
 	void testHandlesAdminMailLogOnly() {
 		MailLogDocumentConverter converter = new MailLogDocumentConverter();
 
-		assertTrue(converter.handles("admin", "MailLog"));
-		assertFalse(converter.handles("admin", "Audit"));
+		assertTrue(converter.handles(AdminDocument.MAIL_LOG));
+		assertFalse(converter.handles(AdminDocument.AUDIT));
 		assertFalse(converter.handles("crm", "MailLog"));
 	}
 
@@ -78,7 +79,7 @@ class MailLogDocumentConverterTest {
 		Map<String, Object> values = new HashMap<>();
 		values.put(MailLog.attachmentsPropertyName, "content-1");
 		values.put(MailLog.subjectPropertyName, "Subject");
-		DynamicBean bean = new DynamicBean(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME, values);
+		DynamicBean bean = new DynamicBean(AdminDocument.MAIL_LOG, values);
 
 		converter.prepareForArchive(bean);
 
@@ -92,7 +93,7 @@ class MailLogDocumentConverterTest {
 		MailLogDocumentConverter converter = new MailLogDocumentConverter();
 		Map<String, Object> values = new HashMap<>();
 		values.put(MailLog.subjectPropertyName, "Subject");
-		DynamicBean bean = new DynamicBean(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME, values);
+		DynamicBean bean = new DynamicBean(AdminDocument.MAIL_LOG, values);
 
 		converter.prepareForArchive(bean);
 

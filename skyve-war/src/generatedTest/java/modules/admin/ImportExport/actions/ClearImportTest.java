@@ -1,7 +1,7 @@
 package modules.admin.ImportExport.actions;
 
 import modules.admin.ImportExport.ImportExportExtension;
-import modules.admin.domain.ImportExport;
+import modules.admin.domain.AdminDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -21,6 +21,6 @@ public class ClearImportTest extends AbstractActionTest<ImportExportExtension, C
 	protected ImportExportExtension getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ImportExport.MODULE_NAME, ImportExport.DOCUMENT_NAME);
+			.build(AdminDocument.IMPORT_EXPORT);
 	}
 }

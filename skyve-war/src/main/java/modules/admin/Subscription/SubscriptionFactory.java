@@ -5,6 +5,7 @@ import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Subscription;
 
 /**
@@ -24,7 +25,7 @@ public class SubscriptionFactory {
 		Subscription sub = new DataBuilder()
 				.optional(true, false)
 				.depth(1)
-				.factoryBuild(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+				.factoryBuild(AdminDocument.SUBSCRIPTION);
 
 		return sub;
 	}

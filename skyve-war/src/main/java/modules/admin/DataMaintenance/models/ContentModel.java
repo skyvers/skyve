@@ -32,6 +32,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
 
@@ -53,7 +54,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
-		drivingDocument = customer.getModule(Content.MODULE_NAME).getDocument(customer, Content.DOCUMENT_NAME);
+		drivingDocument = AdminDocument.CONTENT.toDocument(customer);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
@@ -224,7 +225,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 						properties.put(Content.documentNamePropertyName, bizDocument);
 						properties.put(Content.moduleNamePropertyName, bizModule);
 						properties.put(Content.contentPropertyName, hit.getExcerpt());
-						rows.add(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
+						rows.add(new DynamicBean(AdminDocument.CONTENT, properties));
 
 						if (i >= end) {
 							break;
@@ -240,7 +241,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 					start, end, page.getRows().size(), page.getTotalRows());
 
 			Map<String, Object> properties = new TreeMap<>();
-			page.setSummary(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
+			page.setSummary(new DynamicBean(AdminDocument.CONTENT, properties));
 			return page;
 		}
 	}

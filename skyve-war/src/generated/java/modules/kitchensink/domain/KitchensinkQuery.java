@@ -26,7 +26,21 @@ public enum KitchensinkQuery implements ModuleQuery {
 	/** The "qConditionsFixtureListAttributes" metadata query. */
 	Q_CONDITIONS_FIXTURE_LIST_ATTRIBUTES("qConditionsFixtureListAttributes"),
 	/** The "qConditionsFixtureNodes" metadata query. */
-	Q_CONDITIONS_FIXTURE_NODES("qConditionsFixtureNodes");
+	Q_CONDITIONS_FIXTURE_NODES("qConditionsFixtureNodes"),
+	/** The "qConvertersFixtures" metadata query. */
+	Q_CONVERTERS_FIXTURES("qConvertersFixtures"),
+	/** The "qConvertersDates" metadata query. */
+	Q_CONVERTERS_DATES("qConvertersDates"),
+	/** The "qConvertersDateTimes" metadata query. */
+	Q_CONVERTERS_DATE_TIMES("qConvertersDateTimes"),
+	/** The "qConvertersTimestamps" metadata query. */
+	Q_CONVERTERS_TIMESTAMPS("qConvertersTimestamps"),
+	/** The "qConvertersDateOnly" metadata query. */
+	Q_CONVERTERS_DATE_ONLY("qConvertersDateOnly"),
+	/** The "qConvertersTimes" metadata query. */
+	Q_CONVERTERS_TIMES("qConvertersTimes"),
+	/** The "qConvertersNumbers" metadata query. */
+	Q_CONVERTERS_NUMBERS("qConvertersNumbers");
 
 	private final String name;
 

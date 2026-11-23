@@ -18,7 +18,7 @@ class ReportManagerDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesReportManager() {
 		ReportManager bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ReportManager.MODULE_NAME, ReportManager.DOCUMENT_NAME);
+				.build(AdminDocument.REPORT_MANAGER);
 		assertNotNull(bean);
 	}
 

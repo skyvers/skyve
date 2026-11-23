@@ -7,6 +7,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ImportExport.actions.ResetColumns;
 import modules.admin.ImportExport.actions.RunImport;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ImportExport;
 
@@ -23,8 +24,7 @@ public class ImportExportFactory {
 	@SkyveFixture(types = FixtureType.crud)
 	@SuppressWarnings("static-method")
 	public ImportExportExtension crudInstance() {
-		ImportExportExtension bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(ImportExport.MODULE_NAME,
-				ImportExport.DOCUMENT_NAME);
+		ImportExportExtension bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(AdminDocument.IMPORT_EXPORT);
 
 		bean.setModuleName(Contact.MODULE_NAME);
 		bean.setDocumentName(Contact.DOCUMENT_NAME);

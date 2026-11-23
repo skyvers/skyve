@@ -17,6 +17,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 
 import modules.admin.DataMaintenance.models.BackupsModel;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import modules.admin.domain.DownloadFolder;
 
@@ -37,7 +38,7 @@ public class BatchesModel extends ListModel<Communication> {
 	 */
 	@Override
 	public void postConstruct(org.skyve.metadata.customer.Customer customer, boolean runtime) {
-		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
+		drivingDocument = AdminDocument.DOWNLOAD_FOLDER.toDocument(customer);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);

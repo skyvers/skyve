@@ -137,6 +137,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	/**
+	 * Creates a {@code UserAccess} for a model-driven aggregate list resource; a typed shortcut for
+	 * {@link #modelAggregate(String, String, String)}.
+	 *
+	 * @param document   the compile-time document reference; must not be {@code null}
+	 * @param modelName  the model name; must not be {@code null}
+	 * @return a new model-aggregate {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess modelAggregate(@Nonnull ModuleDocument document, @Nonnull String modelName) {
+		return modelAggregate(document.moduleName(), document.documentName(), modelName);
+	}
+
+	/**
 	 * Creates a {@code UserAccess} for a previous/complete conversation resource.
 	 *
 	 * @param moduleName    the module; must not be {@code null}
@@ -146,6 +158,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 */
 	public static @Nonnull UserAccess previousComplete(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String binding) {
 		return new UserAccess('P', moduleName, documentName, binding);
+	}
+
+	/**
+	 * Creates a {@code UserAccess} for a previous/complete conversation resource; a typed shortcut for
+	 * {@link #previousComplete(String, String, String)}.
+	 *
+	 * @param document  the compile-time document reference; must not be {@code null}
+	 * @param binding   the binding path; must not be {@code null}
+	 * @return a new previous-complete {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess previousComplete(@Nonnull ModuleDocument document, @Nonnull String binding) {
+		return previousComplete(document.moduleName(), document.documentName(), binding);
 	}
 
 	/**
@@ -161,6 +185,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	/**
+	 * Creates a {@code UserAccess} for a named report resource; a typed shortcut for
+	 * {@link #report(String, String, String)}.
+	 *
+	 * @param document    the compile-time document reference; must not be {@code null}
+	 * @param reportName  the report name; must not be {@code null}
+	 * @return a new report {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess report(@Nonnull ModuleDocument document, @Nonnull String reportName) {
+		return report(document.moduleName(), document.documentName(), reportName);
+	}
+
+	/**
 	 * Creates a {@code UserAccess} for a dynamic image resource.
 	 *
 	 * @param moduleName          the module that owns the document; must not be {@code null}
@@ -173,6 +209,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	/**
+	 * Creates a {@code UserAccess} for a dynamic image resource; a typed shortcut for
+	 * {@link #dynamicImage(String, String, String)}.
+	 *
+	 * @param document          the compile-time document reference; must not be {@code null}
+	 * @param dynamicImageName  the dynamic image name; must not be {@code null}
+	 * @return a new dynamic-image {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess dynamicImage(@Nonnull ModuleDocument document, @Nonnull String dynamicImageName) {
+		return dynamicImage(document.moduleName(), document.documentName(), dynamicImageName);
+	}
+
+	/**
 	 * Creates a {@code UserAccess} for a content attachment resource.
 	 *
 	 * @param moduleName    the module that owns the document; must not be {@code null}
@@ -182,6 +230,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 */
 	public static @Nonnull UserAccess content(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String binding) {
 		return new UserAccess('C', moduleName, documentName, binding);
+	}
+
+	/**
+	 * Creates a {@code UserAccess} for a content attachment resource; a typed shortcut for
+	 * {@link #content(String, String, String)}.
+	 *
+	 * @param document  the compile-time document reference; must not be {@code null}
+	 * @param binding   the attribute binding of the content field; must not be {@code null}
+	 * @return a new content {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess content(@Nonnull ModuleDocument document, @Nonnull String binding) {
+		return content(document.moduleName(), document.documentName(), binding);
 	}
 
 	/** Returns {@code true} if this is a singular edit-view access request. */

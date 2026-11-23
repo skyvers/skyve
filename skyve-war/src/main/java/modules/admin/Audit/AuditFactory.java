@@ -8,6 +8,7 @@ import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
@@ -49,8 +50,8 @@ public class AuditFactory {
 	 */
 	private static Audit newAudit() throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
-		Module module = customer.getModule(Audit.MODULE_NAME);
-		Document document = module.getDocument(customer, Audit.DOCUMENT_NAME);
+		Module module = AdminDocument.AUDIT.toModule(customer);
+		Document document = AdminDocument.AUDIT.toDocument(customer);
 	
 		Audit audit = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 0);
 		audit.setOperation(Operation.insert);

@@ -33,6 +33,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -730,6 +731,24 @@ class AbstractDataFileLoaderTest {
 		assertThat(hasWarning(problems, "No data has been loaded"), is(false));
 	}
 
+	@Test
+	void typedSetDocumentContextResolvesTheReferencedDocument() throws Exception {
+		Customer customer = customer();
+		Module other = mock(Module.class);
+		Document otherDocument = mock(Document.class);
+		when(customer.getModule("other")).thenReturn(other);
+		when(other.getDocument(customer, "Other")).thenReturn(otherDocument);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+		loader.setDocumentContext("other", "Other");
+
+		loader.setDocumentContext(SalesDocument.ORDER);
+
+		assertThat(loader.moduleName, is("sales"));
+		assertThat(loader.documentName, is("Order"));
+		assertThat(loader.document, is(customer.getModule("sales").getDocument(customer, "Order")));
+	}
+
 	private static Customer customer() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -887,6 +906,21 @@ class AbstractDataFileLoaderTest {
 				return null;
 			}
 			return new Date(1_700_000_000_000L);
+		}
+	}
+
+	/** References sales.Order, as a generated document enum does. */
+	private enum SalesDocument implements ModuleDocument {
+		ORDER;
+
+		@Override
+		public String moduleName() {
+			return "sales";
+		}
+
+		@Override
+		public String documentName() {
+			return "Order";
 		}
 	}
 }

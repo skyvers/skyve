@@ -22,6 +22,12 @@ public enum KitchensinkDocument implements ModuleDocument {
 	CONDITIONS_FIXTURE_ROW("ConditionsFixtureRow"),
 	/** The "ContainerGrid" document. */
 	CONTAINER_GRID("ContainerGrid"),
+	/** The "ConvertersDataTables" document. */
+	CONVERTERS_DATA_TABLES("ConvertersDataTables"),
+	/** The "ConvertersFixture" document. */
+	CONVERTERS_FIXTURE("ConvertersFixture"),
+	/** The "ConvertersFixtureRow" document. */
+	CONVERTERS_FIXTURE_ROW("ConvertersFixtureRow"),
 	/** The "DataRepeater" document. */
 	DATA_REPEATER("DataRepeater"),
 	/** The "DialogsFixture" document. */
@@ -52,6 +58,8 @@ public enum KitchensinkDocument implements ModuleDocument {
 	ORDERED_GRID_FIXTURE_LINE("OrderedGridFixtureLine"),
 	/** The "OrderedGridFixtureRow" document. */
 	ORDERED_GRID_FIXTURE_ROW("OrderedGridFixtureRow"),
+	/** The "RerenderFixture" document. */
+	RERENDER_FIXTURE("RerenderFixture"),
 	/** The "UploadFixture" document. */
 	UPLOAD_FIXTURE("UploadFixture"),
 	/** The "UploadFixtureGridRow" document. */

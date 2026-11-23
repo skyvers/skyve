@@ -14,6 +14,6 @@ public class SecurityLogTest extends AbstractDomainTest<SecurityLog> {
 	protected SecurityLog getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(SecurityLog.MODULE_NAME, SecurityLog.DOCUMENT_NAME);
+			.build(AdminDocument.SECURITY_LOG);
 	}
 }

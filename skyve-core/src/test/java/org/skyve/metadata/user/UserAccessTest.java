@@ -348,6 +348,11 @@ class UserAccessTest {
 	void typedFactoriesEqualTheStringForms() {
 		assertAll(() -> assertEquals(UserAccess.singular("admin", "Contact"), UserAccess.singular(TestDocument.CONTACT)),
 					() -> assertEquals(UserAccess.documentAggregate("admin", "Contact"), UserAccess.documentAggregate(TestDocument.CONTACT)),
-					() -> assertEquals(UserAccess.queryAggregate("admin", "qContacts"), UserAccess.queryAggregate(TestQuery.Q_CONTACTS)));
+					() -> assertEquals(UserAccess.queryAggregate("admin", "qContacts"), UserAccess.queryAggregate(TestQuery.Q_CONTACTS)),
+					() -> assertEquals(UserAccess.content("admin", "Contact", "image"), UserAccess.content(TestDocument.CONTACT, "image")),
+					() -> assertEquals(UserAccess.modelAggregate("admin", "Contact", "mContacts"), UserAccess.modelAggregate(TestDocument.CONTACT, "mContacts")),
+					() -> assertEquals(UserAccess.previousComplete("admin", "Contact", "name"), UserAccess.previousComplete(TestDocument.CONTACT, "name")),
+					() -> assertEquals(UserAccess.report("admin", "Contact", "rContacts"), UserAccess.report(TestDocument.CONTACT, "rContacts")),
+					() -> assertEquals(UserAccess.dynamicImage("admin", "Contact", "iContacts"), UserAccess.dynamicImage(TestDocument.CONTACT, "iContacts")));
 	}
 }

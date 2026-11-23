@@ -5,6 +5,7 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.OverrideExtended;
+import modules.test.domain.TestDocument;
 
 /**
  * Creates test fixtures for {@link OverrideExtended}, returning the vanilla extension class, which the
@@ -22,7 +23,7 @@ public class OverrideExtendedFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static OverrideExtendedExtension crudInstance() {
-		OverrideExtendedExtension result = new DataBuilder().factoryBuild(OverrideExtended.MODULE_NAME, OverrideExtended.DOCUMENT_NAME);
+		OverrideExtendedExtension result = new DataBuilder().factoryBuild(TestDocument.OVERRIDE_EXTENDED);
 		result.setText(CRUD_TEXT);
 		return result;
 	}

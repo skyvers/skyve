@@ -27,6 +27,7 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Contact.ContactExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminJob;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
@@ -56,7 +57,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		org.skyve.metadata.user.User user = persistence.getUser();
 		String myDataGroupId = user.getDataGroupId();
 		if (myDataGroupId != null) {
-			DocumentQuery query = persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+			DocumentQuery query = persistence.newDocumentQuery(AdminDocument.DATA_GROUP);
 			query.getFilter().addEquals(Bean.DOCUMENT_ID, myDataGroupId);
 			List<DataGroup> dataGroups = query.beanResults();
 			for (DataGroup dataGroup : dataGroups) {
@@ -72,7 +73,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 		// check whether creating a new security group will be mandatory when creating a user
 		// this occurs if there are no security groups yet defined
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.GROUP);
 		bean.setGroupSelection((q.beanResults().isEmpty() ? GroupSelection.newGroup : GroupSelection.existingGroups));
 		bean.setGroupsExist((q.beanResults().isEmpty() ? Boolean.FALSE : Boolean.TRUE));
 
@@ -165,7 +166,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		Persistence persistence = CORE.getPersistence();
 
 		if (User.groupsPropertyName.equals(fieldName)) {
-			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+			DocumentQuery query = persistence.newDocumentQuery(AdminDocument.GROUP);
 			query.addBoundOrdering(Group.namePropertyName, SortDirection.ascending);
 			List<Group> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
@@ -175,7 +176,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 			return result;
 		} else if (User.dataGroupPropertyName.equals(fieldName)) {
-			DocumentQuery query = persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+			DocumentQuery query = persistence.newDocumentQuery(AdminDocument.DATA_GROUP);
 			query.addBoundOrdering(DataGroup.namePropertyName, SortDirection.ascending);
 			List<DataGroup> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());

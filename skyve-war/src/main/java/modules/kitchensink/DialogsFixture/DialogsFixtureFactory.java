@@ -6,6 +6,7 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.kitchensink.domain.DialogsFixture;
+import modules.kitchensink.domain.KitchensinkDocument;
 
 /**
  * Fixture factory for {@code kitchensink.DialogsFixture} test instances.
@@ -25,7 +26,7 @@ public class DialogsFixtureFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static DialogsFixture crudInstance() {
-		DialogsFixture bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME);
+		DialogsFixture bean = new DataBuilder().fixture(FixtureType.crud).factoryBuild(KitchensinkDocument.DIALOGS_FIXTURE);
 		bean.setAskOnSave(Boolean.FALSE);
 		bean.setAskOnDelete(Boolean.FALSE);
 		return bean;

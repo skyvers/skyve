@@ -17,9 +17,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailExecutor;
-import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
 /**
@@ -39,7 +39,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		controlPanel = db.build(AdminDocument.CONTROL_PANEL);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@Test
 	void testExecuteSAILWithNullBaseUrlThrowsValidationException() {
 		// setup the test data - all fields except baseUrl
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(null);
 		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
@@ -99,7 +99,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@Test
 	void testExecuteSAILWithNullExecutorThrowsValidationException() {
 		// setup the test data - all fields except executor
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(BASE_URL);
 		controlPanel.setSailExecutor(null);
@@ -118,7 +118,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@Test
 	void testExecuteSAILWithNullComponentBuilderThrowsValidationException() {
 		// setup the test data - all fields except componentBuilder
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(BASE_URL);
 		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
@@ -137,7 +137,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@Test
 	void testExecuteSAILWithNullLayoutBuilderThrowsValidationException() {
 		// setup the test data - all fields except layoutBuilder
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(BASE_URL);
 		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
@@ -156,7 +156,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	@Test
 	void testExecuteSAILWithNullSailThrowsValidationException() {
 		// setup the test data - all fields except sail
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(BASE_URL);
 		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
@@ -202,7 +202,7 @@ class ExecuteSAILTest extends AbstractH2Test {
 	 */
 	@Test
 	void anExecutionThatFailsPutsItsStackTraceInTheResults() {
-		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		UserProxyExtension user = db.build(AdminDocument.USER_PROXY);
 		controlPanel.setSailUser(user);
 		controlPanel.setSailBaseUrl(BASE_URL);
 		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);

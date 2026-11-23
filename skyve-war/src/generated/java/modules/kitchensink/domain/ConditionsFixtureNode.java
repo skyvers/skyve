@@ -61,7 +61,7 @@ public class ConditionsFixtureNode extends AbstractPersistentBean implements Hie
 
 	public static ConditionsFixtureNode newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return KitchensinkDocument.CONDITIONS_FIXTURE_NODE.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;
@@ -118,7 +118,7 @@ public class ConditionsFixtureNode extends AbstractPersistentBean implements Hie
 
 		if (bizParentId != null) {
 			Persistence p = CORE.getPersistence();
-			DocumentQuery q = p.newDocumentQuery(ConditionsFixtureNode.MODULE_NAME, ConditionsFixtureNode.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(KitchensinkDocument.CONDITIONS_FIXTURE_NODE);
 			q.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);
 			result = q.retrieveBean();
 		}
@@ -130,7 +130,7 @@ public class ConditionsFixtureNode extends AbstractPersistentBean implements Hie
 	@XmlTransient
 	public List<ConditionsFixtureNode> getChildren() {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(ConditionsFixtureNode.MODULE_NAME, ConditionsFixtureNode.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(KitchensinkDocument.CONDITIONS_FIXTURE_NODE);
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}

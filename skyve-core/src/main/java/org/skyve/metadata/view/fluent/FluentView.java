@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 
@@ -373,6 +374,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	}
 
 	/**
+	 * Finds the view report access in this view's list of accesses; a typed shortcut for
+	 * {@link #findReportAccess(String, String, String)}.
+	 */
+	public @Nullable FluentViewReportAccess findReportAccess(final @Nonnull ModuleDocument document, final @Nonnull String reportName) {
+		return findReportAccess(document.moduleName(), document.documentName(), reportName);
+	}
+
+	/**
 	 * Removes the {@link ViewReportUserAccessMetaData} with the specified
 	 * module name, document name and report name if one is defined for this view.
 	 */
@@ -385,6 +394,15 @@ public class FluentView extends FluentContainer<FluentView> {
 													vr.getReportName().equals(reportName)));
 		}
 		return this;
+	}
+
+	/**
+	 * Removes the {@link ViewReportUserAccessMetaData} with the specified
+	 * document and report name if one is defined for this view; a typed shortcut for
+	 * {@link #removeReportAccess(String, String, String)}.
+	 */
+	public @Nonnull FluentView removeReportAccess(final @Nonnull ModuleDocument document, final @Nonnull String reportName) {
+		return removeReportAccess(document.moduleName(), document.documentName(), reportName);
 	}
 
 	/**

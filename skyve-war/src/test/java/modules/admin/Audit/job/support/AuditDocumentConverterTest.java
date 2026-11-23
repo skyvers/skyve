@@ -12,6 +12,7 @@ import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
@@ -21,7 +22,7 @@ class AuditDocumentConverterTest {
 	@Test
 	void handlesWithAuditModuleAndDocumentReturnsTrue() {
 		AuditDocumentConverter converter = new AuditDocumentConverter();
-		assertTrue(converter.handles(Audit.MODULE_NAME, Audit.DOCUMENT_NAME));
+		assertTrue(converter.handles(AdminDocument.AUDIT));
 	}
 
 	@Test

@@ -18,7 +18,7 @@ class UserMonthlyHitsDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserMonthlyHits bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserMonthlyHits.MODULE_NAME, UserMonthlyHits.DOCUMENT_NAME);
+				.build(AdminDocument.USER_MONTHLY_HITS);
 		assertNotNull(bean);
 	}
 

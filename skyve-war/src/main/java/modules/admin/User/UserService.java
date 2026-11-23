@@ -29,6 +29,7 @@ import modules.admin.Group.GroupService;
 import modules.admin.User.actions.GenerateUniqueUserName;
 import modules.admin.UserList.UserListUtil;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
@@ -36,7 +37,6 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
-import modules.admin.domain.UserProxy;
 
 /**
  * This class acts as a service layer to encapsulate domain logic.
@@ -100,7 +100,7 @@ public class UserService {
 		} else if (!user.isPersisted() && user.getUserName().length() < ConfigurationExtension.MINIMUM_USERNAME_LENGTH) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
-			DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+			DocumentQuery q = pers.newDocumentQuery(AdminDocument.USER);
 			q.getFilter().addEquals(User.userNamePropertyName, user.getUserName());
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, user.getBizId());
 
@@ -278,8 +278,8 @@ public class UserService {
 	 */
 	public void evictUserProxy(UserExtension bean) {
 		String bizId = bean.getBizId();
-		if (pers.sharedCacheBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId)) {
-			pers.evictSharedCachedBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId);
+		if (pers.sharedCacheBean(AdminDocument.USER_PROXY, bizId)) {
+			pers.evictSharedCachedBean(AdminDocument.USER_PROXY, bizId);
 		}
 	}
 
@@ -291,9 +291,7 @@ public class UserService {
 	public UserExtension currentAdminUser() {
 		UserExtension result = null;
 		try {
-			result = pers.retrieve(User.MODULE_NAME,
-					User.DOCUMENT_NAME,
-					pers.getUser().getId());
+			result = pers.retrieve(AdminDocument.USER, pers.getUser().getId());
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
@@ -309,7 +307,7 @@ public class UserService {
 	public UserProxyExtension currentAdminUserProxy() {
 		UserProxyExtension result = null;
 		try {
-			result = pers.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, pers.getUser().getId());
+			result = pers.retrieve(AdminDocument.USER_PROXY, pers.getUser().getId());
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
@@ -347,7 +345,7 @@ public class UserService {
 		}
 
 		// check if user already exists
-		DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = pers.newDocumentQuery(AdminDocument.USER);
 		q.getFilter().addEquals(User.userNamePropertyName, contact.getEmail1());
 		q.setMaxResults(1);
 
