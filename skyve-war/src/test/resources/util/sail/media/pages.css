@@ -18,12 +18,14 @@ background:var(--surface);border-bottom:1px solid var(--border)}
 .btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;line-height:1.2;padding:6px 12px;
 border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);cursor:pointer;text-decoration:none}
 .btn:hover{background:var(--sunken);text-decoration:none}
+.btn[hidden]{display:none}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;min-width:72px;justify-content:center}
 @media (prefers-color-scheme:dark){.btn.primary{color:#0b0e12}}
 .badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.6;
 background:var(--sunken);color:var(--muted);white-space:nowrap}
 .badge.pass{background:var(--pass-soft);color:var(--pass)}.badge.fail{background:var(--fail-soft);color:var(--fail)}
 .content{padding:16px 20px 32px}
+.table-wrap{overflow-x:auto}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow)}
 table{border-collapse:separate;border-spacing:0;width:100%}
 th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border)}
@@ -47,7 +49,13 @@ tr.unit td{border-bottom-style:dashed}
 tr.leg td:nth-child(3){padding-left:30px;position:relative}
 tr.leg td:nth-child(3)::before{content:"";position:absolute;left:14px;top:0;bottom:0;border-left:2px solid var(--border)}
 .leg-no{float:right;margin-left:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-td.shot img{display:block;max-width:300px;border:1px solid var(--border);border-radius:4px}
+td.shot img{display:block;max-width:min(600px,45vw);border:1px solid var(--border);border-radius:4px}
+.desc p{margin:0 0 6px;max-width:90ch}.desc p:last-child{margin-bottom:0}
+.story{display:grid;gap:12px;padding:14px 18px;margin-bottom:16px}
+.story h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 4px}
+.story h2 .muted{text-transform:none;letter-spacing:0;font-weight:400;overflow-wrap:anywhere}
+tr.group .desc,td .desc{font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+tr.suite td{background:var(--sunken);font-size:14px}
 .pop{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 64px);overflow:auto;padding:18px 20px;
 border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 12px 32px rgba(0,0,0,.25)}
 .pop::backdrop{background:rgba(0,0,0,.3)}
@@ -55,5 +63,5 @@ border:1px solid var(--border);border-radius:10px;background:var(--surface);colo
 .pop h2{font-size:16px;margin:0}.pop h3{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 6px}
 .pop dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0}
 .pop dt{color:var(--muted)}.pop dd{margin:0;overflow-wrap:anywhere}.pop dd .muted{font-size:12px}
-@media (max-width:700px){.top{padding:12px 16px}.heading{flex-basis:100%}.content{padding:12px 16px 24px}.table-wrap{overflow-x:auto}
-td.shot img{max-width:160px}.pop dl{grid-template-columns:1fr}.pop dd{margin-bottom:6px}}
+@media (max-width:700px){.top{padding:12px 16px}.heading{flex-basis:100%}.content{padding:12px 16px 24px}
+.pop dl{grid-template-columns:1fr}.pop dd{margin-bottom:6px}}

@@ -17,7 +17,7 @@ class AuditListDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		AuditList bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AuditList.MODULE_NAME, AuditList.DOCUMENT_NAME);
+				.build(AdminDocument.AUDIT_LIST);
 		assertNotNull(bean);
 	}
 

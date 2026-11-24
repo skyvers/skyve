@@ -14,6 +14,6 @@ public class MonitoringDashboardTest extends AbstractDomainTest<MonitoringDashbo
 	protected MonitoringDashboard getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME);
+			.build(AdminDocument.MONITORING_DASHBOARD);
 	}
 }

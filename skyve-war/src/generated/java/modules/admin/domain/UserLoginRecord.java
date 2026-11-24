@@ -131,7 +131,7 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 
 	public static UserLoginRecordExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.USER_LOGIN_RECORD.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

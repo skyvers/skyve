@@ -2,13 +2,28 @@ package modules.admin.Configuration;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
+import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.persistence.DocumentFilter;
+import org.skyve.persistence.DocumentQuery;
+
+import modules.admin.domain.AdminDocument;
+import modules.admin.domain.JobSchedule;
 
 class ConfigurationExtensionTest {
 	@Spy
@@ -346,5 +361,40 @@ class ConfigurationExtensionTest {
 		assertThat(result1, is(Boolean.TRUE));
 		assertThat(result2, is(Boolean.TRUE));
 		assertThat(result3, is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validBackupScheduleLooksForAnEnabledScheduleOfTheBackupJob() throws Exception {
+		assertLooksForSchedule("admin.jBackup", ConfigurationExtension::validBackupSchedule);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void validAvailableDiskSpaceAlarmScheduleLooksForAnEnabledScheduleOfTheAlarmJob() throws Exception {
+		assertLooksForSchedule("admin.jAvailableDiskSpaceAlarm", ConfigurationExtension::validAvailableDiskSpaceAlarmSchedule);
+	}
+
+	/** The check is true only when a job schedule with the job's module-qualified name is found. */
+	@SuppressWarnings("unchecked")
+	private static void assertLooksForSchedule(String scheduledJobName, BooleanSupplier check) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		DocumentQuery query = mock(DocumentQuery.class);
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(persistence.newDocumentQuery(AdminDocument.JOB_SCHEDULE)).thenReturn(query);
+		when(query.getFilter()).thenReturn(filter);
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		threadLocal.set(persistence);
+		try {
+			assertFalse(check.getAsBoolean());
+			doReturn(mock(JobSchedule.class)).when(query).beanResult();
+			assertTrue(check.getAsBoolean());
+			verify(filter, times(2)).addEquals(JobSchedule.jobNamePropertyName, scheduledJobName);
+		}
+		finally {
+			threadLocal.remove();
+		}
 	}
 }

@@ -14,7 +14,6 @@ import org.skyve.job.Job;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.CommunicationUtil;
@@ -22,10 +21,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminJob;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserList;
 import modules.admin.domain.UserProxy;
@@ -141,9 +140,7 @@ public class BulkUserCreationJob extends Job {
 		// (comma separated or semicolon separated list is provided)
 		Persistence pers = CORE.getPersistence();
 		Customer customer = pers.getUser().getCustomer();
-		Module module = customer.getModule(UserList.MODULE_NAME);
-
-		Document docContact = module.getDocument(customer, Contact.DOCUMENT_NAME);
+		Document docContact = AdminDocument.CONTACT.toDocument(customer);
 		for (String emailAddress : bean.getUserInvitiationEmailList().split(SPACE_COMMA_OR_SEMICOLON)) {
 
 			// construct contact and validate
@@ -177,7 +174,7 @@ public class BulkUserCreationJob extends Job {
 	public static User createUserFromContact(ContactExtension c, UserList bean, List<String> log) {
 
 		// check if user already exists
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.USER);
 		q.getFilter().addEquals(UserProxy.userNamePropertyName, c.getEmail1());
 		q.setMaxResults(1);
 
@@ -214,7 +211,7 @@ public class BulkUserCreationJob extends Job {
 				// so we need to re-retrieve each group
 				String id = group.getBizId();
 				CORE.getPersistence().evictCached(group);
-				group = CORE.getPersistence().retrieve(Group.MODULE_NAME, Group.DOCUMENT_NAME, id);
+				group = CORE.getPersistence().retrieve(AdminDocument.GROUP, id);
 
 				// now the group can be added to the new user
 				newUser.getGroups().add(group);

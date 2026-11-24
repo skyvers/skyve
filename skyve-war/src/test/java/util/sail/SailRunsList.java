@@ -1,5 +1,6 @@
 package util.sail;
 
+import static util.sail.SailMediaHtml.descriptionHtml;
 import static util.sail.SailMediaHtml.duration;
 import static util.sail.SailMediaHtml.escape;
 import static util.sail.SailMediaHtml.startPage;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +29,10 @@ import jakarta.annotation.Nullable;
 
 /**
  * A directory's list of runs ({@code index.html}), for {@link SailMedia}: by session (a JVM's run of tests), newest
- * first, and in each session the runs in the order they ran, under their suite files, with a workflow's legs under the
- * workflow. It reads each run's {@value SailMedia#RUN_JSON}, and filters by outcome and text.
+ * first, and in each session the runs in the order they ran, under their suite and its member files, with a workflow's
+ * legs under the workflow. The suite, the workflow and each run show their descriptions. It reads each run's
+ * {@value SailMedia#RUN_JSON}, and filters by outcome and text. It also writes the runs in that order as a script
+ * ({@value SailMedia#RUNS_ORDER_JS}), from which each run page makes its previous and next run buttons.
  */
 final class SailRunsList {
 	/** The columns of a session's table, by heading; every row has one cell for each. */
@@ -51,8 +55,18 @@ final class SailRunsList {
 		}
 
 		@Nullable String label() {
-			Object label = (summary == null) ? null : summary.get("label");
-			return (label == null) ? null : label.toString();
+			return text("label");
+		}
+
+		/** Its suite's file, or null when it is not a suite member. */
+		@Nullable String suite() {
+			return text("suite");
+		}
+
+		/** A text value of its summary, or null when it has none. */
+		@Nullable String text(@Nonnull String key) {
+			Object value = (summary == null) ? null : summary.get(key);
+			return (value == null) ? null : value.toString();
 		}
 
 		long unit() {
@@ -74,17 +88,14 @@ final class SailRunsList {
 	}
 
 	/**
-	 * Writes a directory's list of runs: by session (a JVM's run of tests), newest first, and in each session the runs
-	 * in the order they ran, as the suite ran them. A suite file's runs come under its name, and the legs of a unit (a
-	 * workflow) under the unit. Each run shows its title, test, outcome, steps and time (from its {@value SailMedia#RUN_JSON};
-	 * runs written before that file existed come last, by their folders' names), with its film strip and player. It can
-	 * show only the failed runs, or the runs with some text.
+	 * Lists a directory's runs in the list's order: sessions newest first (runs without one last), and each session's
+	 * runs in the order they started.
 	 *
 	 * @param base	the directory
-	 * @return the page
+	 * @return its runs, each a folder with a film strip or a player
 	 * @throws IOException	if the directory cannot be read
 	 */
-	static @Nonnull String runsIndexHtml(@Nonnull Path base) throws IOException {
+	static @Nonnull List<ListedRun> listedRuns(@Nonnull Path base) throws IOException {
 		List<ListedRun> runs = new ArrayList<>();
 		try (DirectoryStream<Path> children = Files.newDirectoryStream(base, Files::isDirectory)) {
 			for (Path child : children) {
@@ -97,6 +108,32 @@ final class SailRunsList {
 		runs.sort(Comparator.comparing((ListedRun r) -> r.session().isEmpty() ? "" : r.session(), Comparator.reverseOrder())
 							.thenComparing(r -> r.session().isEmpty() ? "" : r.name())
 							.thenComparing(ListedRun::name, Comparator.reverseOrder()));
+		return runs;
+	}
+
+	/**
+	 * Writes a directory's list of runs, as {@link #listedRuns(Path)} orders them: by session (a JVM's run of tests),
+	 * newest first, and in each session the runs in the order they ran, as the suite ran them. A suite file's runs come
+	 * under its name, and the legs of a unit (a workflow) under the unit. Each run shows its title, test, outcome, steps
+	 * and time (from its {@value SailMedia#RUN_JSON}; runs written before that file existed come last, by their folders'
+	 * names), with its film strip and player. It can show only the failed runs, or the runs with some text.
+	 *
+	 * @param runs	the runs, in the list's order (see {@link #listedRuns(Path)})
+	 * @return the page
+	 */
+	static @Nonnull String runsIndexHtml(@Nonnull List<ListedRun> runs) {
+		return runsIndexHtml(runs, "");
+	}
+
+	/**
+	 * Writes a list of runs, as {@link #runsIndexHtml(List)} does, from a folder other than the runs' directory.
+	 *
+	 * @param runs	the runs, in the list's order
+	 * @param runsLink	the runs' directory relative to the list, ending in {@code /} (such as {@code media/}), or empty
+	 *			when the list is in it
+	 * @return the page
+	 */
+	static @Nonnull String runsIndexHtml(@Nonnull List<ListedRun> runs, @Nonnull String runsLink) {
 		long failedRuns = runs.stream().filter(ListedRun::failed).count();
 		StringBuilder result = new StringBuilder(4096 + (runs.size() * 768));
 		startPage(result, "SAIL runs", "", null);
@@ -115,7 +152,7 @@ final class SailRunsList {
 				end++;
 			}
 			List<ListedRun> sessionRuns = runs.subList(i, end);
-			group = sessionHtml(result, session, sessionRuns, group);
+			group = sessionHtml(result, session, sessionRuns, group, runsLink);
 			i = end;
 		}
 		result.append("</main>").append(SailMediaHtml.RUNS_SCRIPT).append("</body></html>\n");
@@ -123,21 +160,35 @@ final class SailRunsList {
 	}
 
 	/**
-	 * Writes one session's table: its runs in order, under their suite files and units. Each file heading and unit
-	 * heading takes the next group number; a run row names its file's and unit's groups ({@code data-g},
-	 * {@code data-u}), which is how the filters find the headings to hide with it.
+	 * Writes one session's table: its runs in order, under their suites, suite files and units. Each suite, file and
+	 * unit heading takes the next group number; a run row names its suite's, file's and unit's groups ({@code data-s},
+	 * {@code data-g}, {@code data-u}), which is how the filters find the headings to hide with it.
 	 *
+	 * @param runsLink	the runs' directory relative to the list, or empty
 	 * @return the next group number (groups number the file and unit headings across the page, for the filters)
 	 */
-	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup) {
+	private static int sessionHtml(@Nonnull StringBuilder out, @Nonnull String session, @Nonnull List<ListedRun> runs, int firstGroup,
+									@Nonnull String runsLink) {
 		int group = firstGroup;
 		sessionHeadingHtml(out, session, runs);
+		String suite = null;
+		int suiteGroup = 0;
 		String label = null;
 		int fileGroup = 0;
 		for (int i = 0, sequence = 1; i < runs.size(); ) {
 			ListedRun run = runs.get(i);
+			String runSuite = run.suite();
+			boolean newSuite = ! Objects.equals(runSuite, suite);
+			if (newSuite) {
+				suite = runSuite;
+				suiteGroup = (suite == null) ? 0 : ++group;
+				if (suite != null) {
+					out.append("<tr class=\"group suite\" data-header=\"g").append(suiteGroup).append("\"><td colspan=\"").append(HEADINGS.size())
+						.append("\">Suite ").append(escape(suite)).append(descriptionHtml(run.text("suiteDescription"), "desc")).append("</td></tr>");
+				}
+			}
 			String runLabel = run.label();
-			if (! Objects.equals(runLabel, label)) {
+			if (newSuite || (! Objects.equals(runLabel, label))) {
 				label = runLabel;
 				fileGroup = (label == null) ? 0 : ++group;
 				if (label != null) {
@@ -152,7 +203,7 @@ final class SailRunsList {
 				unitRowHtml(out, runs.subList(i, end), unitGroup);
 			}
 			for (int j = i; j < end; j++) {
-				runRowHtml(out, runs.get(j), new RowPlace(sequence++, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1));
+				runRowHtml(out, runs.get(j), new RowPlace(sequence++, suiteGroup, fileGroup, unitGroup, (unitGroup == 0) ? 0 : j - i + 1), runsLink);
 			}
 			i = end;
 		}
@@ -193,12 +244,13 @@ final class SailRunsList {
 		return result;
 	}
 
-	/** Writes a unit's heading row: its title, how many legs, its outcome and total time. */
+	/** Writes a unit's heading row: its title, how many legs, its description, its outcome and total time. */
 	private static void unitRowHtml(@Nonnull StringBuilder out, @Nonnull List<ListedRun> legs, int unitGroup) {
 		boolean unitFailed = legs.stream().anyMatch(ListedRun::failed);
 		out.append("<tr class=\"unit").append(unitFailed ? " fail" : "").append("\" data-header=\"g").append(unitGroup)
 			.append("\"><td></td><td></td><td><div class=\"summary\">").append(escape(unitTitle(legs)))
-			.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div></td><td>")
+			.append("</div><div class=\"muted small\">workflow of ").append(legs.size()).append(" legs</div>")
+			.append(descriptionHtml(legs.get(0).text("workflowDescription"), "desc")).append("</td><td>")
 			.append(unitFailed ? "<span class=\"badge fail\">Failed</span>" : "<span class=\"badge pass\">Passed</span>")
 			.append("</td><td></td><td class=\"num\">")
 			.append(duration(legs.stream().mapToLong(ListedRun::millis).sum())).append("</td><td></td></tr>");
@@ -228,22 +280,25 @@ final class SailRunsList {
 	 * Where a run's row is in its session's table.
 	 *
 	 * @param sequence	its number in the session, from 1
+	 * @param suiteGroup	its suite's heading's group, or 0 when it has none
 	 * @param fileGroup	its suite file's heading's group, or 0 when it has none
 	 * @param unitGroup	its unit's heading's group, or 0 when it is not in a unit
 	 * @param leg	its number in its unit, from 1; or 0 when it is not in a unit
 	 */
-	private record RowPlace(int sequence, int fileGroup, int unitGroup, int leg) {
+	private record RowPlace(int sequence, int suiteGroup, int fileGroup, int unitGroup, int leg) {
 		// a value
 	}
 
-	/** Writes one run's row. */
-	private static void runRowHtml(@Nonnull StringBuilder out, @Nonnull ListedRun run, @Nonnull RowPlace place) {
+	/** Writes one run's row, linking to its pages through the runs' directory ({@code runsLink}, or empty). */
+	private static void runRowHtml(@Nonnull StringBuilder out, @Nonnull ListedRun run, @Nonnull RowPlace place, @Nonnull String runsLink) {
 		Map<String, Object> summary = run.summary();
 		boolean failed = run.failed();
+		int suiteGroup = place.suiteGroup();
 		int fileGroup = place.fileGroup();
 		int unitGroup = place.unitGroup();
 		int leg = place.leg();
 		out.append("<tr data-run data-failed=\"").append(failed).append('"')
+			.append((suiteGroup == 0) ? "" : " data-s=\"g" + suiteGroup + '"')
 			.append((fileGroup == 0) ? "" : " data-g=\"g" + fileGroup + '"')
 			.append((unitGroup == 0) ? "" : " data-u=\"g" + unitGroup + '"');
 		String classes = (failed ? "fail" : "") + ((leg == 0) ? "" : (failed ? " leg" : "leg"));
@@ -260,13 +315,17 @@ final class SailRunsList {
 				.append("</td><td>").append((leg == 0) ? "" : "<span class=\"leg-no\">leg " + leg + "</span>")
 				.append("<div class=\"summary\">").append(escape(run.title())).append("</div><div class=\"muted small\">")
 				.append(escape(String.valueOf(summary.get("test")))).append((label == null) ? "" : " &middot; " + escape(String.valueOf(label)))
-				.append("</div></td><td>")
+				.append("</div>")
+				// a workflow of one has no unit heading, so its run shows the workflow's description
+				.append((leg == 0) ? descriptionHtml(run.text("workflowDescription"), "desc") : "")
+				.append(descriptionHtml(run.text("description"), "desc"))
+				.append("</td><td>")
 				.append(failed ? "<span class=\"badge fail\">" + ((failedSteps == 0) ? "Failed" : failedSteps + " failed") + "</span>"
 								: "<span class=\"badge pass\">Passed</span>")
 				.append("</td><td class=\"num\">").append(number(summary.get("steps")))
 				.append("</td><td class=\"num\">").append(duration(run.millis())).append("</td>");
 		}
-		String href = escape(run.name());
+		String href = escape(runsLink + run.name());
 		out.append("<td class=\"links\">");
 		if (Files.exists(run.folder().resolve("index.html"))) {
 			out.append("<a class=\"btn\" href=\"").append(href).append("/index.html\">Steps</a>");
@@ -275,6 +334,29 @@ final class SailRunsList {
 			out.append("<a class=\"btn\" href=\"").append(href).append("/player.html\">Video</a>");
 		}
 		out.append("</td></tr>");
+	}
+
+	/**
+	 * Writes {@value SailMedia#RUNS_ORDER_JS}: the runs in the list's order, for each run page's previous and next run
+	 * buttons ({@code runnav.js}). A script, not JSON, as a page opened from the file system cannot fetch a file; it
+	 * loads it with a {@code script} element.
+	 *
+	 * @param runs	the runs, in the list's order (see {@link #listedRuns(Path)})
+	 * @return the script
+	 */
+	static @Nonnull String runsOrderScript(@Nonnull List<ListedRun> runs) {
+		List<Map<String, Object>> order = new ArrayList<>(runs.size());
+		for (ListedRun run : runs) {
+			Map<String, Object> entry = new LinkedHashMap<>();
+			entry.put("n", run.name());
+			entry.put("t", run.title());
+			entry.put("e", run.session());
+			entry.put("s", Boolean.valueOf(Files.exists(run.folder().resolve("index.html"))));
+			entry.put("v", Boolean.valueOf(Files.exists(run.folder().resolve("player.html"))));
+			entry.put("f", Boolean.valueOf(run.failed()));
+			order.add(entry);
+		}
+		return "window.SAIL_RUNS = " + new Json().toJson(order) + ";\n";
 	}
 
 	/** Reads a run folder's {@value SailMedia#RUN_JSON}, or null when it has none or it cannot be read. */

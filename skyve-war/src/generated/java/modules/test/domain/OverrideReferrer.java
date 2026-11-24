@@ -81,7 +81,7 @@ public class OverrideReferrer extends AbstractPersistentBean {
 
 	public static OverrideReferrer newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.OVERRIDE_REFERRER.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

@@ -16,7 +16,7 @@ class DocumentNumberDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		DocumentNumber bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
+				.build(AdminDocument.DOCUMENT_NUMBER);
 		assertNotNull(bean);
 	}
 

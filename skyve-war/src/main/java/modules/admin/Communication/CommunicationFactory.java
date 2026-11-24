@@ -10,9 +10,8 @@ import modules.admin.Communication.actions.GetCount;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.Communication.actions.SendNow;
 import modules.admin.Communication.actions.TestSend;
-import modules.admin.domain.Communication;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
-import modules.admin.domain.Tag;
 
 /**
  * Creates Communication documents with default batching and scheduling values.
@@ -26,9 +25,9 @@ public class CommunicationFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static CommunicationExtension crudInstance() {
-		CommunicationExtension bean = new DataBuilder().factoryBuild(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		CommunicationExtension bean = new DataBuilder().factoryBuild(AdminDocument.COMMUNICATION);
 		bean.setSystemUse(Boolean.FALSE);
-		bean.setTag(new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
+		bean.setTag(new DataBuilder().build(AdminDocument.TAG));
 
 		return bean;
 	}
@@ -41,7 +40,7 @@ public class CommunicationFactory {
 	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public CommunicationExtension sail() {
-		CommunicationExtension result = new DataBuilder().factoryBuild(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		CommunicationExtension result = new DataBuilder().factoryBuild(AdminDocument.COMMUNICATION);
 		result.setSystemUse(Boolean.FALSE);
 		result.setCalendarStartTime(null);
 		result.setCalendarEndTime(null);

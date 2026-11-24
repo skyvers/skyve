@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -29,6 +30,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.types.DateOnly;
@@ -408,6 +410,20 @@ class BinderTest {
 			assertNull(Binder.validateMessage("plain text", "admin", "Contact"));
 			assertNull(Binder.validateMessage("plain text", "admin", "Contact", "Address"));
 		});
+	}
+
+	@Test
+	void typedValidateMessageResolvesTheReferencedDocument() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+
+		withThreadLocalUser(user, () -> assertNull(Binder.validateMessage("plain text", TestDocument.CONTACT)));
+		verify(module).getDocument(customer, "Contact");
 	}
 
 	@Test

@@ -7,12 +7,12 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ReportTemplate;
 
 /**
@@ -49,8 +49,7 @@ public class ExportReportSpecification extends DownloadAction<ReportTemplate> {
 		ReportTemplate copy = Util.cloneToTransientBySerialization(bean);
 		
 		// clear all transient attributes
-		Module module = CORE.getCustomer().getModule(ReportTemplate.MODULE_NAME);
-		Document document  = module.getDocument(CORE.getCustomer(), ReportTemplate.DOCUMENT_NAME);
+		Document document = AdminDocument.REPORT_TEMPLATE.toDocument();
 		for(Attribute a: document.getAttributes()) {
 			if(!a.isPersistent()) {
 				if (a.getAttributeType() != AttributeType.collection) {

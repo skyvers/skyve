@@ -8,6 +8,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
 import jakarta.enterprise.inject.Default;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 
 /**
@@ -31,7 +32,7 @@ public class CommunicationService {
 	public boolean anonymouslyCommunicationExists(Persistence persistence, String bizCustomer, String communicationId) {
 		// temporarily elevate user to be able to see Communication records in case they don't usually have access
 		Boolean result = persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
-			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(AdminDocument.COMMUNICATION);
 			q.addBoundProjection(Bean.DOCUMENT_ID);
 			DocumentFilter f = q.getFilter();
 			f.addEquals(Bean.CUSTOMER_NAME, bizCustomer);

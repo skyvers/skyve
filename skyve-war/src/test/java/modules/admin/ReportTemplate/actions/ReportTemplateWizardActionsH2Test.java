@@ -17,8 +17,8 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.UserExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Generic;
-import modules.admin.domain.User;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.GenerateExisting;
 import modules.admin.domain.ReportTemplate.WizardState;
@@ -42,7 +42,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void backFromEnterMarkupStateGoesToEnterDetails() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setWizardState(WizardState.enterMarkup);
 
 		Back action = new Back();
@@ -54,7 +54,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void backFromEnterDetailsStateKeepsState() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setWizardState(WizardState.enterDetails);
 
 		Back action = new Back();
@@ -69,7 +69,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void nextFromEnterDetailsStateGoesToEnterMarkup() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setWizardState(WizardState.enterDetails);
 
 		Next action = new Next();
@@ -81,7 +81,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void nextFromEnterDetailsResetsState() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setWizardState(WizardState.enterDetails);
 		bean.setGenerateExisting(GenerateExisting.existing);
 		bean.setTemplate("some markup");
@@ -98,7 +98,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void nextFromEnterMarkupStateKeepsMarkupState() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setWizardState(WizardState.enterMarkup);
 
 		Next action = new Next();
@@ -113,7 +113,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void addUserToEmailWithNullUserThrowsValidationException() {
-		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplate bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setNewUserToEmail(null);
 
 		AddUserToEmail action = new AddUserToEmail();
@@ -125,8 +125,8 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addUserToEmailAddsSelectedUserAndEmailEntry() throws Exception {
-		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		ReportTemplate bean = db.build(AdminDocument.REPORT_TEMPLATE);
+		UserExtension user = db.build(AdminDocument.USER);
 		bean.setNewUserToEmail(user);
 
 		ServerSideActionResult<ReportTemplate> result = new AddUserToEmail().execute(bean, webContext);
@@ -142,8 +142,8 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void addUserToEmailRejectsDuplicateSelectedUser() {
-		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		ReportTemplate bean = db.build(AdminDocument.REPORT_TEMPLATE);
+		UserExtension user = db.build(AdminDocument.USER);
 		bean.getUsersToEmail().add(user);
 		bean.setNewUserToEmail(user);
 
@@ -158,7 +158,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void copyReportCreatesNewReportWithCopyPrefix() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setName("Original Report");
 		bean.setTemplateName("OriginalTemplate");
 		bean.setDescription("Original description");
@@ -174,7 +174,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 
 	@Test
 	void copyReportWithNullDescriptionDoesNotCopyDescription() throws Exception {
-		ReportTemplateExtension bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		ReportTemplateExtension bean = db.build(AdminDocument.REPORT_TEMPLATE);
 		bean.setName("Report No Description");
 		bean.setTemplateName("Template");
 		bean.setDescription(null);

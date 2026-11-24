@@ -21,6 +21,15 @@ public interface ModuleJob extends ModuleMember {
 	@Nonnull String jobName();
 
 	/**
+	 * The name a job schedule stores for this module job.
+	 *
+	 * @return <code>moduleName() + '.' + jobName()</code> - e.g. <code>admin.jBackup</code>
+	 */
+	default @Nonnull String scheduledJobName() {
+		return moduleName() + '.' + jobName();
+	}
+
+	/**
 	 * Resolves this reference to the job metadata through the current user's customer, so
 	 * per-customer module overrides are honoured.
 	 *

@@ -199,6 +199,15 @@
 
   <xs:complexType name="automation">
     <xs:sequence>
+      <xs:element name="description" type="xs:string" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            What the automation does, in words, for the people reading the results: shown in the evidence pages and the trace.
+            Plain text: a blank line starts a new paragraph, and other line breaks and indents are spaces. Tokens such
+            as {run} are shown as written.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
       <xs:element ref="tns:interaction" maxOccurs="unbounded"/>
       <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -843,6 +852,15 @@
 
   <xs:complexType name="interaction">
     <xs:sequence>
+      <xs:element name="description" type="xs:string" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            What the interaction does, in words, for the people reading the results: shown in the evidence pages and the trace.
+            Plain text: a blank line starts a new paragraph, and other line breaks and indents are spaces. Tokens such
+            as {run} are shown as written.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
       <xs:element name="method" form="qualified" minOccurs="0">
         <xs:complexType>
@@ -924,6 +942,15 @@
 
   <xs:complexType name="workflow">
     <xs:sequence>
+      <xs:element name="description" type="xs:string" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            What the workflow tests, in words, for the people reading the results: shown in the evidence pages and the trace.
+            Plain text: a blank line starts a new paragraph, and other line breaks and indents are spaces. Tokens such
+            as {run} are shown as written.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element ref="tns:automation" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="testStrategy" type="tns:testStrategy">
@@ -937,6 +964,15 @@
 
   <xs:complexType name="suite">
     <xs:sequence>
+      <xs:element name="description" type="xs:string" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            What the suite tests, in words, for the people reading the results: shown in the evidence pages and the trace.
+            Plain text: a blank line starts a new paragraph, and other line breaks and indents are spaces. Tokens such
+            as {run} are shown as written.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="viewRoles" type="tns:viewRoles" form="qualified" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>

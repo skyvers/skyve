@@ -1,5 +1,6 @@
 package org.skyve.impl.dataaccess.sql;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -21,6 +22,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.AbstractSQL;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.User;
@@ -182,6 +184,20 @@ class SQLDataAccessImplTest {
 	}
 
 	@Test
+	void newSQLWithTypedDocumentUsesItsModuleAndDocumentNames() throws Exception {
+		Fixture fixture = fixture("select * from orders", 15);
+		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
+		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
+
+		AbstractSQL sql = (AbstractSQL) dataAccess.newSQL(SalesDocument.ORDER, "select * from orders");
+
+		assertEquals("sales", sql.getModuleName());
+		assertEquals("Order", sql.getDocumentName());
+		verify(fixture.module).getDocument(fixture.customer, "Order");
+	}
+
+	@Test
 	void newNamedSQLWithDocumentUsesModuleQueryAndTimeout() throws Exception {
 		Fixture fixture = fixture("select * from orders where status = :status", 20);
 		bindPersistenceWithUser(fixture.user);
@@ -214,6 +230,22 @@ class SQLDataAccessImplTest {
 		assertEquals(30, sql.getTimeoutInSeconds());
 		verify(fixture.module).getNullSafeSQL("ArchivedOrders");
 		verify(fixture.module).getDocument(fixture.customer, "Order");
+	}
+
+	@Test
+	void newNamedSQLWithTypedDocumentUsesItsModuleAndDocumentNames() throws Exception {
+		Fixture fixture = fixture("select * from archived_orders", 30);
+		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
+		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
+
+		AbstractSQL sql = (AbstractSQL) dataAccess.newNamedSQL(SalesDocument.ORDER, "ArchivedOrders");
+
+		assertAll(() -> assertEquals("select * from archived_orders", sql.toQueryString()),
+					() -> assertEquals("sales", sql.getModuleName()),
+					() -> assertEquals("Order", sql.getDocumentName()),
+					() -> verify(fixture.module).getNullSafeSQL("ArchivedOrders"),
+					() -> verify(fixture.module).getDocument(fixture.customer, "Order"));
 	}
 
 	@Test
@@ -284,5 +316,19 @@ class SQLDataAccessImplTest {
 
 	private record Fixture(User user, Customer customer, Module module, Document document, SQLDefinition sqlDefinition) {
 		// fixture tuple
+	}
+
+	private enum SalesDocument implements ModuleDocument {
+		ORDER;
+
+		@Override
+		public String moduleName() {
+			return "sales";
+		}
+
+		@Override
+		public String documentName() {
+			return "Order";
+		}
 	}
 }

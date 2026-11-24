@@ -26,7 +26,7 @@ class CommunicationDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesCommunicationBean() {
 		Communication bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+				.build(AdminDocument.COMMUNICATION);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

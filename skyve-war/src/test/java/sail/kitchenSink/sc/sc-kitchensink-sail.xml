@@ -19,7 +19,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and goes through the Kitchen Sink module: menus, lookups, every widget, data grids, actions, conditions, uploads, ordered grids and list grids in a view. It checks that what a user types is what the screens show back, and that actions and conditions behave as they should.</description>
 	<interaction name="Login">
+		<description>Signs in as admin and switches to the SmartClient desktop.</description>
 		<method>
 			<login user="admin" password="admin" />
 			<switchMode />
@@ -27,6 +29,7 @@
 	</interaction>
 
 	<interaction name="Menus">
+		<description>Checks the desktop menu offers Kitchen Sink and Lookup values but not the PrimeFaces-only Reports list, and uses the Refresh tool on the Lookup values list.</description>
 		<method>
 			<testMenu module="kitchensink" />
 			<testMenu module="kitchensink" item="Kitchen Sink" />
@@ -43,6 +46,7 @@
 	</interaction>
 
 	<interaction name="A tree and a calendar">
+		<description>Opens the Condition Node Tree and the List Attribute Calendar, which only SmartClient offers.</description>
 		<method>
 			<comment>The kitchen sink's Condition Node Tree and List Attribute Calendar menu items (SmartClient only): open each by its URL, as navigateTree and navigateCalendar do, and check that the page shows no error</comment>
 			<testMenu module="kitchensink" item="Condition Node Tree" />
@@ -55,6 +59,7 @@
 	</interaction>
 
 	<interaction name="Lookup values to pick">
+		<description>Creates two lookup values for the Kitchen Sink lookup to pick from, checking a save without the required description is refused, then selects and opens one.</description>
 		<method>
 			<comment>Create the lookup values that the kitchen sink's lookup description picks from; {run} keeps each run's values apart (this run's is {run})</comment>
 			<navigateMenu module="kitchensink" item="Lookup values" />
@@ -82,6 +87,7 @@
 	</interaction>
 
 	<interaction name="Widgets">
+		<description>Fills in every Kitchen Sink widget (text, numbers, dates, times, colour, combos, radios, markup and file uploads) and checks each value reads back.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<dataEnter binding="booleanFlag" value="true" />
@@ -147,6 +153,7 @@
 	</interaction>
 
 	<interaction name="Lookup descriptions">
+		<description>Picks a lookup by typing and from the list, and uses its Edit and New buttons to open the lookup value in a zoomed view.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<comment>text is required, and SmartClient validates the view before zooming into a lookup</comment>
@@ -168,6 +175,7 @@
 	</interaction>
 
 	<interaction name="Windows, back, refresh and list grid tools">
+		<description>Opens a link in a new window, makes a lookup value there, nests a second window, closes both, refreshes the list grid, opens a PDF window, and checks Back and Reload, then removes the value.</description>
 		<method>
 			<comment>The List Grid Fixture's first list grid sets selectedVueId, which the view shows; its Deselect tool clears it</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -217,6 +225,7 @@
 	</interaction>
 
 	<interaction name="Remove the lookup values">
+		<description>Opens each lookup value made earlier, declines and then confirms deleting it, and checks none are left.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL Alpha {run}" />
@@ -232,6 +241,7 @@
 	</interaction>
 
 	<interaction name="Test data entry">
+		<description>Opens the Kitchen Sink and fills it with generated test data.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<testDataEnter />
@@ -239,6 +249,7 @@
 	</interaction>
 
 	<interaction name="Data grids">
+		<description>Adds, edits, selects, zooms into and removes rows in the Kitchen Sink data grids, checking each value, including rows added in place.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<dataEnter binding="text" value="Required text" />
@@ -302,6 +313,7 @@
 	</interaction>
 
 	<interaction name="Actions">
+		<description>Presses the Actions Fixture's toolbar, form and tab buttons, runs a script in the page, waits for a timer, calls a server-side helper and checks the results.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<action name="RunFromToolbar" />
@@ -345,6 +357,7 @@
 	</interaction>
 
 	<interaction name="Actions Fixture: a refused upload, a link in a row, a cell and the title">
+		<description>Uploads files that the Actions Fixture refuses for three different reasons and one it accepts, reads the title, and declines and confirms the Run From Row link in a grid row.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<comment>The view's title, with a pattern that keeps its first word</comment>
@@ -375,6 +388,7 @@
 	</interaction>
 
 	<interaction name="Widget state">
+		<description>Checks the Kitchen Sink's widgets are visible or hidden and enabled or disabled as their conditions say, and changes values to check they follow.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<testWidget action="RunFromToolbar" enabled="true" />
@@ -393,6 +407,7 @@
 	</interaction>
 
 	<interaction name="Conditions Fixture: visible and enabled conditions">
+		<description>Ticks the Conditions Fixture's Show and Allow options and checks which fields are shown and enabled, for conditions written as a Skyve expression and as a Java condition.</description>
 		<method>
 			<comment>SAIL waits for SmartClient to settle after each step, so a widget that keeps its form redrawing fails here</comment>
 			<comment>Show and Allow start ticked, so the form items are shown and enabled; changing either rerenders the view</comment>
@@ -417,6 +432,7 @@
 	</interaction>
 
 	<interaction name="Server-side questions">
+		<description>Answers server-side Yes or No questions on the Dialogs Fixture both ways, and a confirmation in the browser followed by questions from the server.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="DialogsFixture" />
 			<action name="AskYesNo" />
@@ -432,6 +448,7 @@
 	</interaction>
 
 	<interaction name="Upload actions">
+		<description>Uploads a file into a content link and through an upload action.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="UploadFixture" />
 			<upload binding="contentLinkNone" file="sail/files/sail-upload.txt" />
@@ -441,6 +458,7 @@
 	</interaction>
 
 	<interaction name="Zoom in">
+		<description>Tries to zoom into an empty reference and checks it is refused.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="EscapingFixture" />
 			<comment>zoomTarget is empty, so the zoom in is refused and opens no view</comment>
@@ -450,6 +468,7 @@
 	</interaction>
 
 	<interaction name="List grids in a view">
+		<description>Saves a fixture and checks it appears in the view's list grid, then opens lists by URL, filters, sorts and clears a list grid in a view, and deletes from the zoomed view.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
 			<dataEnter binding="name" value="SAIL model lookup {run}" />
@@ -478,6 +497,7 @@
 	</interaction>
 
 	<interaction name="Ordered grid: drag rows into a new order, and keep it once saved">
+		<description>Makes an Ordered Grid Fixture with three rows, drags a row to the top and another down, saving between, and checks after reopening that the saved order is kept.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Ordered Grid Fixtures" />
 			<listGridNew module="kitchensink" document="OrderedGridFixture" />
@@ -515,6 +535,7 @@
 		</method>
 	</interaction>
 	<interaction name="Ordered inline grid and ordered list membership: keep their order once saved">
+		<description>Makes lookup values and an owner with an ordered inline grid and an ordered list of members, reorders both, and checks the saved order is kept after reopening, then deletes them.</description>
 		<method>
 			<comment>Lookup values to be members</comment>
 			<navigateMenu module="kitchensink" item="Lookup values" />
@@ -571,6 +592,7 @@
 		</method>
 	</interaction>
 	<interaction name="Logout">
+		<description>Signs out.</description>
 		<method>
 			<logout />
 		</method>

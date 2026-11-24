@@ -1,5 +1,6 @@
 package modules.admin.UserList.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserList;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class CreateUsersTest extends AbstractActionTest<UserList, CreateUsers> {
 	protected UserList getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(UserList.MODULE_NAME, UserList.DOCUMENT_NAME);
+			.build(AdminDocument.USER_LIST);
 	}
 }

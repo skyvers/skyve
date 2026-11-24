@@ -25,6 +25,7 @@ import modules.admin.Group.GroupExtension;
 import modules.admin.Tag.TagExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Tag;
 import modules.admin.domain.Tagged;
@@ -50,12 +51,12 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		long suffix = System.nanoTime();
 		String tagName = "Test Tag " + suffix;
 		// Create source and target users
-		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension sourceUser = db.build(AdminDocument.USER);
 		nameUniquely(sourceUser, "source-" + suffix, "Source");
 		sourceUser.getContact().setEmail1("source-" + suffix + "@test.com");
 		sourceUser = CORE.getPersistence().save(sourceUser);
 
-		UserExtension targetUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension targetUser = db.build(AdminDocument.USER);
 		nameUniquely(targetUser, "target-" + suffix, "Target");
 		targetUser.getContact().setEmail1("target-" + suffix + "@test.com");
 		targetUser = CORE.getPersistence().save(targetUser);
@@ -67,9 +68,9 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		sourceTag = CORE.getPersistence().save(sourceTag);
 
 		// Create some contacts to tag
-		Contact contact1 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact contact1 = db.build(AdminDocument.CONTACT);
 		contact1 = CORE.getPersistence().save(contact1);
-		Contact contact2 = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact contact2 = db.build(AdminDocument.CONTACT);
 		contact2 = CORE.getPersistence().save(contact2);
 
 		// Tag the contacts
@@ -91,7 +92,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(result.getBean(), is(notNullValue()));
 
 		// Verify a new tag was created for the target user
-		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(AdminDocument.TAG);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, tagName);
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
 		TagExtension newTag = tagQuery.beanResult();
@@ -105,19 +106,19 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(2L, newTag.count());
 
 		// Verify the original tag still has 2 tagged items (unchanged)
-		TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, sourceTag.getBizId());
+		TagExtension originalTag = CORE.getPersistence().retrieve(AdminDocument.TAG, sourceTag.getBizId());
 		assertNotNull(originalTag);
 		assertEquals(2L, originalTag.count());
 
 		// Verify the tagged items are the same for both tags
-		DocumentQuery taggedQuery1 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+		DocumentQuery taggedQuery1 = CORE.getPersistence().newDocumentQuery(AdminDocument.TAGGED);
 		taggedQuery1.getFilter().addEquals(Tagged.tagPropertyName, sourceTag);
 		taggedQuery1.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
 		Number originalTagged = taggedQuery1.scalarResult(Number.class);
 		assertNotNull(originalTagged);
 		long originalTaggedCount = originalTagged.longValue();
 
-		DocumentQuery taggedQuery2 = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+		DocumentQuery taggedQuery2 = CORE.getPersistence().newDocumentQuery(AdminDocument.TAGGED);
 		taggedQuery2.getFilter().addEquals(Tagged.tagPropertyName, newTag);
 		taggedQuery2.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
 		Number newTagged = taggedQuery2.scalarResult(Number.class);
@@ -133,7 +134,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 	void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
 		long suffix = System.nanoTime();
 		// Create a user and tag
-		UserExtension user = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = db.build(AdminDocument.USER);
 		user.getContact().setEmail1("user-" + suffix + "@test.com");
 		user = CORE.getPersistence().save(user);
 
@@ -143,7 +144,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		tag = CORE.getPersistence().save(tag);
 
 		// Tag a contact
-		Contact contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact contact = db.build(AdminDocument.CONTACT);
 		contact = CORE.getPersistence().save(contact);
 		tagManager.tag(tag.getBizId(), contact);
 
@@ -160,7 +161,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(exception.getMessages().get(0).getText(), is("You have not selected a user to copy to."));
 
 		// Verify no new tag was created
-		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(AdminDocument.TAG);
 		tagQuery.getFilter().addEquals(Bean.USER_ID, user.getBizId());
 		tagQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
 		Number tagCountNumber = tagQuery.scalarResult(Number.class);
@@ -169,7 +170,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(1L, tagCount); // Only the original tag
 
 		// Verify the original tag still has 1 tagged item
-		TagExtension originalTag = CORE.getPersistence().retrieve(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, tag.getBizId());
+		TagExtension originalTag = CORE.getPersistence().retrieve(AdminDocument.TAG, tag.getBizId());
 		assertNotNull(originalTag);
 		assertEquals(1L, originalTag.count());
 	}
@@ -180,12 +181,12 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		long suffix = System.nanoTime();
 		String tagName = "Empty Tag " + suffix;
 		// Create source and target users
-		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension sourceUser = db.build(AdminDocument.USER);
 		nameUniquely(sourceUser, "source-empty-" + suffix, "Source");
 		sourceUser.getContact().setEmail1("source-empty-" + suffix + "@test.com");
 		sourceUser = CORE.getPersistence().save(sourceUser);
 
-		UserExtension targetUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension targetUser = db.build(AdminDocument.USER);
 		nameUniquely(targetUser, "target-empty-" + suffix, "Target");
 		targetUser.getContact().setEmail1("target-empty-" + suffix + "@test.com");
 		targetUser = CORE.getPersistence().save(targetUser);
@@ -210,7 +211,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 
 		// Verify a new tag was created for the target user
-		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		DocumentQuery tagQuery = CORE.getPersistence().newDocumentQuery(AdminDocument.TAG);
 		tagQuery.getFilter().addEquals(Tag.namePropertyName, tagName);
 		tagQuery.getFilter().addEquals(Bean.USER_ID, targetUser.getBizId());
 		TagExtension newTag = tagQuery.beanResult();

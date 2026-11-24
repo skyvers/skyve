@@ -2,7 +2,10 @@ package org.skyve.metadata.view.model.list;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +13,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class ListModelRowTest {
 
@@ -126,5 +130,15 @@ class ListModelRowTest {
 		ListModelRow row = new ListModelRow("mod", "doc", props);
 		row.setBizKey("keyVal");
 		assertThat(row.getBizKey(), is(row.getBizLock())); // stores bizLock value (implementation quirk)
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorSetsTheReferencedModuleAndDocument() {
+		Map<String, Object> properties = new HashMap<>();
+		ListModelRow row = new ListModelRow(TestDocument.CONTACT, properties);
+		assertAll(() -> assertEquals("admin", row.getBizModule()),
+					() -> assertEquals("Contact", row.getBizDocument()),
+					() -> assertSame(properties, row.getMap()));
 	}
 }

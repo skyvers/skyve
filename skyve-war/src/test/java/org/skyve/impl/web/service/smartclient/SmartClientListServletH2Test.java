@@ -49,10 +49,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Snapshot;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 class SmartClientListServletH2Test extends AbstractSkyveTest {
 	private static final String DATASOURCE = "test_AllAttributesPersistent";
@@ -331,7 +333,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 	 * which is what gives the test user access to list them.
 	 */
 	private Contact saveContact(String name) {
-		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTACT);
 		bean.setName(name + '-' + System.nanoTime());
 		return p.save(bean);
 	}
@@ -351,7 +353,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 
 	private AllAttributesPersistent saveUncommittedBean(String textPrefix) {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText(textPrefix + '-' + System.nanoTime());
 		bean = p.save(bean);
 		return bean;

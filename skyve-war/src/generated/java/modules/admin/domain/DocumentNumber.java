@@ -86,7 +86,7 @@ public class DocumentNumber extends AbstractPersistentBean implements org.skyve.
 
 	public static DocumentNumber newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.DOCUMENT_NUMBER.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

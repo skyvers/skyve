@@ -23,10 +23,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataGroup;
-import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
-import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -88,7 +87,7 @@ class UserPrivilegesH2Test extends AbstractH2Test {
 	@Test
 	void aGroupGivesItsRolesAndLeavingTheGroupTakesThemAway() {
 		String name = name("group");
-		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.GROUP);
 		group.setName("group-" + System.nanoTime());
 		group.getRoles().clear();
 		GroupRole groupRole = GroupRole.newInstance();
@@ -110,7 +109,7 @@ class UserPrivilegesH2Test extends AbstractH2Test {
 	@Test
 	void aGroupAloneIsEnoughToSignIn() {
 		String name = name("grouponly");
-		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		GroupExtension group = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.GROUP);
 		group.setName("grouponly-" + System.nanoTime());
 		group.getRoles().clear();
 		GroupRole groupRole = GroupRole.newInstance();
@@ -183,7 +182,7 @@ class UserPrivilegesH2Test extends AbstractH2Test {
 	@Test
 	void theUsersDataGroupScopesTheirData() {
 		String name = name("datagroup");
-		DataGroup dataGroup = new DataBuilder().fixture(FixtureType.crud).build(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+		DataGroup dataGroup = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.DATA_GROUP);
 		dataGroup = CORE.getPersistence().save(dataGroup);
 		UserExtension user = user(name);
 		user.setDataGroup(dataGroup);
@@ -203,7 +202,7 @@ class UserPrivilegesH2Test extends AbstractH2Test {
 	}
 
 	private static UserExtension user(String name) {
-		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		result.setUserName(name);
 		result.setInactive(Boolean.FALSE);
 		result.setPasswordExpired(Boolean.FALSE);

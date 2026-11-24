@@ -184,6 +184,14 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			Map<String, DocumentImpl> documents = overrides.get(customerName);
 			return (documents != null) && documents.containsKey(documentName);
 		}
+
+		/**
+		 * Whether the customer adds a document of its own, which only an override of the module can declare.
+		 */
+		boolean addsDocuments(String customerName) {
+			Map<String, DocumentImpl> documents = overrides.get(customerName);
+			return (documents != null) && (! vanilla.keySet().containsAll(documents.keySet()));
+		}
 	}
 
 	private static DocumentImpl document(String name, String persistentName, ExtensionStrategy strategy, String extendsName, String... attributeNames) {
@@ -304,6 +312,15 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	 * returning the generated files by relative path.
 	 */
 	private static Map<String, String> generate(Fixture fixture, boolean validate) throws Exception {
+		return generate(fixture, validate, new String[] {MODULE});
+	}
+
+	/**
+	 * Runs the generator over the fixture into {@code root/src}, generating tests for the modules not
+	 * excluded into {@code root/test}, and returns the generated files by relative path, with the
+	 * generated tests under {@code test/}.
+	 */
+	private static Map<String, String> generate(Fixture fixture, boolean validate, String[] excludedModules) throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-override");
 		Path src = root.resolve("source");
 		for (Map.Entry<String, byte[]> entry : fixture.extended.entrySet()) {
@@ -348,6 +365,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			if (key.startsWith("modules/" + MODULE + '/') && fixture.overrides(customerName, documentName)) {
 				return "customers/" + customerName + '/' + key;
 			}
+			if (key.equals("modules/" + MODULE) && fixture.addsDocuments(customerName)) {
+				return "customers/" + customerName + '/' + key;
+			}
 			return key;
 		});
 		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(any(), any(), any())).thenAnswer(invocation -> {
@@ -370,7 +390,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepositoryFactory.set(repo);
 		try {
-			CustomerGenerationTestSupport.generate(src.toString() + '/', root.resolve("src"), root.resolve("test"), repo, validate);
+			CustomerGenerationTestSupport.generate(src.toString() + '/', root.resolve("src"), root.resolve("test"), repo, validate, excludedModules);
 		}
 		finally {
 			ProvidedRepositoryFactory.set(previousRepository);
@@ -382,6 +402,10 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			result.put(entry.getKey(), new String(entry.getValue(), StandardCharsets.ISO_8859_1));
 		}
 		result.putAll(snapshot(root.resolve("src")));
+		Path test = root.resolve("test");
+		if (Files.isDirectory(test)) {
+			snapshot(test).forEach((path, contents) -> result.put("test/" + path, contents));
+		}
 		return result;
 	}
 
@@ -597,6 +621,22 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.OrderVanilla\""), vanillaMapping),
 				() -> assertTrue(vanillaMapping.contains("name=\"description\""), vanillaMapping),
 				() -> assertFalse(files.containsKey("customers/beta/modules/orm.hbm.xml"), "beta overrides nothing"));
+	}
+
+	@Test
+	void aGeneratedDomainTestBuildsItsDocumentThroughTheModuleEnum() throws Exception {
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.vanilla(document("Note", null, null, null, "text")),
+				true,
+				null);
+
+		String orderTest = files.get("test/modules/sales/domain/OrderTest.java");
+		assertAll(
+				() -> assertNotNull(orderTest, "a persistent document gets a domain test, got " + files.keySet()),
+				() -> assertTrue(orderTest.contains(".build(SalesDocument.ORDER);"), orderTest),
+				() -> assertTrue(files.get("modules/sales/domain/SalesDocument.java").contains("ORDER"), "the enum it builds through"),
+				() -> assertFalse(files.containsKey("test/modules/sales/domain/NoteTest.java"), "a transient document gets no domain test"));
 	}
 
 	@Test

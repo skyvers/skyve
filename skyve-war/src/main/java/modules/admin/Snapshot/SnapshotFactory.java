@@ -4,6 +4,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Snapshot;
 
 /**
@@ -21,7 +22,7 @@ public class SnapshotFactory {
 		Snapshot bean = new DataBuilder()
 				.fixture(FixtureType.crud)
 				.domain(false)
-				.factoryBuild(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+				.factoryBuild(AdminDocument.SNAPSHOT);
 
 		bean.setQueryName("snapshot" + System.nanoTime());
 

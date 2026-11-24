@@ -32,12 +32,15 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 			<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 			<automation uxui="tablet" userAgentType="tablet" testStrategy="%s"
 						xmlns="http://www.skyve.org/xml/sail">
+				<description>Signs in as admin in the PrimeFaces tablet UX/UI and runs steps that go wrong: values that differ from what was entered, a widget that is not there, and a check for an error that does not happen. The test runs it under each test strategy, and expects Assert to stop at the first failure, Verify to run on and report every failure at the end, and None to make no checks. The missing widget is left out for None.</description>
 				<interaction name="Login">
+					<description>Signs in as admin.</description>
 					<method>
 						<login user="admin" password="admin" />
 					</method>
 				</interaction>
 				<interaction name="Wrong values">
+					<description>Enters a value and then checks for different values, runs an action and checks for an error that it does not give. Each of those checks is expected to fail.</description>
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
 						<dataEnter binding="eventText" value="entered" />
@@ -49,6 +52,7 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 					</method>
 				</interaction>
 				<interaction name="Missing widget">
+					<description>Enters a value into a binding that the view does not have, which is expected to fail the step and so skip the rest of this interaction.</description>
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
 						<dataEnter binding="noSuchBinding" value="x" />
@@ -56,6 +60,7 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 					</method>
 				</interaction>
 				<interaction name="Still runs">
+					<description>Checks a value that is wrong, to show that a later interaction still runs after earlier failures when the strategy is Verify.</description>
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
 						<testValue binding="eventText" value="also wrong" />

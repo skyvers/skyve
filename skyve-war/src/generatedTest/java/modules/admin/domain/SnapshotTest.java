@@ -14,6 +14,6 @@ public class SnapshotTest extends AbstractDomainTest<Snapshot> {
 	protected Snapshot getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+			.build(AdminDocument.SNAPSHOT);
 	}
 }

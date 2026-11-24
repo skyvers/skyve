@@ -13,12 +13,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) as a report administrator: designs a report with the wizard, tests it, manages specifications, and checks the Report Schedules list, then deletes the report.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Reports menu: the SmartClient tools, not the Reports list">
+		<description>Checks the Reports menu offers the SmartClient tools (Report Manager, Report Designer, Report Schedules) and not the PrimeFaces Reports list.</description>
 		<method>
 			<testMenu module="admin" item="Reports/Reports" present="false" />
 			<testMenu module="admin" item="Reports/Report Manager" />
@@ -27,6 +29,7 @@
 		</method>
 	</interaction>
 	<interaction name="Report Designer: design a report with the wizard">
+		<description>Designs a report with the wizard, a constant dataset and a query dataset, checks the wizard refuses to continue until the parameter has a type, then saves the report and finds it in the list.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Designer" />
 			<listGridNew module="admin" document="ReportTemplate" createView="true" />
@@ -64,6 +67,7 @@
 		</method>
 	</interaction>
 	<interaction name="Report Designer: a report name already in use is refused">
+		<description>Starts a second report with the same name and checks it is refused as already defined.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Designer" />
 			<listGridNew module="admin" document="ReportTemplate" createView="true" />
@@ -78,6 +82,7 @@
 		</method>
 	</interaction>
 	<interaction name="Datasets: TestQuery runs a query and refuses a class that is not there">
+		<description>Runs Test Query on the query dataset and checks its results, then adds a dataset for a class that does not exist and checks Test Query reports an error.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Designer" />
 			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
@@ -99,6 +104,7 @@
 		</method>
 	</interaction>
 	<interaction name="Test Report, Download Template and Export Report Specification, and a Test Report refused with unsaved changes">
+		<description>Runs Test Report, Download Template and Export Report Specification on the saved report, then changes it without saving and checks Test Report is refused.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Designer" />
 			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
@@ -113,6 +119,7 @@
 		</method>
 	</interaction>
 	<interaction name="Report Schedules: only enabled reports are listed">
+		<description>Checks Report Schedules lists the report, then disables the report and checks it drops out of the list, and enables it and checks it returns.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Schedules" />
 			<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
@@ -135,6 +142,7 @@
 		</method>
 	</interaction>
 	<interaction name="Report Manager: export, and import validated and imported">
+		<description>Exports report specifications, refusing it until a report is selected, then imports a specification as a validation only, refuses an invalid file, imports it for real twice, and checks the report appears once and is then deleted.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Manager" />
 			<action name="ExportReportSpecifications" testSuccess="false" />
@@ -169,6 +177,7 @@
 		</method>
 	</interaction>
 	<interaction name="Report Designer: delete the report">
+		<description>Deletes the designed report and checks it is gone from the designer and from Report Schedules.</description>
 		<method>
 			<navigateMenu module="admin" item="Reports/Report Designer" />
 			<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />

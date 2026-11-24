@@ -12,6 +12,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
@@ -52,6 +53,24 @@ public class CSVLoader extends AbstractDataFileLoader {
 		}
 
 		dataIndex = 0;
+	}
+
+	/**
+	 * Creates a CSV loader for the referenced document; a typed shortcut for
+	 * {@link #CSVLoader(LoaderActivityType, InputStream, UploadException, String, String, String...)}.
+	 *
+	 * @param activityType	what to do with each row
+	 * @param fileInputStream	the CSV content, with a header row
+	 * @param exception	collects the problems found while loading
+	 * @param document	the compile-time reference to the document to load into
+	 * @param bindings	the bindings in the same order as the columns
+	 */
+	public CSVLoader(@Nonnull LoaderActivityType activityType,
+						@Nonnull InputStream fileInputStream,
+						@Nonnull UploadException exception,
+						@Nonnull ModuleDocument document,
+						@Nonnull String... bindings) {
+		this(activityType, fileInputStream, exception, document.moduleName(), document.documentName(), bindings);
 	}
 
 	@Override

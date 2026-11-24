@@ -24,6 +24,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *   <li>The {@link UserAgentType} (phone, tablet, desktop) that constrains element location.</li>
  *   <li>The {@link TestStrategy} — {@code Assert} halts on first failure,
  *       {@code Verify} collects all failures, {@code None} runs without assertions.</li>
+ *   <li>An optional {@code description}: what it does, in words, for its reports.</li>
  *   <li>Optional {@code before} and {@code after} {@link Procedure} blocks for test setup
  *       and teardown.</li>
  *   <li>An ordered list of {@link Interaction} objects that define the test steps.</li>
@@ -36,7 +37,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see Procedure
  * @see org.skyve.metadata.sail.execution.Executor
  */
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "description", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Automation implements Executable {
 	/**
@@ -56,6 +57,7 @@ public class Automation implements Executable {
 	private String uxui;
 	private UserAgentType userAgentType;
 	private TestStrategy testStrategy;
+	private String description;
 	private Procedure before;
 	private List<Interaction> interactions = new ArrayList<>();
 	private Procedure after;
@@ -110,6 +112,26 @@ public class Automation implements Executable {
 	@XmlAttribute(name = "testStrategy")
 	public void setTestStrategy(@Nullable TestStrategy testStrategy) {
 		this.testStrategy = testStrategy;
+	}
+
+	/**
+	 * Returns what the automation is for, in words for the people reading its results: its {@code <description>}, tidied by
+	 * {@link Descriptions#normalise(String)}.
+	 *
+	 * @return the description, or {@code null} when it has none
+	 */
+	public @Nullable String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Sets what the automation is for, in words. The text is tidied by {@link Descriptions#normalise(String)}.
+	 *
+	 * @param description	the description, or {@code null} for none
+	 */
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "description")
+	public void setDescription(@Nullable String description) {
+		this.description = Descriptions.normalise(description);
 	}
 
 	/**

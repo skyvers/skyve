@@ -15,8 +15,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
-import modules.admin.domain.UserProxy;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -56,8 +55,7 @@ class JobMaintainerSecurityH2Test extends AbstractH2Test {
 		persistence.setUser(metadataUser);
 
 		Customer customer = metadataUser.getCustomer();
-		Document userProxyDocument = customer.getModule(UserProxy.MODULE_NAME).getDocument(customer,
-				UserProxy.DOCUMENT_NAME);
+		Document userProxyDocument = AdminDocument.USER_PROXY.toDocument(customer);
 		Bean resolved = WebUtil.findReferencedBean(userProxyDocument, runAsUser.getBizId(), persistence, null,
 				mockWebContext());
 
@@ -65,7 +63,7 @@ class JobMaintainerSecurityH2Test extends AbstractH2Test {
 	}
 
 	private static UserExtension user(String userName, String bizId) {
-		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension result = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		result.setBizId(bizId);
 		result.setUserName(userName);
 		result.getGroups().clear();

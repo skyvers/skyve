@@ -4,11 +4,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and checks the User Dashboard, rejected and accepted sign ins, and that Update My Details still saves afterwards.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Home: User Dashboard">
+		<description>Opens the User Dashboard, checks it shows admin as the signed in user with the user name read only, changes the mobile number through Update My Details, and checks the new number after reopening the dashboard.</description>
 		<method>
 			<navigateEdit module="admin" document="UserDashboard" />
 			<testValue binding="currentUser.userName" value="admin" />
@@ -22,6 +24,7 @@
 		</method>
 	</interaction>
 	<interaction name="Sign in, out, and with a bad password">
+		<description>Tries a wrong password and an unknown user name, checking each is refused with a message, then signs in properly and checks the menu offers Contacts.</description>
 		<method>
 			<login user="admin" password="not the password" />
 			<testFailure message="Invalid username and/or password" />
@@ -37,6 +40,7 @@
 		</method>
 	</interaction>
 	<interaction name="Home: Update My Details after those sign ins">
+		<description>Changes the mobile number through Update My Details again, which proves the save is not broken by the good and bad sign ins before it.</description>
 		<method>
 			<comment>Runtime issue P4: Update My Details was reported to fail with an optimistic lock after sign ins, good and bad</comment>
 			<navigateEdit module="admin" document="UserDashboard" />

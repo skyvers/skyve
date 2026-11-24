@@ -59,12 +59,15 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	void unmatchedOptionsColumnsAndRowsFail() {
 		String script = """
 				<automation uxui="tablet" userAgentType="tablet" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<description>Signs in as admin in the PrimeFaces tablet UX/UI and tries steps that cannot do what they say: picking an option, an operator, a lookup row, a link or an action that does not exist, filtering a column that the Vue list grid does not show, and sorting an empty data table. The test expects the script to fail, reporting all seven problems with a clear reason for each.</description>
 					<interaction name="Login">
+						<description>Signs in as admin.</description>
 						<method>
 							<login user="admin" password="admin" />
 						</method>
 					</interaction>
 					<interaction name="No such option">
+						<description>Opens the Kitchen Sink Widgets tab and enters an option label that the combo does not have, which is expected to fail by saying the combo has no option with that label.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="KitchenSink" />
 							<tabSelect path="Widgets" />
@@ -72,12 +75,14 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="A text column has no greater than">
+						<description>Filters a text column of the Lookup Description list with greater than, which is expected to fail by saying that a text column cannot filter that way.</description>
 						<method>
 							<navigateList module="kitchensink" document="LookupDescription" />
 							<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="x" operator="greaterThan" />
 						</method>
 					</interaction>
 					<interaction name="No such lookup row">
+						<description>Picks a lookup row that does not exist, which is expected to fail by saying that no row contains the text.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="KitchenSink" />
 							<tabSelect path="Widgets" />
@@ -85,12 +90,14 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="A hidden column">
+						<description>Filters the List Attributes list by a column that the Vue list grid does not show, which is expected to fail by saying so.</description>
 						<method>
 							<navigateList module="kitchensink" document="ListAttributes" />
 							<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="10:00" />
 						</method>
 					</interaction>
 					<interaction name="An empty data table">
+						<description>Filters a data table to no rows and then sorts it, which is expected to fail because PrimeFaces does not sort an empty data table.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="no such row {run}" />
@@ -99,12 +106,14 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="No such action">
+						<description>Tests an action that the Actions Fixture does not have, which is expected to fail by saying the action is not in the view.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ActionsFixture" />
 							<testWidget action="NoSuchAction{run}" visible="false" />
 						</method>
 					</interaction>
 					<interaction name="No such link">
+						<description>Follows a link that is not on the page, which is expected to fail by saying which links the page has.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="No such link {run}" />
@@ -136,28 +145,33 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	void windowAndToolFailures() {
 		String script = """
 				<automation uxui="tablet" userAgentType="tablet" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<description>Signs in as admin in the PrimeFaces tablet UX/UI and tries window and tool steps that cannot do what they say: following links that open the wrong kind of window, closing a window when none is open, going back with no earlier page, and using the Refresh and Deselect tools that PrimeFaces list grids do not have. The test expects the script to fail, reporting each problem with a clear reason.</description>
 					<before>
 						<login user="admin" password="admin" />
 					</before>
 					<interaction name="A link that opens its page in this window">
+						<description>Opens the List Grid Fixture and follows a link as if it opened a new window, which is expected to fail because the link opens its page in this window.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open the selected lookup value" exact="true" window="new" />
 						</method>
 					</interaction>
 					<interaction name="No window to close">
+						<description>Opens the List Grid Fixture and closes a window when none is open, which is expected to fail.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<closeWindow />
 						</method>
 					</interaction>
 					<interaction name="A link that opens a new window, without window">
+						<description>Follows a link that opens a new window without saying so, which is expected to fail by telling the author to follow it with window="new".</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open a PDF in a new window" />
 						</method>
 					</interaction>
 					<interaction name="No earlier page in a new window">
+						<description>Follows a link into a new window and goes back, which is expected to fail because the new window has no earlier page.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<navigateLink text="Open a PDF in a new window" window="new" />
@@ -165,6 +179,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="The failed interaction's window was closed">
+						<description>Tests a widget that is not there and then closes a window, which is expected to fail because the window the failed interaction left was closed already.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<testWidget binding="selectedVueId" />
@@ -172,12 +187,14 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 						</method>
 					</interaction>
 					<interaction name="No Refresh tool">
+						<description>Uses the Refresh tool on a Vue list grid, which is expected to fail because PrimeFaces list grids have no Refresh tool.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="refresh" />
 						</method>
 					</interaction>
 					<interaction name="No Deselect tool">
+						<description>Uses the Deselect tool on a data table, which is expected to fail because PrimeFaces data tables have no Deselect tool.</description>
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
 							<listGridTool module="kitchensink" query="qListGridFixtureFaces" tool="clearSelection" />
@@ -260,6 +277,8 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	private static String automation(String steps) {
 		return "<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-				"<interaction name=\"Switch mode\"><method>" + steps + "</method></interaction></automation>";
+				"<description>Runs part of the test that switches from SmartClient back to PrimeFaces, in the tablet UX/UI as admin: signing in and checking the kitchensink menu, and then, once the test has switched to SmartClient, switching back, running an action on the Actions Fixture and signing out. " +
+				"Checks that the menu is there and that the action runs after the switch.</description>" +
+				"<interaction name=\"Switch mode\"><description>Runs one stage of the switch back from SmartClient: signing in, or, after the test has switched to SmartClient, switching back, running an action and signing out.</description><method>" + steps + "</method></interaction></automation>";
 	}
 }

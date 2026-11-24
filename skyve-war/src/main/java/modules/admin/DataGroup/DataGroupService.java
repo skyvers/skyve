@@ -17,6 +17,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataGroup;
 
 /**
@@ -76,7 +77,7 @@ public class DataGroupService {
 			p = pers;
 		}
 
-		DocumentQuery query = p.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+		DocumentQuery query = p.newDocumentQuery(AdminDocument.DATA_GROUP);
 		query.addBoundOrdering(DataGroup.namePropertyName, SortDirection.ascending);
 		List<DataGroup> groups = query.beanResults();
 		for (DataGroup group : groups) {
@@ -97,7 +98,7 @@ public class DataGroupService {
 		DataGroup result = null;
 
 		if (bean.getBizDataGroupId() != null) {
-			result = pers.retrieve(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME, bean.getBizDataGroupId());
+			result = pers.retrieve(AdminDocument.DATA_GROUP, bean.getBizDataGroupId());
 		}
 
 		return result;

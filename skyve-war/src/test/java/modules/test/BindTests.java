@@ -46,6 +46,7 @@ import org.skyve.util.Time;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.Snapshot;
@@ -173,7 +174,7 @@ class BindTests extends AbstractSkyveTest {
 	void testSimpleDynamicBeanProperty() {
 		Map<String, Object> map = new TreeMap<>();
 		map.put(UserProxy.userNamePropertyName, "mike");
-		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		DynamicBean bean = new DynamicBean(AdminDocument.USER, map);
 		assertEquals("mike", Binder.get(bean, UserProxy.userNamePropertyName));
 	}
 
@@ -183,7 +184,7 @@ class BindTests extends AbstractSkyveTest {
 		String binding = Binder.createCompoundBinding(UserProxy.contactPropertyName, Contact.namePropertyName);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(binding, "mike");
-		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		DynamicBean bean = new DynamicBean(AdminDocument.USER, map);
 		assertEquals("mike", Binder.get(bean, binding));
 	}
 	
@@ -415,7 +416,7 @@ class BindTests extends AbstractSkyveTest {
 	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testExtraDynamicPropertyWithMethodCall() {
 		TreeMap<String, Object> map = new TreeMap<>();
-		DynamicBean bean = new DynamicBean("admin", "Contact", map);
+		DynamicBean bean = new DynamicBean(AdminDocument.CONTACT, map);
 		bean.putDynamic("test", new StringBuilder());
 		Binder.formatMessage("{el:bean.test.append('test')}", bean);
 		assertEquals("test", bean.get("test").toString());
@@ -717,7 +718,7 @@ class BindTests extends AbstractSkyveTest {
 	void testDynamicBeanWithNoThisReturnsDynamicDomainCode() {
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(Snapshot.queryNamePropertyName, "dynamicDomainValue");
-		DynamicBean bean = new DynamicBean(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME, properties);
+		DynamicBean bean = new DynamicBean(AdminDocument.SNAPSHOT, properties);
 		assertEquals("dynamicDomainValue",
 									BindUtil.getDisplay(c, bean, Snapshot.queryNamePropertyName),
 									"Dynamic domain code value with no THIS_ALIAS should return the code value for a DynamicBean");

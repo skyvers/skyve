@@ -40,7 +40,11 @@ class PrimeFacesRequiredMessagesSailIT extends AbstractInterpretedSailWorkflow {
 	 */
 	private static String automation(String uxui, String userAgentType) {
 		return "<automation uxui=\"" + uxui + "\" userAgentType=\"" + userAgentType + "\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-				"<interaction name=\"Required messages (" + uxui + ")\"><method>" +
+				"<description>Signs in as admin and opens the kitchensink EscapingFixture and KitchenSink documents in the " + uxui + " UX/UI. " +
+				"Checks that PrimeFaces shows required-field messages only when an action with client validation runs, and not when a view first renders, after an action that has client validation turned off, or after a rerender.</description>" +
+				"<interaction name=\"Required messages (" + uxui + ")\">" +
+				"<description>Opens a view with empty required fields, runs an action without client validation and then OK, and then leaves a date field to rerender another view. " +
+				"Checks that the required messages appear only when OK runs, and that OK does not go ahead.</description><method>" +
 				"<login user=\"admin\" password=\"admin\" />" +
 				"<testSuccess />" +
 				"<comment>A view shows no required message when it first renders</comment>" +

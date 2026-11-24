@@ -44,6 +44,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 import net.sf.jasperreports.engine.JasperPrint;
+import modules.admin.domain.AdminDocument;
 import modules.test.AbstractSkyveTest;
 import modules.admin.domain.Contact;
 
@@ -288,7 +289,7 @@ class ReportServletH2Test extends AbstractSkyveTest {
 	 * which is what gives the test user access to export them.
 	 */
 	private Contact saveReportBean(String prefix) {
-		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTACT);
 		bean.setName(prefix + "-" + System.nanoTime());
 		return p.save(bean);
 	}

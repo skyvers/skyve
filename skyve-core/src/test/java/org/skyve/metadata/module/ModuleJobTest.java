@@ -39,6 +39,11 @@ class ModuleJobTest {
 	}
 
 	@Test
+	void scheduledJobNameIsTheModuleDotJobName() {
+		assertEquals("admin.jBulkUserCreation", TestJob.J_BULK_USER_CREATION.scheduledJobName());
+	}
+
+	@Test
 	void toJobWithCustomerResolvesTheJobInTheModule() {
 		Customer customer = mock(Customer.class);
 		JobMetaData job = mockJob(customer);

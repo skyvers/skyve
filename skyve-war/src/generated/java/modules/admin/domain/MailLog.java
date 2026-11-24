@@ -240,7 +240,7 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 
 	public static MailLog newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.MAIL_LOG.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

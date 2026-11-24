@@ -37,8 +37,10 @@ class SmartClientPushGrowlSailIT extends AbstractSmartClientInterpretedSail {
 	@Test
 	void aPushedGrowlKeepsTheGrowlsShowing() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<description>Signs in as admin in the SmartClient UI and opens the kitchensink ActionsFixture document, so that the test can show growls in the page. " +
+							"The script itself checks nothing more than that the view opens.</description>" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-							"<interaction name=\"A view\"><method>" +
+							"<interaction name=\"A view\"><description>Opens the ActionsFixture view.</description><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
 							"</method></interaction></automation>";
 		Assertions.assertDoesNotThrow(() -> sailString(script));

@@ -2,6 +2,8 @@ package org.skyve.domain;
 
 import java.util.Map;
 
+import org.skyve.metadata.model.document.ModuleDocument;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -27,6 +29,16 @@ public class DynamicPersistentChildBean extends DynamicPersistentBean implements
 	 */
 	public DynamicPersistentChildBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
+	}
+
+	/**
+	 * Creates a new DynamicPersistentChildBean instance for the referenced document; a typed shortcut for
+	 * {@link #DynamicPersistentChildBean(String, String, Map)}.
+	 * @param document the compile-time document reference
+	 * @param properties the properties
+	 */
+	public DynamicPersistentChildBean(@Nonnull ModuleDocument document, @Nonnull Map<String, Object> properties) {
+		this(document.moduleName(), document.documentName(), properties);
 	}
 
 	/**

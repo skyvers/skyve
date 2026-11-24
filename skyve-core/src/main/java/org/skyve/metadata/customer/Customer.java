@@ -15,6 +15,7 @@ import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 
 import jakarta.annotation.Nonnull;
@@ -182,7 +183,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 * @param moduleName   the owning module name
 	 * @param documentName the owning document name
 	 * @param attribute    the attribute whose domain values are requested
-	 * @return the list of domain values; or {@code null} if there are none
+	 * @return the list of domain values; empty if there are none
 	 * @throws Exception if the Bizlet call fails
 	 */
 	@SuppressWarnings("java:S112") // Allow generic exception to propagate from Bizlet call; Skyve will handle appropriately
@@ -191,6 +192,25 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 																				@Nonnull String documentName,
 																				@Nonnull Attribute attribute)
 	throws Exception;
+
+	/**
+	 * Resolves and returns the constant domain values for a document attribute, applying
+	 * any customer-specific Bizlet override; a typed shortcut for
+	 * {@link #getConstantDomainValues(Bizlet, String, String, Attribute)}.
+	 *
+	 * @param bizlet       the bizlet to invoke; may be {@code null}
+	 * @param document     the compile-time document reference
+	 * @param attribute    the attribute whose domain values are requested
+	 * @return the list of domain values; empty if there are none
+	 * @throws Exception if the Bizlet call fails
+	 */
+	@SuppressWarnings("java:S112") // Allow generic exception to propagate from Bizlet call; Skyve will handle appropriately
+	public default @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(@Nullable Bizlet<T> bizlet,
+																						@Nonnull ModuleDocument document,
+																						@Nonnull Attribute attribute)
+	throws Exception {
+		return getConstantDomainValues(bizlet, document.moduleName(), document.documentName(), attribute);
+	}
 	
 	/**
 	 * Initialise the dependencies on this customer given their modules and overrides.

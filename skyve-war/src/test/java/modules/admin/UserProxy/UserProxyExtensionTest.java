@@ -11,7 +11,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import util.AbstractH2Test;
 
 class UserProxyExtensionTest extends AbstractH2Test {
@@ -27,7 +27,7 @@ class UserProxyExtensionTest extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	void testUserFromUserProxy() throws Exception {
 		// setup test data
-		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 
 		// persist user
 		ue = CORE.getPersistence().save(ue);

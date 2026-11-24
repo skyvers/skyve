@@ -92,7 +92,7 @@ public class CorruptArchiveError extends AbstractPersistentBean implements org.s
 
 	public static CorruptArchiveError newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.CORRUPT_ARCHIVE_ERROR.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

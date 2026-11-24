@@ -1239,7 +1239,7 @@ public abstract class JobSchedule extends AbstractPersistentBean {
 
 	public static JobScheduleExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.JOB_SCHEDULE.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

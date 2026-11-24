@@ -25,6 +25,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -444,6 +445,29 @@ public class Util {
 		return result.toString();
 	}
 
+	/**
+	 * Returns the URL that opens a new instance of the referenced document; a typed shortcut for
+	 * {@link #getDocumentUrl(String, String)}.
+	 *
+	 * @param document The compile-time document reference
+	 * @return The document URL
+	 */
+	public static @Nonnull String getDocumentUrl(@Nonnull ModuleDocument document) {
+		return getDocumentUrl(document.moduleName(), document.documentName());
+	}
+
+	/**
+	 * Returns the URL that opens the referenced document, or the given bean of it; a typed shortcut for
+	 * {@link #getDocumentUrl(String, String, String)}.
+	 *
+	 * @param document The compile-time document reference
+	 * @param bizId The bizId of the bean to open, or null for a new instance
+	 * @return The document URL
+	 */
+	public static @Nonnull String getDocumentUrl(@Nonnull ModuleDocument document, @Nullable String bizId) {
+		return getDocumentUrl(document.moduleName(), document.documentName(), bizId);
+	}
+
 	public static @Nonnull String getDocumentUrl(@Nonnull Bean bean) {
 		return getDocumentUrl(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
@@ -477,6 +501,23 @@ public class Util {
 		return result.toString();
 	}
 
+	/**
+	 * Constructs a HTML anchor for the referenced document, or the given bean of it; a typed shortcut for
+	 * {@link #getDocumentAnchorUrl(String, String, String, boolean, String)}.
+	 *
+	 * @param document The compile-time document reference
+	 * @param bizId The bizId of the bean to open, or null for a new instance
+	 * @param targetNewWindow Whether the anchor opens in a new window
+	 * @param anchorMarkup The html markup (usually text) of the anchor
+	 * @return The constructed anchor
+	 */
+	public static @Nonnull String getDocumentAnchorUrl(@Nonnull ModuleDocument document,
+														@Nullable String bizId,
+														boolean targetNewWindow,
+														@Nonnull String anchorMarkup) {
+		return getDocumentAnchorUrl(document.moduleName(), document.documentName(), bizId, targetNewWindow, anchorMarkup);
+	}
+
 	public static @Nonnull String getListUrl(@Nonnull String bizModule, @Nonnull String queryName) {
 		StringBuilder result = new StringBuilder(128);
 
@@ -499,6 +540,21 @@ public class Util {
 
 		return result.toString();
 	}
+
+	/**
+	 * Returns the URL of a content attachment of the referenced document; a typed shortcut for
+	 * {@link #getContentUrl(String, String, String, String)}.
+	 *
+	 * @param document The compile-time document reference
+	 * @param binding The binding of the content attribute
+	 * @param contentId The content id
+	 * @return The content URL
+	 */
+	public static @Nonnull String getContentUrl(@Nonnull ModuleDocument document,
+													@Nonnull String binding,
+													@Nonnull String contentId) {
+		return getContentUrl(document.moduleName(), document.documentName(), binding, contentId);
+	}
 	
 	public static @Nonnull String getResourceUrl(@Nullable String bizModule,
 													@Nullable String bizDocument,
@@ -512,6 +568,18 @@ public class Util {
 		}
 
 		return result.toString();
+	}
+
+	/**
+	 * Returns the URL of a resource file in the context of the referenced document; a typed shortcut for
+	 * {@link #getResourceUrl(String, String, String)}.
+	 *
+	 * @param document The compile-time document reference
+	 * @param resourceFileName The resource file name
+	 * @return The resource URL
+	 */
+	public static @Nonnull String getResourceUrl(@Nonnull ModuleDocument document, @Nonnull String resourceFileName) {
+		return getResourceUrl(document.moduleName(), document.documentName(), resourceFileName);
 	}
 
 	public static @Nonnull String getResourceUrl(@Nonnull String resourceFileName) {
@@ -562,6 +630,28 @@ public class Util {
     }
 
 	/**
+	 * Constructs a HTML image URL for the given content item; a typed shortcut for
+	 * {@link #getContentImageUrl(String, String, String, String, int, int)}.
+	 * (If the content item is not an image type, the content servlet returns a file type thumbnail)
+	 * The image is shown at the given width and height, keeping its shape, as the thumbnail the
+	 * content servlet sends can be bigger or smaller than asked for.
+	 * 
+	 * @param document - the compile-time document reference
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param width - the width of the image in pixels
+	 * @param height - the height of the image in pixels
+	 * @return - the constructed URL as a String
+	 */
+	public static @Nonnull String getContentImageUrl(@Nonnull ModuleDocument document,
+														@Nonnull String binding,
+														@Nonnull String contentId,
+														int width,
+														int height) {
+		return getContentImageUrl(document.moduleName(), document.documentName(), binding, contentId, width, height);
+	}
+
+	/**
 	 * Constructs an HTML anchor URL for the given content item
 	 *  
 	 * @param bizModule - the module of the document containing the content
@@ -592,6 +682,25 @@ public class Util {
         
         return result.toString();
     }
+
+	/**
+	 * Constructs an HTML anchor URL for the given content item; a typed shortcut for
+	 * {@link #getContentAnchorUrl(String, String, String, String, boolean, String)}.
+	 *  
+	 * @param document - the compile-time document reference
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param targetNewWindow - whether the target value for the anchor is a new window
+	 * @param anchorMarkup - the html markup value (usually text) of the anchor 
+	 * @return - the constructed URL as a String
+	 */
+	public static @Nonnull String getContentAnchorUrl(@Nonnull ModuleDocument document,
+														@Nonnull String binding,
+														@Nonnull String contentId,
+														boolean targetNewWindow,
+														@Nonnull String anchorMarkup) {
+		return getContentAnchorUrl(document.moduleName(), document.documentName(), binding, contentId, targetNewWindow, anchorMarkup);
+	}
 	
 	/**
 	 * Constructs an HTML anchor with image URL for the given content item
@@ -619,6 +728,27 @@ public class Util {
     								targetNewWindow,
     								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
+
+	/**
+	 * Constructs an HTML anchor with image URL for the given content item; a typed shortcut for
+	 * {@link #getContentAnchorWithImageUrl(String, String, String, String, boolean, int, int)}.
+	 *  
+	 * @param document - the compile-time document reference
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param targetNewWindow - whether the target value for the anchor is a new window
+	 * @param width - the width of the image in pixels
+	 * @param height - the height of the image in pixels
+	 * @return - the constructed URL as a String
+	 */
+	public static @Nonnull String getContentAnchorWithImageUrl(@Nonnull ModuleDocument document,
+																@Nonnull String binding,
+																@Nonnull String contentId,
+																boolean targetNewWindow,
+																int width,
+																int height) {
+		return getContentAnchorWithImageUrl(document.moduleName(), document.documentName(), binding, contentId, targetNewWindow, width, height);
+	}
 
 	/**
 	 * Yields the HTML hex code for a given colour.
@@ -705,5 +835,18 @@ public class Util {
 		q.addBoundOrdering(attributeName);
 		q.setDistinct(true);
 		return q.scalarResults(String.class);
+	}
+
+	/**
+	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values;
+	 * a typed shortcut for {@link #getCompleteSuggestions(String, String, String, String)}.
+	 *
+	 * @param document The compile-time reference to the document to query
+	 * @param attributeName The name of the attribute to retrieve suggestions for
+	 * @param value The prefix value to filter suggestions (null returns all distinct values)
+	 * @return A list of distinct String values matching the prefix, ordered alphabetically
+	 */
+	public static @Nonnull List<String> getCompleteSuggestions(@Nonnull ModuleDocument document, @Nonnull String attributeName, @Nullable String value) {
+		return getCompleteSuggestions(document.moduleName(), document.documentName(), attributeName, value);
 	}
 }

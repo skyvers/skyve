@@ -18,6 +18,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.servlet.http.HttpServletRequest;
+import modules.admin.domain.AdminDocument;
 import modules.test.AbstractSkyveTest;
 
 @SuppressWarnings({ "java:S1192", "java:S5960" }) // Repeated literals and assertions are test-only fixtures.
@@ -36,7 +37,7 @@ class SensitiveEndpointAccessH2Test extends AbstractSkyveTest {
 		when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(selection);
 
 		User denied = spy(u);
-		UserAccess access = UserAccess.dynamicImage("admin", "User", "portrait");
+		UserAccess access = UserAccess.dynamicImage(AdminDocument.USER, "portrait");
 		doReturn(false).when(denied).canAccess(access, "phone");
 		AbstractPersistence.get().setUser(denied);
 

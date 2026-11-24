@@ -5,7 +5,7 @@ import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.AdminDocument;
 
 /**
  * Creates Data Maintenance documents with default maintenance state.
@@ -21,7 +21,7 @@ public class DataMaintenanceFactory {
 	public static DataMaintenanceExtension crudInstance() {
 		DataMaintenanceExtension bean = new DataBuilder()
 				.optional(true, false)
-				.factoryBuild(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+				.factoryBuild(AdminDocument.DATA_MAINTENANCE);
 
 		bean.setModDocName(null);
 		bean.setRestorePreProcess(null);

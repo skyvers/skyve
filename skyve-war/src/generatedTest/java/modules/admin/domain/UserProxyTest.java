@@ -14,6 +14,6 @@ public class UserProxyTest extends AbstractDomainTest<UserProxy> {
 	protected UserProxy getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+			.build(AdminDocument.USER_PROXY);
 	}
 }

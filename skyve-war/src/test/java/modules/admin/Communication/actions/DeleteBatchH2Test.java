@@ -20,6 +20,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.inject.Inject;
 import modules.admin.Communication.CommunicationExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import util.AbstractH2Test;
 
@@ -39,7 +40,7 @@ class DeleteBatchH2Test extends AbstractH2Test {
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
-		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		communication = db.build(AdminDocument.COMMUNICATION);
 	}
 
 	@AfterEach

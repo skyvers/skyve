@@ -25,6 +25,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 import util.AbstractH2TestTruncate;
 
 /**
@@ -41,9 +42,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 			persistence.save(bean);
 			cacheConversationAndCycleTransaction();
 
-			AllAttributesPersistent laterBean = new DataBuilder().fixture(FixtureType.crud).build(
-					AllAttributesPersistent.MODULE_NAME,
-					AllAttributesPersistent.DOCUMENT_NAME);
+			AllAttributesPersistent laterBean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 			laterBean.setText("background rollback");
 			laterBean = persistence.save(laterBean);
 			laterBizId = laterBean.getBizId();
@@ -88,9 +87,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	void cachedConversationCanRetainValidationStateAfterDeliberateRollback() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("cached but rolled back");
 		bean = persistence.save(bean);
 
@@ -113,8 +110,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 		restoredPersistence.setForThread();
 		restoredPersistence.begin();
 		restoredPersistence.setUser(user);
-		AllAttributesPersistent cachedEntity = restoredPersistence.retrieve(AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		AllAttributesPersistent cachedEntity = restoredPersistence.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				bizId);
 		assertNull(cachedEntity);
 
@@ -131,9 +127,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	void cacheConversationCommitsMutationAndKeepsConversationUsable() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("committed before cache");
 		bean = persistence.save(bean);
 
@@ -153,8 +147,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 		restoredPersistence.begin();
 		restoredPersistence.setUser(user);
 
-		AllAttributesPersistent retrieved = restoredPersistence.retrieve(AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		AllAttributesPersistent retrieved = restoredPersistence.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				bizId);
 		assertNotNull(retrieved);
 		assertEquals("committed before cache", retrieved.getText());
@@ -169,9 +162,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	void terminalWorkflowRollbackAfterCacheDoesNotUndoCheckpoint() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("terminal checkpoint");
 		bean = persistence.save(bean);
 		String bizId = bean.getBizId();
@@ -188,8 +179,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 		AbstractPersistence verificationPersistence = AbstractPersistence.get();
 		verificationPersistence.begin();
 		verificationPersistence.setUser(user);
-		AllAttributesPersistent retrieved = verificationPersistence.retrieve(AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		AllAttributesPersistent retrieved = verificationPersistence.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				bizId);
 		assertNotNull(retrieved);
 		assertEquals("terminal checkpoint", retrieved.getText());
@@ -204,9 +194,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	void smartClientDeleteIsCommittedBeforeConversationIsCached() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean = persistence.save(bean);
 		String bizId = bean.getBizId();
 		persistence.commit(false);
@@ -238,9 +226,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	@SuppressWarnings("static-method")
 	void repeatedTerminalCacheDoesNotRequireAReplacementTransaction() {
 		AbstractPersistence persistence = AbstractPersistence.get();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("cached twice");
 		bean = persistence.save(bean);
 
@@ -256,9 +242,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	@SuppressWarnings("static-method")
 	void webContextCacheBeginsAReplacementTransactionForContinuedWork() {
 		AbstractPersistence persistence = AbstractPersistence.get();
-		AllAttributesPersistent checkpointedBean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent checkpointedBean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		checkpointedBean.setText("checkpointed");
 		checkpointedBean = persistence.save(checkpointedBean);
 
@@ -267,9 +251,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 		webContext.setConversation(persistence);
 		webContext.cacheConversationAndCycleTransaction();
 
-		AllAttributesPersistent laterBean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent laterBean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		laterBean.setText("rolled back later");
 		laterBean = persistence.save(laterBean);
 		String laterBizId = laterBean.getBizId();
@@ -300,9 +282,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	void backgroundTaskCacheCyclesTransactionAndLaterFailureRollsBackOnlyLaterWork() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("before background");
 		bean = persistence.save(bean);
 		String bizId = bean.getBizId();
@@ -326,8 +306,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 		AbstractPersistence verificationPersistence = AbstractPersistence.get();
 		verificationPersistence.begin();
 		verificationPersistence.setUser(user);
-		AllAttributesPersistent checkpointed = verificationPersistence.retrieve(AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		AllAttributesPersistent checkpointed = verificationPersistence.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				bizId);
 		assertNotNull(checkpointed);
 		assertEquals("background checkpoint", checkpointed.getText());

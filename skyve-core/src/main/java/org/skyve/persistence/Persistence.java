@@ -522,6 +522,18 @@ public interface Persistence extends Serializable {
 	@Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query);
 
 	/**
+	 * Creates a new {@link SQL} wrapper for the given SQL query string with document context
+	 * applied for row-level security filtering; a typed shortcut for
+	 * {@link #newSQL(String, String, String)}.
+	 * @param document The compile-time document reference for security context.
+	 * @param query The SQL query string.
+	 * @return The SQL wrapper.
+	 */
+	default @Nonnull SQL newSQL(@Nonnull ModuleDocument document, @Nonnull String query) {
+		return newSQL(document.moduleName(), document.documentName(), query);
+	}
+
+	/**
 	 * Creates a new {@link SQL} wrapper from a named SQL query with module and document context
 	 * applied for row-level security filtering.
 	 * @param moduleName The module name for security context.
@@ -530,6 +542,18 @@ public interface Persistence extends Serializable {
 	 * @return The SQL wrapper.
 	 */
 	@Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName);
+
+	/**
+	 * Creates a new {@link SQL} wrapper from a named SQL query with document context
+	 * applied for row-level security filtering; a typed shortcut for
+	 * {@link #newNamedSQL(String, String, String)}.
+	 * @param document The compile-time document reference for security context.
+	 * @param queryName The name of the SQL query.
+	 * @return The SQL wrapper.
+	 */
+	default @Nonnull SQL newNamedSQL(@Nonnull ModuleDocument document, @Nonnull String queryName) {
+		return newNamedSQL(document.moduleName(), document.documentName(), queryName);
+	}
 
 	/**
 	 * Creates a new {@link SQL} wrapper for the given SQL query string with document context

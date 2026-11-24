@@ -8,6 +8,7 @@ import java.util.SortedMap;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 
@@ -61,6 +62,15 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 		this.moduleName = moduleName;
 		this.drivingDocumentName = drivingDocumentName;
 		this.referenceBinding = referenceBinding;
+	}
+
+	/**
+	 * Convenience constructor; a typed shortcut for {@link #ReferenceListModel(String, String, String)}.
+	 * @param drivingDocument	The compile-time reference to the reference's document
+	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
+	 */
+	protected ReferenceListModel(@Nonnull ModuleDocument drivingDocument, @Nonnull String referenceBinding) {
+		this(drivingDocument.moduleName(), drivingDocument.documentName(), referenceBinding);
 	}
 	
 	@Override

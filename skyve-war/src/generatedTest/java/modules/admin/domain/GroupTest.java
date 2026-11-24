@@ -14,6 +14,6 @@ public class GroupTest extends AbstractDomainTest<Group> {
 	protected Group getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+			.build(AdminDocument.GROUP);
 	}
 }

@@ -14,6 +14,6 @@ public class UserTest extends AbstractDomainTest<User> {
 	protected User getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+			.build(AdminDocument.USER);
 	}
 }

@@ -17,6 +17,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Startup;
 import util.AbstractH2Test;
 
@@ -68,7 +69,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testMapLayerFieldCanHoldOpenStreetMapDefault() {
 		Customer customer = CORE.getCustomer();
-		Document document = customer.getModule(Startup.MODULE_NAME).getDocument(customer, Startup.DOCUMENT_NAME);
+		Document document = AdminDocument.STARTUP.toDocument(customer);
 		Text mapLayer = (Text) document.getAttribute(Startup.mapLayerPropertyName);
 
 		Assertions.assertTrue(mapLayer.getLength() >= StartupBizlet.MAP_LAYER_OPEN_STREET_MAP.length());
@@ -91,7 +92,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexInvalidCharacters() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("container@name");
 
 		// call the method under test
@@ -108,7 +109,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexUpperCaseLetters() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("MyContainer");
 
 		// call the method under test
@@ -125,7 +126,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexEndingWithDash() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("container-");
 
 		// call the method under test
@@ -142,7 +143,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexStartingWithDash() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("-container");
 
 		// call the method under test
@@ -159,7 +160,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexConsecutiveDashes() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("my--container");
 
 		// call the method under test
@@ -176,7 +177,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 	@Test
 	void testValidateBackupDirectoryNameAgainstMetadataRegexValidNameDoesNotThrow() {
 		// setup the test data
-		bean = db.build(Startup.MODULE_NAME, Startup.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.STARTUP);
 		bean.setBackupDirectoryName("my-container-1");
 
 		// call the method under test

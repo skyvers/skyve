@@ -10,10 +10,8 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserProxy.UserProxyExtension;
-import modules.admin.domain.ControlPanel;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel.SailExecutor;
-import modules.admin.domain.User;
-import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 
 /**
@@ -79,7 +77,7 @@ final class ControlPanelSAILFixture {
 	 * <p>Side effects: saves and commits a user with the roles the automation's views need.
 	 */
 	static ControlPanelExtension controlPanel() {
-		ControlPanelExtension result = new DataBuilder().fixture(FixtureType.crud).build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		ControlPanelExtension result = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTROL_PANEL);
 		result.setSailUser(sailUser());
 		result.setSailBaseUrl(BASE_URL);
 		result.setSailComponentBuilder("org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain");
@@ -96,7 +94,7 @@ final class ControlPanelSAILFixture {
 	 * @return	the user's proxy
 	 */
 	private static UserProxyExtension sailUser() {
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName("sail.generated." + System.nanoTime());
 		user.setInactive(Boolean.FALSE);
 		user.getGroups().clear();
@@ -110,6 +108,6 @@ final class ControlPanelSAILFixture {
 		user = persistence.save(user);
 		persistence.commit(false);
 		persistence.begin();
-		return persistence.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, user.getBizId());
+		return persistence.retrieve(AdminDocument.USER_PROXY, user.getBizId());
 	}
 }

@@ -14,6 +14,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.UserDashboard.UserDashboardExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
@@ -34,7 +35,7 @@ public class UserActivityContextModel extends ChartModel<UserDashboard> {
 	public ChartData getChartData() {
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
-			DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(AdminDocument.AUDIT);
 			q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.twoWeeksAgo());
 			q.getFilter().addEquals(Audit.userNamePropertyName, userService.currentAdminUser().getUserName());
 

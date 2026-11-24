@@ -21,6 +21,7 @@ import com.cronutils.parser.CronParser;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Generic;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
@@ -201,7 +202,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 		getUsersToEmail().clear();
 
 		for (Generic g : getEditUsersToEmail()) {
-			UserProxyExtension u = CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, g.getId1());
+			UserProxyExtension u = CORE.getPersistence().retrieve(AdminDocument.USER_PROXY, g.getId1());
 			getUsersToEmail().add(u);
 		}
 	}

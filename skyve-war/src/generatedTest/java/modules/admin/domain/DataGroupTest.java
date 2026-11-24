@@ -14,6 +14,6 @@ public class DataGroupTest extends AbstractDomainTest<DataGroup> {
 	protected DataGroup getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+			.build(AdminDocument.DATA_GROUP);
 	}
 }

@@ -645,8 +645,8 @@ class OverridableDomainGeneratorMoreTest {
 		StringBuilder sb = new StringBuilder();
 
 		declaredMethod("generateDomainTest",
-				StringBuilder.class, String.class, String.class, String.class)
-				.invoke(gen, sb, "modules/testMod", "modules.testMod.domain", "TestDocument");
+				StringBuilder.class, String.class, String.class, String.class, String.class)
+				.invoke(gen, sb, "modules/testMod", "modules.testMod.domain", "TestDocument", "TestModDocument.TEST_DOCUMENT");
 
 		String result = sb.toString();
 		assertTrue(result.contains("package modules.testMod.domain;"));
@@ -655,6 +655,8 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(result.contains("extends AbstractDomainTest<TestDocument>"));
 		assertTrue(result.contains("getBean()"));
 		assertTrue(result.contains("DataBuilder"));
+		assertTrue(result.contains(".build(TestModDocument.TEST_DOCUMENT);"), result);
+		assertFalse(result.contains("MODULE_NAME"), result);
 	}
 
 	// ----- generateActionTest -----------------------------------------------
@@ -666,9 +668,9 @@ class OverridableDomainGeneratorMoreTest {
 
 		declaredMethod("generateActionTest",
 				StringBuilder.class, String.class, String.class, String.class,
-				String.class, String.class, boolean.class)
+				String.class, String.class, String.class, boolean.class)
 				.invoke(gen, sb, "modules/testMod", "modules.testMod.TestDoc.actions",
-						"modules.testMod.domain", "TestDoc", "Save", Boolean.FALSE);
+						"modules.testMod.domain", "TestDoc", "TestModDocument.TEST_DOC", "Save", Boolean.FALSE);
 
 		String result = sb.toString();
 		assertTrue(result.contains("package modules.testMod.TestDoc.actions;"));
@@ -686,16 +688,63 @@ class OverridableDomainGeneratorMoreTest {
 
 		declaredMethod("generateActionTest",
 				StringBuilder.class, String.class, String.class, String.class,
-				String.class, String.class, boolean.class)
+				String.class, String.class, String.class, boolean.class)
 				.invoke(gen, sb, "modules/testMod", "modules.testMod.TestDoc.actions",
-						"modules.testMod.domain", "TestDoc", "Submit", Boolean.TRUE);
+						"modules.testMod.domain", "TestDoc", "TestModDocument.TEST_DOC", "Submit", Boolean.TRUE);
 
 		String result = sb.toString();
 		assertTrue(result.contains("TestDocExtension"));
 		assertTrue(result.contains("extends AbstractActionTest<TestDocExtension, Submit>"));
+		assertTrue(result.contains("import modules.testMod.TestDoc.TestDocExtension;"), result);
+		// only the extension is used, so the domain class is not imported
+		assertFalse(result.contains("import modules.testMod.domain.TestDoc;"), result);
+		assertTrue(result.contains(".build(TestModDocument.TEST_DOC);"), result);
 	}
 
-	// ----- generateJava with minimal transient document --------------------
+	@Test
+	void generateActionTestBuildsByTheModuleDocumentEnum() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		StringBuilder sb = new StringBuilder();
+
+		declaredMethod("generateActionTest",
+				StringBuilder.class, String.class, String.class, String.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, sb, "modules/testMod", "modules.testMod.TestDoc.actions",
+						"modules.testMod.domain", "TestDoc", "TestModDocument.TEST_DOC", "Save", Boolean.FALSE);
+
+		String result = sb.toString();
+		assertTrue(result.contains("import modules.testMod.domain.TestModDocument;"), result);
+		assertTrue(result.contains("import modules.testMod.domain.TestDoc;"), result);
+		assertTrue(result.contains(".build(TestModDocument.TEST_DOC);"), result);
+		assertFalse(result.contains("MODULE_NAME"), result);
+	}
+
+	// ----- documentEnumConstant ---------------------------------------------
+
+	@Test
+	void documentEnumConstantNamesTheModuleDocumentEnumConstant() throws Exception {
+		DocumentImpl order = newDocument();
+		order.setName("ShippedOrder");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("ShippedOrder", new Module.DocumentRef()));
+		Method method = declaredMethod("documentEnumConstant", Module.class, Document.class);
+
+		assertEquals("SalesDocument.SHIPPED_ORDER", method.invoke(null, module, order));
+	}
+
+	@Test
+	void documentEnumConstantDodgesADocumentNamedLikeTheEnum() throws Exception {
+		DocumentImpl order = newDocument();
+		order.setName("Order");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("Order", new Module.DocumentRef(),
+																	"SalesDocument", new Module.DocumentRef()));
+		Method method = declaredMethod("documentEnumConstant", Module.class, Document.class);
+
+		assertEquals("SalesDocumentDocument.ORDER", method.invoke(null, module, order));
+	}
 
 	@Test
 	void generateJavaForMinimalTransientDocument() throws Exception {
@@ -1897,6 +1946,35 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(java.contains("getChildren()"), "Should have getChildren() for hierarchical");
 	}
 
+	@Test
+	void generateJavaAddressesItsDocumentByTheModuleDocumentEnum() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl doc = newDocument();
+		doc.setName("TreeNode");
+		doc.setOwningModuleName("testMod");
+		doc.setParentDocumentName("TreeNode"); // hierarchical, so it also generates getParent() and getChildren()
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "TreeNode")).thenReturn(doc);
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("TreeNode", new Module.DocumentRef()));
+
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, null, module, doc, contents,
+						"modules.testMod.domain", "TreeNode", null, Boolean.FALSE);
+
+		String java = contents.toString();
+		assertAll(() -> assertTrue(java.contains("return TestModDocument.TREE_NODE.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());"), java),
+					() -> assertEquals(2, java.split("p.newDocumentQuery\\(TestModDocument.TREE_NODE\\);", -1).length - 1, java),
+					() -> assertFalse(java.contains("getModule(MODULE_NAME)"), java),
+					() -> assertFalse(java.contains("newDocumentQuery(TreeNode.MODULE_NAME"), java));
+	}
+
 	// ----- generateJava with child document having interface ----------------
 
 	@Test
@@ -2809,6 +2887,33 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(java.contains("getRefField"), "Should have getter for the association");
 	}
 
+	@Test
+	void generateJavaOfANewCustomerDocumentUsesTheCustomersModuleDocumentEnum() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = newDocument();
+		doc.setName("CustomerOnly");
+		doc.setOwningModuleName("custMod");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("custMod");
+		when(module.getDocumentRefs()).thenReturn(java.util.Map.of("CustomerOnly", new Module.DocumentRef()));
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(customer.getName()).thenReturn("acme");
+
+		// a new customer document: no vanilla document, generated into the customer's domain package
+		StringBuilder contents = new StringBuilder();
+		declaredMethod("generateJava",
+				org.skyve.metadata.customer.Customer.class,
+				Module.class, Document.class, StringBuilder.class,
+				String.class, String.class, String.class, boolean.class)
+				.invoke(gen, customer, module, doc, contents,
+						"customers.acme.modules.custMod.domain", "CustomerOnly", null, Boolean.TRUE);
+
+		String java = contents.toString();
+		assertTrue(java.contains("return CustModDocument.CUSTOMER_ONLY.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());"), java);
+		assertFalse(java.contains("getModule(MODULE_NAME)"), java);
+	}
+
 	// ----- populatePropertyLengths tests ------------------------------------
 
 	@Test
@@ -3304,11 +3409,11 @@ class OverridableDomainGeneratorMoreTest {
 		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
 				"generateActionTests",
 				String.class, String.class, String.class,
-				Document.class, String.class,
+				Document.class, String.class, String.class,
 				org.skyve.util.test.SkyveFactory.class);
 		m.setAccessible(true);
 		// annotation=null, class not found → skipGeneration=true → nothing written
-		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "ActionDoc", null),
+		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "ActionDoc", "TestModDocument.ACTION_DOC", null),
 				"void generateActionTests should return null when skipping");
 	}
 
@@ -3331,10 +3436,10 @@ class OverridableDomainGeneratorMoreTest {
 		Method m = OverridableDomainGenerator.class.getDeclaredMethod(
 				"generateActionTests",
 				String.class, String.class, String.class,
-				Document.class, String.class,
+				Document.class, String.class, String.class,
 				org.skyve.util.test.SkyveFactory.class);
 		m.setAccessible(true);
-		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "DebugActionDoc", null),
+		assertNull(m.invoke(gen, "testMod", "modules/testMod/domain", "modules/testMod", doc, "DebugActionDoc", "TestModDocument.DEBUG_ACTION_DOC", null),
 				"void generateActionTests should return null for debug mode");
 	}
 

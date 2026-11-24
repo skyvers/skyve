@@ -14,13 +14,16 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>A report is designed in SmartClient, run and scheduled in PrimeFaces, then found and deleted in SmartClient. This proves the two UIs share one report definition and that PrimeFaces offers only running and scheduling, while designing stays on the desktop.</description>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI) and designs a report with a constant dataset, a query dataset and a required parameter.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="SmartClient: design a report with a required parameter">
+			<description>Opens Report Designer, creates a report with a CSV template, a title dataset, a users query dataset and a required user name parameter, and saves it.</description>
 			<method>
 				<navigateMenu module="admin" item="Reports/Report Designer" />
 				<listGridNew module="admin" document="ReportTemplate" createView="true" />
@@ -57,11 +60,13 @@
 		</after>
 	</automation>
 	<automation uxui="tablet" userAgentType="tablet">
+		<description>Signs in as admin in PrimeFaces (tablet UX/UI) and checks the report is listed, runs it with a parameter value, and cannot be scheduled while its parameter is required.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 		</before>
 		<interaction name="Reports: the report is listed and runs">
+			<description>Checks the tablet menu hides the designer items, finds the report in Reports, runs it with an input value, and checks the Schedule Details tab refuses scheduling because of the required parameter.</description>
 			<method>
 				<testMenu module="admin" item="Reports/Report Designer" present="false" />
 				<testMenu module="admin" item="Reports/Report Manager" present="false" />
@@ -84,12 +89,14 @@
 		</after>
 	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI) and makes the report's parameter optional.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="SmartClient: the parameter is no longer required">
+			<description>Opens the report in the designer and clears the parameter's Required flag, then saves.</description>
 			<method>
 				<navigateMenu module="admin" item="Reports/Report Designer" />
 				<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
@@ -108,11 +115,13 @@
 		</after>
 	</automation>
 	<automation uxui="tablet" userAgentType="tablet">
+		<description>Signs in as admin in PrimeFaces (tablet UX/UI) and schedules the report, checking each missing setting is refused, then reads the schedule back.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 		</before>
 		<interaction name="Reports: schedule the report">
+			<description>Turns scheduling on and checks the refusals for a missing Run As user and a missing email user, adds the user, picks hour 3 and saves, then reopens the report and checks the schedule is as saved.</description>
 			<method>
 				<navigateMenu module="admin" item="Reports/Reports" />
 				<listGridZoom module="admin" query="qEnabledReports" rowContaining="SAIL{run}" />
@@ -147,12 +156,14 @@
 		</after>
 	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
+		<description>Signs in as admin in SmartClient (desktop UX/UI), finds the report's schedule in Report Schedules, and deletes the report.</description>
 		<before>
 			<login user="admin" password="admin" />
 			<testSuccess />
 			<switchMode />
 		</before>
 		<interaction name="SmartClient: Report Schedules shows the schedule, then the report is deleted">
+			<description>Opens Report Schedules and checks the report is listed with its 03:00 schedule, then deletes the report and checks it has gone.</description>
 			<method>
 				<navigateMenu module="admin" item="Reports/Report Schedules" />
 				<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />

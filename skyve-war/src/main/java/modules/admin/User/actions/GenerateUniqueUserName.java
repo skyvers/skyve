@@ -13,6 +13,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.Contact.ContactExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 
 /**
@@ -61,7 +62,7 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 		}
 
 		Persistence persistence = CORE.getPersistence();
-		DocumentQuery q = persistence.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = persistence.newDocumentQuery(AdminDocument.USER);
 		q.getFilter().addLike(User.userNamePropertyName, newUName + "%");
 		q.addAggregateProjection(AggregateFunction.Max, User.userNamePropertyName, "MaxOfUserName");
 

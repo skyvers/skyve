@@ -16,7 +16,7 @@ class SnapshotDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		Snapshot bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
+				.build(AdminDocument.SNAPSHOT);
 		assertNotNull(bean);
 	}
 

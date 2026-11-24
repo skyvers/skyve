@@ -9,10 +9,11 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Contact.ContactExtension;
-import modules.admin.domain.Contact;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact.ContactType;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
+import modules.whosin.domain.WhosinDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -31,10 +32,10 @@ public class StaffFactory {
 	@SkyveFixture(types = FixtureType.seed)
 	public static @Nonnull Staff seedInstance() {
 
-		Staff bean = new DataBuilder().factoryBuild(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		Staff bean = new DataBuilder().factoryBuild(WhosinDocument.STAFF);
 
 		// create a new person type contact
-		ContactExtension contact = new DataBuilder().fixture(FixtureType.seed).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension contact = new DataBuilder().fixture(FixtureType.seed).build(AdminDocument.CONTACT);
 		contact.setContactType(ContactType.person);
 		bean.setContact(contact);
 
@@ -42,7 +43,7 @@ public class StaffFactory {
 		int dice = random.nextInt(50);
 		if (dice < 49) {
 			// re-use a random existing office
-			DocumentQuery qOffice = CORE.getPersistence().newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
+			DocumentQuery qOffice = CORE.getPersistence().newDocumentQuery(WhosinDocument.OFFICE);
 
 			int officeCount = qOffice.beanResults().size();
 			if (officeCount > 0) {
@@ -58,7 +59,7 @@ public class StaffFactory {
 		}
 		if (bean.getBaseOffice() == null) {
 			// create a new office
-			Office office = new DataBuilder().fixture(FixtureType.seed).build(Office.MODULE_NAME, Office.DOCUMENT_NAME);
+			Office office = new DataBuilder().fixture(FixtureType.seed).build(WhosinDocument.OFFICE);
 			bean.setBaseOffice(office);
 		}
 

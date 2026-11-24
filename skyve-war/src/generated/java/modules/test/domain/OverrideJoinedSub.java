@@ -55,7 +55,7 @@ public class OverrideJoinedSub extends OverrideJoinedBase {
 
 	public static OverrideJoinedSub newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.OVERRIDE_JOINED_SUB.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

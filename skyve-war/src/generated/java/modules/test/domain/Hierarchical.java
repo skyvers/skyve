@@ -61,7 +61,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 	public static Hierarchical newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.HIERARCHICAL.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;
@@ -118,7 +118,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 		if (bizParentId != null) {
 			Persistence p = CORE.getPersistence();
-			DocumentQuery q = p.newDocumentQuery(Hierarchical.MODULE_NAME, Hierarchical.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(TestDocument.HIERARCHICAL);
 			q.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);
 			result = q.retrieveBean();
 		}
@@ -130,7 +130,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 	@XmlTransient
 	public List<Hierarchical> getChildren() {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(Hierarchical.MODULE_NAME, Hierarchical.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(TestDocument.HIERARCHICAL);
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}

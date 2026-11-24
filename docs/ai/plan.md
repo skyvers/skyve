@@ -45,7 +45,7 @@ Use these sources when planning or executing milestones:
 - `docs/ai/learnings.md` for durable engineering guidance and project learnings
 - `docs/architecture-design.md` for framework architecture decisions and design attributes
 - `docs/ai/test-patterns.md` before creating or modifying tests
-- `docs/coverage-plan.md` before any coverage-improvement work (defines target, skip list, tier ordering)
+- `docs/ai/coverage-plan.md` before any coverage-improvement work (defines target, skip list, tier ordering)
 - module-local `pom.xml` files for dependency and build structure
 - current module metadata, views, bizlets, services, jobs, and tests for the actual implemented behaviour
 
@@ -57,7 +57,7 @@ These files should exist and evolve over time:
 - `docs/ai/plan.md` — framework roadmap and orchestration rules (this file)
 - `docs/architecture-design.md` — durable architecture decisions and design attributes
 - `docs/ai/learnings.md` — durable engineering learnings and patterns
-- `docs/coverage-plan.md` — coverage improvement plan, baselines, and tier ordering
+- `docs/ai/coverage-plan.md` — coverage improvement plan, baselines, and tier ordering
 - `docs/ai/test-patterns.md` — reusable test pattern cookbook
 - `docs/ai/plan_m{n}.md` — one self-contained plan per milestone, for example `docs/ai/plan_m1.md`
 
@@ -74,7 +74,7 @@ If the user asks you to plan a milestone, these are the steps to take.
 1. Read all of `docs/ai/plan.md` to understand the framework roadmap, milestone boundaries, and planning rules.
 2. Read any prior related `docs/ai/plan_m{n}.md` files that this milestone depends on.
 3. Read `docs/ai/project-agent-guide.md`, `docs/architecture-design.md`, and `docs/ai/learnings.md`.
-4. If the milestone involves coverage work, also read `docs/coverage-plan.md` and `docs/ai/test-patterns.md`.
+4. If the milestone involves coverage work, also read `docs/ai/coverage-plan.md` and `docs/ai/test-patterns.md`.
 5. Inspect the current repository and determine the real current state before planning.
 6. Ask important clarifying questions only where needed.
    - Prefer discovering facts from the repo over asking the user.
@@ -159,7 +159,7 @@ If the user asks you to execute a milestone plan, these are the steps to take.
 
 1. Read the relevant `docs/ai/plan_m{n}.md` in full.
 2. Re-read any referenced parts of `docs/ai/plan.md`, `docs/ai/project-agent-guide.md`, `docs/ai/learnings.md`, and area-specific guidance.
-3. If the milestone involves tests or coverage, also read `docs/ai/test-patterns.md` and `docs/coverage-plan.md`.
+3. If the milestone involves tests or coverage, also read `docs/ai/test-patterns.md` and `docs/ai/coverage-plan.md`.
 4. Implement the plan.
    - Prefer the smallest clean solution that satisfies the scope.
    - Reuse existing Skyve patterns, metadata mechanisms, and service abstractions.
@@ -172,7 +172,7 @@ If the user asks you to execute a milestone plan, these are the steps to take.
    - Run the smallest meaningful compile or test step first.
    - After editing any Java file, call the `get_errors` MCP tool and resolve all warnings before moving on.
    - Follow `docs/ai/test-patterns.md` for test placement and base class selection.
-   - For coverage work, use the build commands in `docs/coverage-plan.md`.
+   - For coverage work, use the build commands in `docs/ai/coverage-plan.md`.
    - Broaden validation before handoff: `mvn -B package` is the baseline CI-aligned build.
 7. Update the `Acceptance checklist` and `AI validation results` sections in the milestone plan.
 8. Review your own work for behavioural regressions, backward compatibility, and scope completeness.
@@ -198,7 +198,7 @@ The roadmap below tracks planned framework milestones. Each milestone groups rel
 Framework milestones typically fall into one of these categories:
 
 - **Feature**: New framework capability, API, metadata format, or runtime behaviour
-- **Coverage**: Test coverage improvement following the tier ordering in `docs/coverage-plan.md`
+- **Coverage**: Test coverage improvement following the tier ordering in `docs/ai/coverage-plan.md`
 - **Refactor**: Internal restructuring that preserves external behaviour
 - **Fix**: Bug fix or correctness improvement
 - **Docs**: Documentation, Javadoc, or developer guide improvements

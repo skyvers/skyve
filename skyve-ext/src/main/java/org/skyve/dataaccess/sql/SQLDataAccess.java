@@ -1,6 +1,7 @@
 package org.skyve.dataaccess.sql;
 
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.persistence.SQL;
 
 import jakarta.annotation.Nonnull;
@@ -36,6 +37,18 @@ public interface SQLDataAccess extends AutoCloseable {
 	public @Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query);
 
 	/**
+	 * Creates a new SQL query bound to a specific document; a typed shortcut for
+	 * {@link #newSQL(String, String, String)}.
+	 *
+	 * @param document the compile-time reference to the document to bind the query to
+	 * @param query the SQL query string to execute
+	 * @return a new {@link SQL} instance configured with the specified query and document binding
+	 */
+	public default @Nonnull SQL newSQL(@Nonnull ModuleDocument document, @Nonnull String query) {
+		return newSQL(document.moduleName(), document.documentName(), query);
+	}
+
+	/**
 	 * Creates a new SQL query from a named query definition bound to a specific document.
 	 * 
 	 * @param moduleName the name of the module containing the document
@@ -44,6 +57,18 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @return a new {@link SQL} instance configured with the named query and document binding
 	 */
 	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName);
+
+	/**
+	 * Creates a new SQL query from a named query definition bound to a specific document; a typed shortcut for
+	 * {@link #newNamedSQL(String, String, String)}.
+	 *
+	 * @param document the compile-time reference to the document to bind the query to
+	 * @param queryName the name of the predefined query to use
+	 * @return a new {@link SQL} instance configured with the named query and document binding
+	 */
+	public default @Nonnull SQL newNamedSQL(@Nonnull ModuleDocument document, @Nonnull String queryName) {
+		return newNamedSQL(document.moduleName(), document.documentName(), queryName);
+	}
 	
 	/**
 	 * Creates a new SQL query bound to a specific document.

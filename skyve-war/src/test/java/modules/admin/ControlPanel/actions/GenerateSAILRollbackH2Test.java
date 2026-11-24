@@ -24,6 +24,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.UserAgentType;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ControlPanel.SailUserAgentType;
@@ -75,7 +76,7 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 										UserAgentType userAgentType,
 										TestStrategy testStrategy)
 			throws Exception {
-				Contact contact = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+				Contact contact = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTACT);
 				CORE.getPersistence().save(contact);
 				return super.single(user, loginCustomer, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 			}
@@ -113,7 +114,7 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 	@Test
 	void anUnsavedChangeDuringGenerationIsNotFlushedLater() throws Exception {
 		Persistence p = CORE.getPersistence();
-		Contact contact = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		Contact contact = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTACT);
 		contact.setName("Before generation");
 		contact = p.save(contact);
 		p.commit(false);
@@ -129,7 +130,7 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 										UserAgentType userAgentType,
 										TestStrategy testStrategy)
 			throws Exception {
-				Contact retrieved = CORE.getPersistence().retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, bizId);
+				Contact retrieved = CORE.getPersistence().retrieve(AdminDocument.CONTACT, bizId);
 				if (retrieved != null) { // it was saved and committed above
 					retrieved.setName("Changed while generating");
 				}
@@ -141,18 +142,18 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 		changing.execute(bean, webContext);
 		// Skyve's session flushes only on a save, which flushes every change in the session: save something later in
 		// the request, then commit as the request does
-		p.save(new DataBuilder().fixture(FixtureType.crud).<Contact> build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
+		p.save(new DataBuilder().fixture(FixtureType.crud).<Contact> build(AdminDocument.CONTACT));
 		p.commit(false);
 		p.begin();
 		p.evictAllCached();
 
-		Contact reread = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, bizId);
+		Contact reread = p.retrieve(AdminDocument.CONTACT, bizId);
 		assertNotNull(reread);
 		assertEquals("Before generation", reread.getName());
 	}
 
 	private static long contacts() {
-		return CORE.getPersistence().newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME).beanResults().size();
+		return CORE.getPersistence().newDocumentQuery(AdminDocument.CONTACT).beanResults().size();
 	}
 
 	/**

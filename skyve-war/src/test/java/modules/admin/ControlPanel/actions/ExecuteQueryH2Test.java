@@ -19,6 +19,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
@@ -35,7 +36,7 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		controlPanel = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		controlPanel = db.build(AdminDocument.CONTROL_PANEL);
 		action = new ExecuteQuery();
 	}
 
@@ -58,10 +59,10 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 	void testExecuteWithValidQueryReturnsResults() throws Exception {
 		// setup the test data - create some users in the database
 		long suffix = System.nanoTime();
-		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User user1 = db.build(AdminDocument.USER);
 		nameUniquely(user1, "query-user1-" + suffix, "Query 1");
 		CORE.getPersistence().save(user1);
-		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User user2 = db.build(AdminDocument.USER);
 		nameUniquely(user2, "query-user2-" + suffix, "Query 2");
 		CORE.getPersistence().save(user2);
 
@@ -116,10 +117,10 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 	void testExecuteFormatsMultipleResultsWithNewlines() throws Exception {
 		// setup the test data - create multiple users
 		long suffix = System.nanoTime();
-		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User user1 = db.build(AdminDocument.USER);
 		nameUniquely(user1, "query-user1-" + suffix, "Query 1");
 		CORE.getPersistence().save(user1);
-		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		User user2 = db.build(AdminDocument.USER);
 		nameUniquely(user2, "query-user2-" + suffix, "Query 2");
 		CORE.getPersistence().save(user2);
 

@@ -22,7 +22,7 @@ class OrderedGridDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		OrderedGrid bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(OrderedGrid.MODULE_NAME, OrderedGrid.DOCUMENT_NAME);
+				.build(KitchensinkDocument.ORDERED_GRID);
 		assertNotNull(bean);
 	}
 

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -28,6 +29,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
@@ -308,6 +310,24 @@ class UtilTest {
 	}
 
 	@Test
+	void typedGetDocumentUrlsMatchTheStringForms() {
+		assertAll(() -> assertEquals(Util.getDocumentUrl("admin", "Contact"), Util.getDocumentUrl(TestDocument.CONTACT)),
+					() -> assertEquals(Util.getDocumentUrl("admin", "Contact", "abc123"), Util.getDocumentUrl(TestDocument.CONTACT, "abc123")),
+					() -> assertEquals(Util.getDocumentAnchorUrl("admin", "Contact", "abc123", true, "Click"),
+										Util.getDocumentAnchorUrl(TestDocument.CONTACT, "abc123", true, "Click")),
+					() -> assertEquals(Util.getContentUrl("admin", "Contact", "photo", "cid1"),
+										Util.getContentUrl(TestDocument.CONTACT, "photo", "cid1")),
+					() -> assertEquals(Util.getResourceUrl("admin", "Contact", "logo.png"),
+										Util.getResourceUrl(TestDocument.CONTACT, "logo.png")),
+					() -> assertEquals(Util.getContentImageUrl("admin", "Contact", "photo", "cid1", 32, 24),
+										Util.getContentImageUrl(TestDocument.CONTACT, "photo", "cid1", 32, 24)),
+					() -> assertEquals(Util.getContentAnchorUrl("admin", "Contact", "photo", "cid1", true, "Open"),
+										Util.getContentAnchorUrl(TestDocument.CONTACT, "photo", "cid1", true, "Open")),
+					() -> assertEquals(Util.getContentAnchorWithImageUrl("admin", "Contact", "photo", "cid1", false, 32, 24),
+										Util.getContentAnchorWithImageUrl(TestDocument.CONTACT, "photo", "cid1", false, 32, 24)));
+	}
+
+	@Test
 	void getDocumentAnchorUrlContainsHref() {
 		String anchor = Util.getDocumentAnchorUrl("admin", "Contact", null, false, "Click");
 		assertTrue(anchor.contains("<a href="));
@@ -463,6 +483,26 @@ class UtilTest {
 			List<String> all = Util.getCompleteSuggestions("admin", "Contact", "name", null);
 			assertEquals(2, all.size());
 			verify(filter, never()).addLike("name", "null%");
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void typedGetCompleteSuggestionsQueriesTheReferencedDocument() {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(mock(User.class));
+		persistence.setForThread();
+		try {
+			DocumentQuery query = mock(DocumentQuery.class);
+			DocumentFilter filter = mock(DocumentFilter.class);
+			when(persistence.newDocumentQuery("admin", "Contact")).thenReturn(query);
+			when(query.getFilter()).thenReturn(filter);
+			when(query.scalarResults(String.class)).thenReturn(List.of("Alice"));
+
+			assertEquals(List.of("Alice"), Util.getCompleteSuggestions(TestDocument.CONTACT, "name", "Al"));
+			verify(filter).addLike("name", "Al%");
 		}
 		finally {
 			clearPersistenceThreadLocal();

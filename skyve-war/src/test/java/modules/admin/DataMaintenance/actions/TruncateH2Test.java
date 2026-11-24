@@ -14,6 +14,7 @@ import org.skyve.persistence.Persistence;
 
 import jakarta.inject.Inject;
 import modules.admin.User.UserService;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.DataMaintenance;
@@ -41,7 +42,7 @@ class TruncateH2Test extends AbstractH2TestDispose {
 		p.commit(false);
 		p.begin();
 		p.evictAllCached();
-		Contact cached = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, contact.getBizId());
+		Contact cached = p.retrieve(AdminDocument.CONTACT, contact.getBizId());
 		assertNotNull(cached);
 		assertTrue(p.sharedCacheBean(cached), "the contact is in the shared cache before the truncate");
 
@@ -57,7 +58,7 @@ class TruncateH2Test extends AbstractH2TestDispose {
 
 		p.evictAllCached(); // a new request starts with an empty session
 		assertFalse(p.sharedCacheBean(cached), "the truncate evicted the contact from the shared cache");
-		assertNull(p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, contact.getBizId()),
+		assertNull(p.retrieve(AdminDocument.CONTACT, contact.getBizId()),
 					"the truncate deleted the contact's row");
 	}
 }

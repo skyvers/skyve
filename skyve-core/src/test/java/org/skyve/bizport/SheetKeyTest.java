@@ -2,12 +2,14 @@ package org.skyve.bizport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class SheetKeyTest {
 
@@ -149,4 +151,15 @@ class SheetKeyTest {
                 SheetKey k2 = new SheetKey("admin", "User", "roles");
                 assertEquals(k1.hashCode(), k2.hashCode());
         }
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedConstructorsEqualTheStringForms() {
+		SheetKey document = new SheetKey(TestDocument.CONTACT);
+		SheetKey collection = new SheetKey(TestDocument.CONTACT, "roles");
+		assertAll(() -> assertEquals(new SheetKey("admin", "Contact"), document),
+					() -> assertNull(document.getCollectionBinding()),
+					() -> assertEquals(new SheetKey("admin", "Contact", "roles"), collection),
+					() -> assertEquals("roles", collection.getCollectionBinding()));
+	}
 }

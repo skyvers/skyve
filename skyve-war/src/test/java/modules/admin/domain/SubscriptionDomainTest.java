@@ -18,7 +18,7 @@ class SubscriptionDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesSubscription() {
 		Subscription bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+				.build(AdminDocument.SUBSCRIPTION);
 		assertNotNull(bean);
 	}
 

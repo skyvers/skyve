@@ -1,6 +1,7 @@
 package modules.kitchensink.ActionsFixtureRow.actions;
 
 import modules.kitchensink.domain.ActionsFixtureRow;
+import modules.kitchensink.domain.KitchensinkDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -20,6 +21,6 @@ public class RunFromRowTest extends AbstractActionTest<ActionsFixtureRow, RunFro
 	protected ActionsFixtureRow getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ActionsFixtureRow.MODULE_NAME, ActionsFixtureRow.DOCUMENT_NAME);
+			.build(KitchensinkDocument.ACTIONS_FIXTURE_ROW);
 	}
 }

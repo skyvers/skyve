@@ -16,7 +16,7 @@ class UserDashboardDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesUserDashboard() {
 		UserDashboard bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserDashboard.MODULE_NAME, UserDashboard.DOCUMENT_NAME);
+				.build(AdminDocument.USER_DASHBOARD);
 		assertNotNull(bean);
 	}
 

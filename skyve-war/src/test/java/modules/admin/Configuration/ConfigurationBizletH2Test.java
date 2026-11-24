@@ -9,8 +9,9 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.Configuration;
 import util.AbstractH2Test;
+
+import modules.admin.domain.AdminDocument;
 
 /**
  * H2-backed tests for {@link ConfigurationBizlet} covering preExecute and postSave branches.
@@ -22,7 +23,7 @@ class ConfigurationBizletH2Test extends AbstractH2Test {
 
 	@BeforeEach
 	void setUpBean() {
-		bean = new DataBuilder().fixture(FixtureType.crud).build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
+		bean = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONFIGURATION);
 	}
 
 	@Test

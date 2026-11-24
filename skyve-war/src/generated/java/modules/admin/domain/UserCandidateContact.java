@@ -78,7 +78,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	public static UserCandidateContact newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.USER_CANDIDATE_CONTACT.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

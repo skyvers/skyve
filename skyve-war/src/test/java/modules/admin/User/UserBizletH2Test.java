@@ -28,6 +28,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.springframework.mock.web.MockHttpSession;
 
 import modules.admin.Contact.ContactExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
@@ -50,7 +51,7 @@ class UserBizletH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.USER);
 		webContext = new MockWebContext();
 	}
 

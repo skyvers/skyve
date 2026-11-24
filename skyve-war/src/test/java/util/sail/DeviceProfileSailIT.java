@@ -103,6 +103,21 @@ class DeviceProfileSailIT {
 		return ((JavascriptExecutor) selenium.driver).executeAsyncScript(READ_INDEXED_DB);
 	}
 
+	/** Chrome opens its new tab page (a search page) on a profile unless SAIL sends it to the start page. */
+	@Test
+	void aBrowserOnANewOrReusedProfileStartsOnTheBlankPage() {
+		BrowserConfiguration a = device(root.resolve("a"));
+
+		selenium.startBrowser(a);
+		String fresh = selenium.driver.getCurrentUrl();
+		selenium.stopBrowser();
+		selenium.startBrowser(a);
+		String reused = selenium.driver.getCurrentUrl();
+
+		assertAll(() -> assertEquals(CrossBrowserSelenium.START_PAGE, fresh, "a new profile"),
+					() -> assertEquals(CrossBrowserSelenium.START_PAGE, reused, "a reused profile"));
+	}
+
 	@Test
 	void aProfileKeepsItsStorageAcrossARestartAndAnotherProfileHasNone() {
 		BrowserConfiguration a = device(root.resolve("a"));

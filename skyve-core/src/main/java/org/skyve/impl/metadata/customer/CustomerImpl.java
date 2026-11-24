@@ -739,7 +739,7 @@ public class CustomerImpl implements Customer {
 	 * @param documentName the owning document name.
 	 * @param attribute the attribute whose constant domain values are required.
 	 * @param <T> the bean type handled by the bizlet.
-	 * @return the resolved constant domain values, or {@code null} when resolution is vetoed.
+	 * @return the resolved constant domain values; empty if there are none or resolution is vetoed.
 	 * @throws Exception if bizlet execution or interceptor processing fails.
 	 */
 	@Override

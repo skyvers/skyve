@@ -26,6 +26,7 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ModuleDocument;
@@ -201,7 +202,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
 
 		if (ControlPanel.testTagNamePropertyName.equals(attributeName)) {
-			return Util.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName, value);
+			return Util.getCompleteSuggestions(AdminDocument.TAG, Tag.namePropertyName, value);
 		}
 
 		return super.complete(attributeName, value, bean);

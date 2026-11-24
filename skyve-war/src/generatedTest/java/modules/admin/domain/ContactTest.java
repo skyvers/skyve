@@ -14,6 +14,6 @@ public class ContactTest extends AbstractDomainTest<Contact> {
 	protected Contact getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+			.build(AdminDocument.CONTACT);
 	}
 }

@@ -20,6 +20,7 @@ import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.impl.archive.support.ArchiveRetriever;
 import org.skyve.impl.util.UtilImpl;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.MailLog;
 
 class MailLogServiceTest {
@@ -53,7 +54,7 @@ class MailLogServiceTest {
 	void testMailLogDocConfigPresentWhenConfigured() {
 		UtilImpl.ARCHIVE_CONFIG = new UtilImpl.ArchiveConfig(300,
 												100,
-												List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig("admin", "MailLog", "maillog-archive", 30)),
+												List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig(AdminDocument.MAIL_LOG, "maillog-archive", 30)),
 												ArchivedDocumentCacheConfig.DEFAULT,
 												UtilImpl.ArchiveConfig.ArchiveSchedule.DEFUALT);
 		MailLogService service = new MailLogService();
@@ -68,7 +69,7 @@ class MailLogServiceTest {
 	void testRetrieveFromArchivesReturnsArchivedMailLogWhenPresent() throws Exception {
 		UtilImpl.ARCHIVE_CONFIG = new UtilImpl.ArchiveConfig(300,
 												100,
-												List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig("admin", "MailLog", "maillog-archive", 30)),
+												List.of(new UtilImpl.ArchiveConfig.ArchiveDocConfig(AdminDocument.MAIL_LOG, "maillog-archive", 30)),
 												ArchivedDocumentCacheConfig.DEFAULT,
 												UtilImpl.ArchiveConfig.ArchiveSchedule.DEFUALT);
 

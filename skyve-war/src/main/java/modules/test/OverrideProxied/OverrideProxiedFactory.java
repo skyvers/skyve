@@ -5,6 +5,7 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.OverrideProxied;
+import modules.test.domain.TestDocument;
 
 /**
  * Creates test fixtures for {@link OverrideProxied}, returning the extension class as UserFactory does.
@@ -21,7 +22,7 @@ public class OverrideProxiedFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static OverrideProxiedExtension crudInstance() {
-		OverrideProxiedExtension result = new DataBuilder().factoryBuild(OverrideProxied.MODULE_NAME, OverrideProxied.DOCUMENT_NAME);
+		OverrideProxiedExtension result = new DataBuilder().factoryBuild(TestDocument.OVERRIDE_PROXIED);
 		result.setText(CRUD_TEXT);
 		return result;
 	}

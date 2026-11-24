@@ -1,5 +1,6 @@
 package modules.admin.User.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class BackTest extends AbstractActionTest<User, Back> {
 	protected User getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+			.build(AdminDocument.USER);
 	}
 }

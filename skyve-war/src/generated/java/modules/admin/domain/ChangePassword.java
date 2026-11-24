@@ -49,8 +49,11 @@ public class ChangePassword extends AbstractTransientBean {
 	 * <br/>
 	 * Enter your old password
 	 * <br/>
-	 * The old password is not always required to change the password as the
-					self service reset password function cannot demand the user for their old password.
+	 * The old password is required, and must be right, for every password change except a reset by token
+					(resetPassword.jsp), which cannot ask for it. The action enforces this: the reset path marks itself
+					in the persistence stash (AppConstants.PASSWORD_RESET_STASH_KEY) and nothing else can skip the check.
+					The attribute is not marked required here only because the reset path leaves it empty;
+					the edit view marks it required.
 	 **/
 	private String oldPassword;
 
@@ -87,7 +90,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	public static ChangePassword newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.CHANGE_PASSWORD.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

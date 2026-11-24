@@ -17,6 +17,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import util.AbstractH2Test;
@@ -36,7 +37,7 @@ class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.DATA_MAINTENANCE);
 		webContext = new MockWebContext();
 	}
 

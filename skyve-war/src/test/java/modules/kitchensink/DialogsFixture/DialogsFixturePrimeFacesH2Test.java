@@ -71,6 +71,7 @@ import jakarta.faces.event.PhaseEvent;
 import jakarta.faces.event.PhaseId;
 import modules.kitchensink.domain.DialogsFixture;
 import modules.kitchensink.domain.DialogsFixtureRow;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 /**
@@ -197,7 +198,7 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 		assertEquals(1, count());
 
 		p.begin();
-		startRequest(p.retrieve(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME, fixture.getBizId()), answers(question, "OK"));
+		startRequest(p.retrieve(KitchensinkDocument.DIALOGS_FIXTURE, fixture.getBizId()), answers(question, "OK"));
 		new DeleteAction(view).execute();
 		assertFalse(FacesAction.isQuestionAsked(fc));
 		p.commit(false);
@@ -388,7 +389,7 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 		view.delete();
 		String answers = answers(askedQuestion(), "OK");
 
-		startRequest(p.retrieve(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME, fixture.getBizId()), answers);
+		startRequest(p.retrieve(KitchensinkDocument.DIALOGS_FIXTURE, fixture.getBizId()), answers);
 		view.delete();
 
 		assertEquals(List.of("SKYVE.PF.popHistory(true)"), scripts());
@@ -631,7 +632,7 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 	private int count() {
 		Persistence persistence = p;
 		persistence.begin();
-		Number result = persistence.newDocumentQuery(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME)
+		Number result = persistence.newDocumentQuery(KitchensinkDocument.DIALOGS_FIXTURE)
 										.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "count")
 										.scalarResult(Number.class);
 		assertNotNull(result);

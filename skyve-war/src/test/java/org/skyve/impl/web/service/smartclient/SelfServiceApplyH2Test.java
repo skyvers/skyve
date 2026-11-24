@@ -23,6 +23,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserDashboard;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
@@ -122,11 +123,11 @@ class SelfServiceApplyH2Test extends AbstractH2Test {
 
 	private static UserExtension appUser(AbstractPersistence p, String roleName, String userName) {
 		DataBuilder builder = new DataBuilder().fixture(FixtureType.crud);
-		UserExtension me = builder.build("admin", "User");
+		UserExtension me = builder.build(AdminDocument.USER);
 		me.setUserName(userName + "-" + System.nanoTime());
 		me.getGroups().clear();
 		me.getRoles().clear();
-		UserRole role = builder.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+		UserRole role = builder.build(AdminDocument.USER_ROLE);
 		role.setRoleName("admin." + roleName);
 		me.addRolesElement(role);
 		me = p.save(me);

@@ -14,6 +14,6 @@ public class ReportTemplateTest extends AbstractDomainTest<ReportTemplate> {
 	protected ReportTemplate getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+			.build(AdminDocument.REPORT_TEMPLATE);
 	}
 }

@@ -18,7 +18,7 @@ class TaggedDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		Tagged bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+				.build(AdminDocument.TAGGED);
 		assertNotNull(bean);
 	}
 

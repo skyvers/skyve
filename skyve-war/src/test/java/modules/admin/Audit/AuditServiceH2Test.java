@@ -17,6 +17,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import util.AbstractH2Test;
@@ -164,7 +165,7 @@ class AuditServiceH2Test extends AbstractH2Test {
 		properties.put(Bean.BIZ_KEY, bizKey);
 		properties.put(Audit.millisPropertyName, Long.valueOf(millis));
 		properties.put(Audit.operationPropertyName, operation);
-		return new DynamicBean(Audit.MODULE_NAME, Audit.DOCUMENT_NAME, properties);
+		return new DynamicBean(AdminDocument.AUDIT, properties);
 	}
 
 	@SuppressWarnings("unchecked")

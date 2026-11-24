@@ -26,7 +26,7 @@ class ConfigurationDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesConfigurationBean() {
 		Configuration bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
+				.build(AdminDocument.CONFIGURATION);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

@@ -7,12 +7,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and looks at each DevOps screen with its safe actions: Control Panel, Data Maintenance, Document Creator, Monitoring Dashboard and Heap Dumps. The destructive actions are left to the destructive script.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Control Panel: every tab, a query, cache statistics and generated SAIL">
+		<description>Opens the Control Panel, visits each tab, runs a query, shows the cache statistics, checks that generating SAIL is refused until a UX/UI is chosen, and switches query tracing on and off.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -38,6 +40,7 @@
 		</method>
 	</interaction>
 	<interaction name="Data Maintenance: every tab, the backup list and import/export">
+		<description>Opens Data Maintenance, visits its tabs, checks the backup list shows the suite's backups and that selecting a backup enables Delete and Restore, and runs the safe database actions on the Data tab and the audit check, then opens the import/export list.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Import/Export" />
@@ -67,6 +70,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Creator: write a script and preview it">
+		<description>Opens Document Creator, writes a short script and checks it survives a visit to each preview tab.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
 			<tabSelect path="Input" />
@@ -79,6 +83,7 @@
 		</method>
 	</interaction>
 	<interaction name="Monitoring Dashboard: charts and requests">
+		<description>Opens the Monitoring Dashboard, checks its Refresh buttons are hidden in their closed boxes, and that the Requests tab lists requests.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
 			<tabSelect path="Charts" />
@@ -94,6 +99,7 @@
 	</interaction>
 	<!-- User Hits (SmartClient only) is checked, with its counts, in 09-operations.xml -->
 	<interaction name="Heap Dumps (SmartClient only)">
+		<description>Opens Heap Dumps, which only SmartClient offers, and checks Download Heap Dump is disabled until a dump is selected.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Heap Dumps" />
 			<comment>Nothing in the UI makes a heap dump (the Dump Heap job has no menu item or action), so the list is whatever the server has, and nothing is selected</comment>
@@ -101,6 +107,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Creator: Submit refused without an output location">
+		<description>Opens Document Creator and presses Submit without an output location, checking it is refused.</description>
 		<method>
 			<comment>No script or output location has been entered, so Submit must refuse to run</comment>
 			<navigateEdit document="DocumentCreator" module="admin" />

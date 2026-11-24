@@ -18,6 +18,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.opentest4j.TestAbortedException;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Descriptions;
 import org.skyve.metadata.sail.language.OrdinarySuiteMember;
 import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.SuiteMember;
@@ -434,6 +435,9 @@ public final class SailSuite {
 		Map<String, String> skips = new HashMap<>();
 		Map<SuiteMember, Outcome> byMember = new HashMap<>();
 		SuiteMember previousOrdinary = null;
+		String description = suite.getDescription();
+		printDescription(description);
+		SailMedia.suite(name, description); // for the members' media pages, when they are on
 		try {
 			for (SuiteMember member : suite.getAllMembers()) {
 				String file = member.getFile();
@@ -474,13 +478,22 @@ public final class SailSuite {
 			}
 		}
 		finally {
+			SailMedia.suite(null, null);
 			if (engine != null) {
 				engine.closeBrowser();
 			}
 		}
 		Summary result = new Summary(outcomes, failures, skips, notes);
+		printDescription(description); // the story heads the summary, where a reader of the log looks first
 		System.out.println(result.describe(name));
 		return result;
+	}
+
+	/** Prints the suite's description, one line per paragraph, if it has one. */
+	private void printDescription(@Nullable String description) {
+		for (String paragraph : Descriptions.paragraphs(description)) {
+			System.out.println("SAIL suite " + name + " description: " + paragraph);
+		}
 	}
 
 	/**

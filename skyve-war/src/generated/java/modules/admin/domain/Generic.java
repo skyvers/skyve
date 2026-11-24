@@ -1273,7 +1273,7 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 
 	public static Generic newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.GENERIC.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;
@@ -4128,7 +4128,7 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 
 		if (bizParentId != null) {
 			Persistence p = CORE.getPersistence();
-			DocumentQuery q = p.newDocumentQuery(Generic.MODULE_NAME, Generic.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(AdminDocument.GENERIC);
 			q.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);
 			result = q.retrieveBean();
 		}
@@ -4140,7 +4140,7 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	@XmlTransient
 	public List<Generic> getChildren() {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(Generic.MODULE_NAME, Generic.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(AdminDocument.GENERIC);
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}

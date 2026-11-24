@@ -60,7 +60,7 @@ public class DialogsFixtureRow extends AbstractPersistentBean implements ChildBe
 
 	public static DialogsFixtureRow newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return KitchensinkDocument.DIALOGS_FIXTURE_ROW.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

@@ -31,6 +31,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -74,7 +75,7 @@ import jakarta.annotation.Nullable;
  *  loader.setLoaderActivityType(LoaderActivityType.CREATE_FIND);
  *  loader.setFileInputStream(file.getInputStream());
  *  loader.setException(loadExceptions);
- *  loader.setDocumentContext(Invoice.MODULE_NAME, Invoice.DOCUMENT_NAME);
+ *  loader.setDocumentContext(SalesDocument.INVOICE); // the generated document enum of the module
  *  loader.setBindings(bindings);
  *  loader.setCreateMissingAssocations(Boolean.TRUE); //create any beans required for the load
  *  loader.setDataIndex(1); //handle header row in file
@@ -372,6 +373,16 @@ public abstract class AbstractDataFileLoader {
 		module = customer.getModule(moduleName);
 		this.documentName = documentName;
 		document = module.getDocument(customer, documentName);
+	}
+
+	/**
+	 * Sets the document context for the creation of beans from the values found in the file;
+	 * a typed shortcut for {@link #setDocumentContext(String, String)}.
+	 *
+	 * @param document	the compile-time reference to the document to load into
+	 */
+	public void setDocumentContext(@Nonnull ModuleDocument document) {
+		setDocumentContext(document.moduleName(), document.documentName());
 	}
 
 	/**

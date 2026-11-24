@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.Util;
 
 import modules.test.InjectedDocument.InjectedDocumentExtension;
-import modules.test.domain.InjectedDocument;
+import modules.test.domain.TestDocument;
 
 @SuppressWarnings("java:S1130")
 class InjectionTest extends AbstractSkyveTest {
@@ -41,7 +41,7 @@ class InjectionTest extends AbstractSkyveTest {
 		test.r.getRouter();
 
 		test.p.evictAllCached();
-		test = test.p.retrieve(InjectedDocument.MODULE_NAME, InjectedDocument.DOCUMENT_NAME, test.getBizId());
+		test = test.p.retrieve(TestDocument.INJECTED_DOCUMENT, test.getBizId());
 		Assertions.assertNotNull(test);
 		Assertions.assertNotNull(test.p);
 		Assertions.assertNotNull(test.c);

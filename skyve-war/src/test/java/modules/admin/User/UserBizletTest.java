@@ -7,15 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.User;
 import util.AbstractH2Test;
+
+import modules.admin.domain.AdminDocument;
 
 class UserBizletTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
 	void testPreSaveSetsPasswordExpired() throws Exception {
 		// setup the test data
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setPasswordExpired(Boolean.FALSE);
 		user.setGeneratedPassword("test");
 

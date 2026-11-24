@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,10 +20,10 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.DataBuilder;
-import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -33,8 +32,7 @@ import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.User.RememberMeTokens;
 import modules.admin.User.UserExtension;
-import modules.admin.domain.Configuration;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -182,7 +180,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 	void anUnknownEmailAddressGetsNoMailAndNoError() throws Exception {
 		WebUtil.requestPasswordReset(CUSTOMER, "nobody-" + System.nanoTime() + "@skyve.org");
 
-		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.getSent().size());
 	}
 
 	@Test
@@ -197,7 +195,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 
 		assertNotNull(tokenOf(a.name));
 		assertEquals(tokenOf(a.name), tokenOf(b.name));
-		assertEquals(1, capture.sendCount);
+		assertEquals(1, capture.getSent().size());
 	}
 
 	private record Fixture(String name, String token) {
@@ -210,7 +208,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 	private static Fixture user(String prefix, Boolean inactive, Timestamp tokenCreated) {
 		String name = "reset." + prefix + "." + System.nanoTime();
 		String token = "token-" + name;
-		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.USER);
 		user.setUserName(name);
 		user.setInactive(inactive);
 		user.setPassword(EXT.hashPassword(OLD));
@@ -271,8 +269,7 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 	private static void setExpiryMinutes(Integer minutes) throws Exception {
 		if (updateExpiry(minutes) == 0 && minutes != null) {
 			ConfigurationExtension configuration = new DataBuilder().fixture(FixtureType.crud)
-					.build(Configuration.MODULE_NAME,
-							Configuration.DOCUMENT_NAME);
+					.build(AdminDocument.CONFIGURATION);
 			configuration.getStartup().setMapLayer(StartupBizlet.MAP_LAYER_GMAP);
 			configuration.getStartup().setMailPort(Integer.valueOf(25));
 			configuration.setPasswordMinLength(Integer.valueOf(ConfigurationExtension.PASSWORD_DEFAULT_MIN_LENGTH));
@@ -287,25 +284,6 @@ class PasswordResetTokenH2Test extends AbstractH2Test {
 		try (Connection c = EXT.getDataStoreConnection(); Statement s = c.createStatement()) {
 			c.setAutoCommit(true);
 			return s.executeUpdate("update ADM_Configuration set passwordResetTokenExpiryMinutes = " + minutes);
-		}
-	}
-
-	private static class CaptureMailService implements MailService {
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// not needed
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// not needed
 		}
 	}
 }

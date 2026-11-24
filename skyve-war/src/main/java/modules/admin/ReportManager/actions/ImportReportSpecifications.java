@@ -32,6 +32,7 @@ import jakarta.inject.Inject;
 import modules.admin.ReportManager.ReportManagerExtension;
 import modules.admin.ReportManager.ReportManagerService;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
@@ -202,7 +203,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 */
 	private static void removePreviousTemplate(String name) {
 		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		DocumentQuery q = pers.newDocumentQuery(AdminDocument.REPORT_TEMPLATE);
 		q.getFilter().addEquals(ReportTemplate.namePropertyName, name);
 		ReportTemplate rt = q.beanResult();
 		if (rt != null) {

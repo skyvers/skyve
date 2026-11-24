@@ -16,7 +16,7 @@ class HeapDumpListDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		HeapDumpList bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(HeapDumpList.MODULE_NAME, HeapDumpList.DOCUMENT_NAME);
+				.build(AdminDocument.HEAP_DUMP_LIST);
 		assertNotNull(bean);
 	}
 

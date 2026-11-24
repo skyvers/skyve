@@ -58,6 +58,7 @@ import jakarta.servlet.http.HttpSession;
 import modules.kitchensink.domain.KitchenSink;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 // Reflection and servlet exception propagation are required to exercise private servlet branches.
 @SuppressWarnings({ "java:S1192", "java:S1989", "java:S3011", "java:S5960" })
@@ -209,7 +210,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	@Test
 	void removeDeletesPersistedTopLevelBeanAndWritesSuccessPayload() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("edit-delete-" + System.nanoTime());
 		bean = p.save(bean);
 

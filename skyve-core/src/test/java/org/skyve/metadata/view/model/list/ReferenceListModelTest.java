@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -20,7 +21,9 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
 class ReferenceListModelTest {
@@ -155,6 +158,29 @@ class ReferenceListModelTest {
 		// Should not throw - postConstruct resolves module/document via customer
 		model.postConstruct(customer, false);
 		assertNotNull(model.getDrivingDocument(), "postConstruct should resolve the driving document");
+	}
+
+	/** The typed convenience constructor, which postConstruct resolves as it does the string one. */
+	private static class TypedConstructorModel extends ReferenceListModel<Bean> {
+		TypedConstructorModel(ModuleDocument document, String referenceBinding) {
+			super(document, referenceBinding);
+		}
+		@Override public List<MetaDataQueryColumn> getColumns() { return Collections.emptyList(); }
+		@Override public String getDescription() { return "TypedConstructorModel"; }
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void postConstructWithTypedConstructorResolvesTheReferencedDocument() {
+		Customer customer = mock(Customer.class);
+		Module resolvedModule = mock(Module.class);
+		Document resolvedDocument = mock(Document.class);
+		when(customer.getModule("admin")).thenReturn(resolvedModule);
+		when(resolvedModule.getDocument(customer, "Contact")).thenReturn(resolvedDocument);
+
+		TypedConstructorModel model = new TypedConstructorModel(TestDocument.CONTACT, "items");
+		model.postConstruct(customer, false);
+		assertSame(resolvedDocument, model.getDrivingDocument());
 	}
 
 	@Test

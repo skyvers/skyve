@@ -1,5 +1,6 @@
 package modules.admin.DocumentCreator.actions;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DocumentCreator;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -20,6 +21,6 @@ public class SubmitTest extends AbstractActionTest<DocumentCreator, Submit> {
 	protected DocumentCreator getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DocumentCreator.MODULE_NAME, DocumentCreator.DOCUMENT_NAME);
+			.build(AdminDocument.DOCUMENT_CREATOR);
 	}
 }

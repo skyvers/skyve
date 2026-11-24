@@ -28,7 +28,7 @@ class DataMaintenanceDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesDataMaintenanceBean() {
 		DataMaintenance bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+				.build(AdminDocument.DATA_MAINTENANCE);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

@@ -8,7 +8,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Used by the recorder round-trip test: a user in an already signed-in SmartClient (desktop UX/UI) session makes a lookup value, fills in the Kitchen Sink widgets, runs actions and opens a list grid row, while the recorder writes a script of what was done, which is then replayed.</description>
 	<interaction name="Lookup values">
+		<description>Creates a lookup value, opens it again from the Lookup values list and checks its description.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
@@ -21,6 +23,7 @@
 		</method>
 	</interaction>
 	<interaction name="Widgets">
+		<description>Fills in every kind of Kitchen Sink widget (checkbox, colour, dates, number, combo, radio, spinner, slider, text, memo, time, timestamp and markup) and checks the combo and text values.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<dataEnter binding="booleanFlag" value="true" />
@@ -45,6 +48,7 @@
 		</method>
 	</interaction>
 	<interaction name="Actions and tabs">
+		<description>Runs the Actions Fixture's toolbar, form button and tab button actions, checking the outcome each time.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<action name="RunFromToolbar" />
@@ -58,6 +62,7 @@
 		</method>
 	</interaction>
 	<interaction name="List grid in a view">
+		<description>Makes a Model Lookup Fixture, opens it from the list grid in its view and deletes it.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
 			<dataEnter binding="name" value="SAIL recorded lookup {run}" />

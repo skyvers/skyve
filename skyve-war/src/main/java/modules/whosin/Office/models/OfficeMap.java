@@ -15,6 +15,7 @@ import org.skyve.persistence.Persistence;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
+import modules.whosin.domain.WhosinDocument;
 
 import jakarta.annotation.Nonnull;
 
@@ -59,7 +60,7 @@ public class OfficeMap extends MapModel<Office> {
 		// add the staff features
 		if (office.isPersisted()) {
 			Persistence p = CORE.getPersistence();
-			DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(WhosinDocument.STAFF);
 			q.getFilter().addEquals(Staff.baseOfficePropertyName, office);
 
 			List<Staff> staff = q.beanResults();

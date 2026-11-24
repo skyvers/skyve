@@ -17,7 +17,7 @@ class MailLogListDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		MailLogList bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(MailLogList.MODULE_NAME, MailLogList.DOCUMENT_NAME);
+				.build(AdminDocument.MAIL_LOG_LIST);
 		assertNotNull(bean);
 	}
 

@@ -6,12 +6,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and checks Audits, the System Dashboard, Document Numbers and the Jobs list.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Audits: the saves made by the suite are audited">
+		<description>Opens Audits and checks the saves made by the suite have been audited, then opens an audit record.</description>
 		<method>
 			<navigateMenu module="admin" item="Audits" />
 			<testWidget tab="Audits" />
@@ -22,6 +24,7 @@
 		</method>
 	</interaction>
 	<interaction name="System Dashboard">
+		<description>Opens the System Dashboard and checks it shows a status and a list of jobs.</description>
 		<method>
 			<navigateMenu module="admin" item="System Dashboard" />
 			<testGridRows binding="status" minRows="1" />
@@ -29,6 +32,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Numbers: create, find and delete">
+		<description>Creates a document number, finds it, raises its number and saves it, then deletes it and checks it has gone.</description>
 		<method>
 			<navigateMenu module="admin" item="Document Numbers" />
 			<listGridNew module="admin" document="DocumentNumber" />
@@ -49,6 +53,7 @@
 		</method>
 	</interaction>
 	<interaction name="Jobs: the backup job has completed">
+		<description>Opens Jobs and checks the completed jobs list shows the suite's backup job, then opens it and visits the Schedule tab.</description>
 		<method>
 			<navigateMenu module="admin" item="Jobs" />
 			<tabSelect path="Actual" />
@@ -61,6 +66,7 @@
 		</method>
 	</interaction>
 	<interaction name="Document Numbers: generated data, from the document numbers query">
+		<description>Opens the document numbers query and saves a document number filled with generated test data twice, then deletes it.</description>
 		<method>
 			<navigateList module="admin" query="qDocumentNumbers" />
 			<listGridNew module="admin" query="qDocumentNumbers" />

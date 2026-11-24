@@ -16,7 +16,7 @@ class UserProxyDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		UserProxy bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+				.build(AdminDocument.USER_PROXY);
 		assertNotNull(bean);
 	}
 

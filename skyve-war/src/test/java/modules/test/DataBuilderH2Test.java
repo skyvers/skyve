@@ -9,6 +9,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 @SuppressWarnings("static-method")
 class DataBuilderH2Test extends AbstractSkyveTest {
@@ -17,7 +18,7 @@ class DataBuilderH2Test extends AbstractSkyveTest {
 	void testDefaultCrudFixtureBuildReturnsBean() {
 		AllAttributesPersistent bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 
 		assertNotNull(bean);
 	}
@@ -26,10 +27,10 @@ class DataBuilderH2Test extends AbstractSkyveTest {
 	void testSeedAndSailFixtureBuildsReturnBean() {
 		AllAttributesPersistent seedBean = new DataBuilder()
 				.fixture(FixtureType.seed)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		AllAttributesPersistent sailBean = new DataBuilder()
 				.fixture(FixtureType.sail)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 
 		assertNotNull(seedBean);
 		assertNotNull(sailBean);
@@ -46,7 +47,7 @@ class DataBuilderH2Test extends AbstractSkyveTest {
 				.name(AllAttributesPersistent.textPropertyName, false)
 				.type(AttributeType.bool, false)
 				.cardinality(AllAttributesPersistent.aggregatedCollectionPropertyName, 2)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+				.build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 
 		assertNotNull(bean);
 		assertNotNull(bean.getAggregatedCollection());

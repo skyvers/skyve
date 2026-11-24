@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.json.Json;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CallParameter;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -37,6 +39,7 @@ import org.skyve.web.UserAgentType;
 import util.sail.SailMedia.Frame;
 import util.sail.SailMedia.RunInfo;
 import util.sail.SailMedia.StepRecord;
+import util.sail.SailMedia.Story;
 
 /**
  * Tests the pages that SAIL step snapshots and video write: the film strip, the player and its data, and the list
@@ -44,14 +47,15 @@ import util.sail.SailMedia.StepRecord;
  */
 @SuppressWarnings({"static-method", "java:S5960"}) // test-only assertions
 class SailMediaTest {
+	private static final Story NO_STORY = new Story(null, null, null, null);
 	private static final RunInfo INFO = new RunInfo("20261106-120000-000-KitchenSinkIT.test", "Contacts: create", "KitchenSinkIT.test", "01-setup.xml",
 													"2026-11-06 12:00:00", "tablet",
-													List.of("testStrategy=Verify (-Dsail.testStrategy)", "var.password=******** (code)"));
+													List.of("testStrategy=Verify (-Dsail.testStrategy)", "var.password=******** (code)"), NO_STORY);
 	private static final List<StepRecord> STEPS = List.of(
-			new StepRecord(1, "Contacts: create", 1, "Navigate menu (item: Contacts, module: admin)", "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null),
+			new StepRecord(1, "Contacts: create", 1, "Navigate menu (item: Contacts, module: admin)", "<navigateMenu module=\"admin\" item=\"Contacts\"/>", 1000L, 1250L, null, "001-Contacts-create-navigateMenu.png", null, null),
 			new StepRecord(2, "Contacts: create", 2, "Data enter (binding: name, value: a < b)", "<dataEnter binding=\"name\" value=\"a &lt; b\"/>", 1250L, 1300L,
-							"Interaction \"Contacts: create\" step 2: <boom> & more", "002-Contacts-create-dataEnter.png", "002-Contacts-create-dataEnter.html"),
-			new StepRecord(3, "Contacts: create", 3, "Save", "<save/>", 1300L, 1700L, "second failure", null, null));
+							"Interaction \"Contacts: create\" step 2: <boom> & more", "002-Contacts-create-dataEnter.png", "002-Contacts-create-dataEnter.html", null),
+			new StepRecord(3, "Contacts: create", 3, "Save", "<save/>", 1300L, 1700L, "second failure", null, null, null));
 
 	@Test
 	void theFilmStripHasARowPerStepAndLeadsToTheFirstFailure() {
@@ -88,7 +92,7 @@ class SailMediaTest {
 
 	@Test
 	void aRunWithDefaultSettingsSaysSo() {
-		RunInfo info = new RunInfo("r", "T.t", "T.t", null, "2026-11-17 12:00:00", "desktop", List.of());
+		RunInfo info = new RunInfo("r", "T.t", "T.t", null, "2026-11-17 12:00:00", "desktop", List.of(), NO_STORY);
 		String html = SailRunPages.filmStripHtml(info, STEPS, null);
 		assertTrue(html.contains("Settings: all defaults"), html);
 	}
@@ -127,7 +131,7 @@ class SailMediaTest {
 		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media"))
 																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
 		Path media = base.resolve("media");
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path first;
 		Path second;
 		try {
@@ -139,7 +143,7 @@ class SailMediaTest {
 		finally {
 			SailMedia.endUnit(true);
 		}
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path kept;
 		try {
 			kept = run(failedOnly, media, "unitFailedLater", null, true);
@@ -150,6 +154,104 @@ class SailMediaTest {
 		assertAll(() -> assertFalse(Files.exists(first), "the passed unit's runs are deleted"),
 					() -> assertFalse(Files.exists(second), "the passed unit's runs are deleted"),
 					() -> assertTrue(Files.exists(kept.resolve("index.html")), "a failed unit keeps its passed runs"));
+	}
+
+	/**
+	 * With the default media directory (from an evidence request), the list of runs is one folder up, in target/sail
+	 * beside media/, and links into media/; the run's pages link back up to it; runs-order.js stays beside the runs;
+	 * and a list an earlier version left in media/ is removed. A directory that is set keeps its list in itself.
+	 */
+	@Test
+	void theDefaultDirectorysListOfRunsIsInTheEvidenceFolder(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings defaulted = SailSettings.resolve(environment, List.of(SailSettings.code().evidence(Suite.Evidence.all).layer()));
+		Path evidence = base.resolve("target/sail");
+		Path media = evidence.resolve("media");
+		Files.createDirectories(media);
+		Files.writeString(media.resolve("index.html"), "an earlier version's list");
+
+		Path folder = run(defaulted, media, "rooted", null, true);
+		String list = Files.readString(evidence.resolve("index.html"));
+		String strip = Files.readString(folder.resolve("index.html"));
+		String player = Files.readString(folder.resolve("player.html"));
+		String href = "media/" + folder.getFileName();
+		assertAll(() -> assertTrue(list.contains("href=\"" + href + "/index.html\">Steps</a>"), list),
+					() -> assertTrue(list.contains("href=\"" + href + "/player.html\">Video</a>"), list),
+					() -> assertTrue(strip.contains("<a class=\"btn\" href=\"../../index.html\">All runs</a>"), "the film strip's All runs"),
+					() -> assertTrue(player.contains("<a class=\"btn\" href=\"../../index.html\">All runs</a>"), "the player's All runs"),
+					() -> assertTrue(Files.exists(media.resolve(SailMedia.RUNS_ORDER_JS)), "runs-order.js beside the runs"),
+					() -> assertFalse(Files.exists(media.resolve("index.html")), "the earlier list in media/ is removed"));
+
+		SailSettings set = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("shots")).layer()));
+		Path shots = base.resolve("shots");
+		Path setFolder = run(set, shots, "set", null, true);
+		String setList = Files.readString(shots.resolve("index.html"));
+		assertAll(() -> assertTrue(setList.contains("href=\"" + setFolder.getFileName() + "/index.html\">Steps</a>"), setList),
+					() -> assertTrue(Files.readString(setFolder.resolve("index.html")).contains("href=\"../index.html\">All runs</a>"),
+										"a set directory's run links to the list beside it"),
+					() -> assertFalse(Files.exists(base.resolve("index.html")), "no list above a set directory"));
+	}
+
+	/**
+	 * With keepMedia=failed and the default media directory, a passed run is deleted and the list in the evidence
+	 * folder is rewritten without it.
+	 */
+	@Test
+	void aDeletedRunLeavesTheEvidenceFoldersList(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().evidence(Suite.Evidence.snapshots)
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path evidence = base.resolve("target/sail");
+		Path media = evidence.resolve("media");
+		Path failed = run(failedOnly, media, "rootFailed", "a failure", true);
+		Path passed = run(failedOnly, media, "rootPassed", null, true);
+		String list = Files.readString(evidence.resolve("index.html"));
+		assertAll(() -> assertFalse(Files.exists(passed), "a passed run's folder is deleted"),
+					() -> assertTrue(list.contains("1 runs"), list),
+					() -> assertTrue(list.contains("media/" + failed.getFileName() + "/index.html"), list),
+					() -> assertFalse(Files.exists(media.resolve("index.html")), "no list in media/"));
+	}
+
+	/** With keepMedia=failed and only a video directory, a passed run's video folder is deleted and its list rewritten. */
+	@Test
+	void aPassedVideoOnlyRunIsDeleted(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings videoOnly = SailSettings.resolve(environment, List.of(SailSettings.code().videoDir(Path.of("video"))
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path video = base.resolve("video");
+		Path passed = run(videoOnly, video, "videoOnly", null, true);
+		String list = Files.readString(video.resolve("index.html"));
+		assertAll(() -> assertFalse(Files.exists(passed), "a passed run's video folder is deleted"),
+					() -> assertTrue(list.contains("0 runs"), list));
+	}
+
+	/**
+	 * When a passed run's folder can't be deleted, as its directory of runs is read-only, the run is kept and the unit
+	 * ends without failing.
+	 */
+	@Test
+	void aPassedRunWhoseFolderCannotBeDeletedIsKept(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media"))
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path media = base.resolve("media");
+		Path kept;
+		SailMedia.beginUnit(null);
+		try {
+			kept = run(failedOnly, media, "undeletable", null, true);
+			Files.setPosixFilePermissions(media, PosixFilePermissions.fromString("r-xr-xr-x"));
+		}
+		finally {
+			try {
+				SailMedia.endUnit(true);
+			}
+			finally {
+				if (Files.exists(media)) {
+					Files.setPosixFilePermissions(media, PosixFilePermissions.fromString("rwxr-xr-x"));
+				}
+			}
+		}
+		assertTrue(Files.exists(kept), "the run's folder is kept when it can't be deleted");
 	}
 
 	/** Runs one step in a run's media, labelled, and ends it; returns the run's folder. */
@@ -173,7 +275,7 @@ class SailMediaTest {
 		DataEnter step = new DataEnter();
 		step.setBinding("text");
 		step.setValue("x");
-		media.stepStarted("Interaction", 1, step);
+		media.stepStarted("Interaction", null, 1, step);
 		media.stepEnded(failure);
 		media.finish(passed);
 		// the folder is named by the time, the test (outside the harness: none here) and the label
@@ -237,7 +339,7 @@ class SailMediaTest {
 		listedRun(base, "20261106-120200-000-B.test", "HM2 office: recalls it", "10-home.xml", new SailMedia.Place(none.session(), 7, 2), false);
 		listedRun(base, "20261106-120300-000-B.test", "CK1 checks out", "20-checkout.xml", none, true);
 		Files.createDirectories(base.resolve("not-a-run"));
-		String html = SailRunsList.runsIndexHtml(base);
+		String html = SailRunsList.runsIndexHtml(SailRunsList.listedRuns(base));
 		int newSession = html.indexOf("Session started 2026-11-06 11:59:00");
 		int oldSession = html.indexOf("Session started 2026-11-06 08:59:00");
 		int earlier = html.indexOf("Earlier runs");
@@ -268,7 +370,7 @@ class SailMediaTest {
 		Path run = Files.createDirectories(base.resolve(folder));
 		Files.writeString(run.resolve("player.html"), "player");
 		RunInfo info = new RunInfo(folder, title, "B.test", label, "2026-11-06 " + folder.substring(9, 11) + ':' + folder.substring(11, 13) + ":00",
-									"phone", List.of());
+									"phone", List.of(), NO_STORY);
 		Files.writeString(run.resolve(SailMedia.RUN_JSON), SailMedia.runJson(info, place, passed ? STEPS.subList(0, 1) : STEPS, passed));
 	}
 
@@ -279,7 +381,7 @@ class SailMediaTest {
 		SailSettings settings = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media")).layer()));
 		Path media = base.resolve("media");
 		Path alone = run(settings, media, "alone", null, true);
-		SailMedia.beginUnit();
+		SailMedia.beginUnit(null);
 		Path first;
 		Path second;
 		try {

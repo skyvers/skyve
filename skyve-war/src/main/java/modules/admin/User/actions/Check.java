@@ -17,13 +17,13 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
@@ -56,8 +56,7 @@ public class Check implements ServerSideAction<UserExtension> {
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(UserCandidateContact.MODULE_NAME);
-		Document contactDocument = module.getDocument(customer, Contact.DOCUMENT_NAME);
+		Document contactDocument = AdminDocument.CONTACT.toDocument(customer);
 
 		// contact to match score
 		Map<ContactExtension, Integer> distinctContacts = new LinkedHashMap<>();
@@ -80,7 +79,7 @@ public class Check implements ServerSideAction<UserExtension> {
 					searchEmail = searchEmail + "%";
 				}
 
-				DocumentQuery q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+				DocumentQuery q = persistence.newDocumentQuery(AdminDocument.CONTACT);
 				q.getFilter().addLike(Contact.email1PropertyName, searchEmail);
 				List<ContactExtension> emailMatches = q.beanResults();
 				for (ContactExtension emailMatch : emailMatches) {

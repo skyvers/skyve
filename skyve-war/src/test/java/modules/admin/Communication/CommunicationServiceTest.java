@@ -11,6 +11,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
 import util.AbstractH2Test;
 
@@ -29,8 +30,7 @@ class CommunicationServiceTest extends AbstractH2Test {
 		// create the test data
 		Persistence pers = CORE.getPersistence();
 		Communication c = new DataBuilder().fixture(SkyveFixture.FixtureType.crud)
-				.build(Communication.MODULE_NAME,
-						Communication.DOCUMENT_NAME);
+				.build(AdminDocument.COMMUNICATION);
 		c = pers.save(c);
 		String customer = pers.getUser().getCustomerName();
 

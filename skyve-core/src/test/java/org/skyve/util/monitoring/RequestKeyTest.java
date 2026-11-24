@@ -2,6 +2,7 @@ package org.skyve.util.monitoring;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class RequestKeyTest {
 
@@ -428,5 +430,15 @@ class RequestKeyTest {
 		assertEquals('M', key.getType());
 		assertThat(key.getComponent(), is("qUsers"));
 		assertThat(key.toString(), is("Madmin.User^qUsers"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedDocumentListModelEqualsTheStringForm() {
+		RequestKey key = RequestKey.documentListModel(TestDocument.CONTACT);
+		assertAll(() -> assertEquals(RequestKey.documentListModel("admin", "Contact").toString(), key.toString()),
+					() -> assertEquals('M', key.getType()),
+					() -> assertEquals("admin", key.getModuleName()),
+					() -> assertEquals("Contact", key.getDocumentName()));
 	}
 }

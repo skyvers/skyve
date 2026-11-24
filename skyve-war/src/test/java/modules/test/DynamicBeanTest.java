@@ -32,6 +32,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.test.AllAttributesDynamicPersistent.TestDynamicImage;
 import modules.test.AllAttributesDynamicPersistent.TestListModel;
@@ -62,7 +63,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 	void testDynamicBean() {
 		Map<String, Object> values = new TreeMap<>();
 		values.put(ONE, TWO);
-		DynamicBean contact = new DynamicBean(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, values);
+		DynamicBean contact = new DynamicBean(AdminDocument.CONTACT, values);
 		Assertions.assertEquals(TWO, contact.getDynamic(ONE), "Dynamic Property set correctly");
 		Assertions.assertTrue(contact.isDynamic(ONE), "Is a dynamic property");
 		contact.setDynamic(ONE, THREE);

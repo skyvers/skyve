@@ -29,8 +29,8 @@ import org.springframework.mock.web.MockHttpSession;
 import jakarta.servlet.http.Cookie;
 import modules.admin.User.RememberMeTokens;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminRole;
-import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -48,7 +48,7 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 	void setup() {
 		p = CORE.getPersistence();
 		db = new DataBuilder().fixture(FixtureType.crud);
-		target = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		target = db.build(AdminDocument.USER);
 		target.setUserName("signOutTarget");
 		target = p.save(target);
 		targetPrincipal = target.getBizCustomer() + "/signOutTarget";
@@ -94,7 +94,7 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 		StateUtil.addSession(admin.getId(), new MockHttpSession(null, "adminPhoneSession"));
 		request.setCookies(new Cookie("remember",
 				Base64.getEncoder().encodeToString("pc:token".getBytes(StandardCharsets.UTF_8))));
-		UserExtension self = Objects.requireNonNull(p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, admin.getId()));
+		UserExtension self = Objects.requireNonNull(p.retrieve(AdminDocument.USER, admin.getId()));
 
 		new SignOutEverywhere().execute(self, new MockWebContext());
 
@@ -104,7 +104,7 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 
 	@Test
 	void anUnsavedUserHasNothingToSignOut() throws Exception {
-		UserExtension unsaved = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension unsaved = db.build(AdminDocument.USER);
 		unsaved.setUserName("neverSaved");
 		RememberMeTokens.add(p, unsaved.getBizCustomer(), unsaved.getBizCustomer() + "/neverSaved", "stale");
 
@@ -118,11 +118,11 @@ class SignOutEverywhereH2Test extends AbstractH2Test {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		org.skyve.metadata.user.User originalUser = persistence.getUser();
 		try {
-			UserExtension basic = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+			UserExtension basic = db.build(AdminDocument.USER);
 			basic.setUserName("basicUserNoAdmin");
 			basic.getGroups().clear();
 			basic.getRoles().clear();
-			UserRole role = db.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+			UserRole role = db.build(AdminDocument.USER_ROLE);
 			role.setRoleName("admin.BasicUser");
 			basic.addRolesElement(role);
 			basic = p.save(basic);

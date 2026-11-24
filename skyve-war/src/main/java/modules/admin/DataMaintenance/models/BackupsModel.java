@@ -37,6 +37,7 @@ import org.skyve.util.FileUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.DataMaintenance.DataMaintenanceService;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DownloadFolder;
 
@@ -61,7 +62,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	 */
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
-		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
+		drivingDocument = AdminDocument.DOWNLOAD_FOLDER.toDocument(customer);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
@@ -311,7 +312,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 				properties.put(Bean.BIZ_KEY, backupName);
 				properties.put(DownloadFolder.namePropertyName, backupName);
 				properties.put(DownloadFolder.sizePropertyName, backups.get(backupName));
-				rows.add(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+				rows.add(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 
 				if (i >= end) {
 					break;
@@ -325,7 +326,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		page.setRows(rows);
 
 		Map<String, Object> properties = new TreeMap<>();
-		page.setSummary(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+		page.setSummary(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 		return page;
 	}
 
@@ -353,7 +354,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 				properties.put(Bean.BIZ_KEY, thing);
 				properties.put(DownloadFolder.namePropertyName, thing);
-				rows.add(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+				rows.add(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 
 				if (i >= end) {
 					break;
@@ -367,7 +368,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		page.setRows(rows);
 
 		Map<String, Object> properties = new TreeMap<>();
-		page.setSummary(new DynamicBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
+		page.setSummary(new DynamicBean(AdminDocument.DOWNLOAD_FOLDER, properties));
 		return page;
 	}
 }

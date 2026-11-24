@@ -21,9 +21,6 @@ public class DifferentCountryLoginNotificationJob extends Job {
 	@SuppressWarnings("java:S6813") // allow member injection
 	private transient ContactService contactService;
 
-	/** The admin module's name for this job, which {@link modules.admin.domain.AdminJob#J_DIFFERENT_COUNTRY_LOGIN_NOTIFICATION} references. */
-	public static final String JOB_NAME = "jDifferentCountryLoginNotification";
-
 	private static final String EMAIL_DESCRIPTION = "SYSTEM Different Country Login Notification";
 	private static final String EMAIL_SUBJECT = "Security Alert: Unusual Login Activity Detected";
 	private static final String EMAIL_BODY = "Dear {"

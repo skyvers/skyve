@@ -9,11 +9,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in PrimeFaces (tablet UX/UI) and defines an import of Contacts from a spreadsheet, runs it, finds the three imported contacts, then defines and runs an export and cleans everything up.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
 	<interaction name="Leftover guard: no SAIL Import contacts or Contact definitions from an earlier run">
+		<description>Checks that no imported contacts or Contact import definitions are left from an earlier run, which would make the later checks wrong.</description>
 		<method>
 			<comment>The names in sail-import-contacts.xlsx are fixed, and so is the definition (module and document only): leftovers from a failed run (pf or sc) would make this member fail or zoom the wrong definition. Reset or clean the data by hand if this fails.</comment>
 			<navigateList module="admin" document="Contact" />
@@ -25,6 +27,7 @@
 		</method>
 	</interaction>
 	<interaction name="Import definition: choose the document, get the template, upload the spreadsheet">
+		<description>Starts an import definition for Contact, checks upload stays disabled until a document is chosen, uploads the spreadsheet and checks its three columns are read.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Import/Export" />
@@ -49,6 +52,7 @@
 		</method>
 	</interaction>
 	<interaction name="Import definition: clear the upload (declined, then confirmed) and upload again">
+		<description>Declines to clear the upload and checks the columns remain, then confirms and checks the upload is hidden again, and uploads the spreadsheet a second time.</description>
 		<method>
 			<action name="ClearImport" confirm="false" />
 			<comment>Declined: the file and its columns are still there</comment>
@@ -65,6 +69,7 @@
 		</method>
 	</interaction>
 	<interaction name="Run the import: three contacts are created">
+		<description>Declines the import and checks no contacts are made, then runs it and checks that three SAIL Import contacts appear in the Contacts list with the spreadsheet's names, email and mobile.</description>
 		<method>
 			<comment>Declined first: no contacts are created</comment>
 			<action name="RunImport" confirm="false" />
@@ -86,6 +91,7 @@
 		</method>
 	</interaction>
 	<interaction name="Export definition: columns from the document, reset, and run the export">
+		<description>Starts an export definition for Contact, checks a column is generated per persistent attribute, removes one and resets to get it back, runs the export and saves the definition.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Import/Export" />
@@ -117,6 +123,7 @@
 		</method>
 	</interaction>
 	<interaction name="Clean up: the imported contacts and both definitions">
+		<description>Deletes the three imported contacts and both definitions, checking each has gone.</description>
 		<method>
 			<navigateList module="admin" document="Contact" />
 			<listGridFilter module="admin" document="Contact" column="name" value="SAIL Import" />

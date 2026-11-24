@@ -25,6 +25,7 @@ import org.skyve.util.MailAttachment;
 
 import freemarker.template.Template;
 import modules.admin.ReportDataset.ReportDatasetExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.UserProxy;
@@ -148,7 +149,7 @@ public class ReportJob extends Job {
 
 	@SuppressWarnings("static-method") // test seam
 	protected ReportTemplate retrieveReport(String bizId) {
-		return CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, bizId);
+		return CORE.getPersistence().retrieve(AdminDocument.REPORT_TEMPLATE, bizId);
 	}
 
 	@SuppressWarnings("static-method") // test seam

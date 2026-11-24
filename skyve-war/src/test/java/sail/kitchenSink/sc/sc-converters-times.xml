@@ -8,7 +8,7 @@
 	seconds, negatives, separators, $, percentages (over 1000% too), rounding, durations rounded to the minute, and
 	the absolute converter of a stored negative. Equals compares the stored value exactly, so a value shown rounded is
 	not filtered by what it shows.
-	Run by SmartClientConvertersSailIT.
+	A member of converters.suite.xml (ConvertersSuiteSailIT).
 -->
 <automation uxui="desktop"
 			userAgentType="desktop"
@@ -16,11 +16,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and checks that times in 12 and 24 hour formats, with and without seconds are shown, typed, saved and filtered in the format each field uses. It types records into the fields and an inline grid row, checks the values as saved and after reopening, then filters the list by each column as its cells show the values.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<switchMode />
 	</before>
 	<interaction name="Times: record a, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose time fields hold 2:47 PM, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersTimes" />
 			<listGridNew module="kitchensink" query="qConvertersTimes" />
@@ -64,6 +66,7 @@
 		</method>
 	</interaction>
 	<interaction name="Times: record b, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose time fields hold noon, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersTimes" />
 			<listGridNew module="kitchensink" query="qConvertersTimes" />
@@ -107,6 +110,7 @@
 		</method>
 	</interaction>
 	<interaction name="Times: record c, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose time fields hold midnight, with 59 seconds, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersTimes" />
 			<listGridNew module="kitchensink" query="qConvertersTimes" />
@@ -150,6 +154,7 @@
 		</method>
 	</interaction>
 	<interaction name="Times: filter the list grid by each column, as its cells show the values">
+		<description>Filters the list grid of Converters Fixtures by each time column, typed as the cells show the values, with equals, less than and greater than, and checks which of the run's records each filter leaves.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersTimes" />
 			<listGridClearFilter module="kitchensink" query="qConvertersTimes" />

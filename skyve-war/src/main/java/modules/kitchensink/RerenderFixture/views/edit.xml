@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Rerender Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<blurb>
+		Week Ending Date rerenders the view from both its change handler and its blur handler, as the Biz Hub Apps
+		weekly timesheet's week ending date does.
+		Show Rerender Count shows how many rerenders the server was sent for it.
+	</blurb>
+	<form border="true" borderTitle="Rerenders">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<textField binding="weekEndingDate">
+					<onBlurHandlers>
+						<rerender />
+					</onBlurHandlers>
+					<onChangedHandlers>
+						<rerender />
+					</onChangedHandlers>
+				</textField>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="rerenderCount" enabled="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<button action="ShowRerenderCount" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<cancel />
+		<action className="ShowRerenderCount" displayName="Show Rerender Count" inActionPanel="false" />
+	</actions>
+</view>

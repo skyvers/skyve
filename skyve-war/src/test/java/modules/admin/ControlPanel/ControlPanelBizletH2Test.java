@@ -19,6 +19,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ControlPanel;
 import util.AbstractH2Test;
 
@@ -38,7 +39,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.CONTROL_PANEL);
 		webContext = new MockWebContext();
 	}
 

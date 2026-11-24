@@ -17,6 +17,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.MonitoringDashboard;
 import modules.admin.domain.MonitoringDashboard.RequestType;
 import util.AbstractH2Test;
@@ -36,7 +37,7 @@ class MonitoringDashboardBizletH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.MONITORING_DASHBOARD);
 		webContext = new MockWebContext();
 	}
 

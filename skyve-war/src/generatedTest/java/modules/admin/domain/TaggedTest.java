@@ -14,6 +14,6 @@ public class TaggedTest extends AbstractDomainTest<Tagged> {
 	protected Tagged getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+			.build(AdminDocument.TAGGED);
 	}
 }

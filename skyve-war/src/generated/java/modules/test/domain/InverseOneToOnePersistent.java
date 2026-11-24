@@ -63,7 +63,7 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 
 	public static InverseOneToOnePersistent newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.INVERSE_ONE_TO_ONE_PERSISTENT.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

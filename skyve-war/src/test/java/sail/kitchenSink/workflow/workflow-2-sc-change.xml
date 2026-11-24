@@ -9,11 +9,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and finds the lookup value that the first leg made, by its number, then changes its description.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<switchMode />
 	</before>
 	<interaction name="Find the lookup value by its number and change it">
+		<description>Filters the Lookup values list by the kept number, checks the one row and its number, changes the description and checks the change in the list.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridFilter column="number" value="{var:number}" operator="equals" />

@@ -14,6 +14,6 @@ public class CorruptArchiveErrorTest extends AbstractDomainTest<CorruptArchiveEr
 	protected CorruptArchiveError getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(CorruptArchiveError.MODULE_NAME, CorruptArchiveError.DOCUMENT_NAME);
+			.build(AdminDocument.CORRUPT_ARCHIVE_ERROR);
 	}
 }

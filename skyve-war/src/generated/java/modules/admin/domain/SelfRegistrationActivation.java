@@ -205,7 +205,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 
 	public static SelfRegistrationActivationExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.SELF_REGISTRATION_ACTIVATION.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

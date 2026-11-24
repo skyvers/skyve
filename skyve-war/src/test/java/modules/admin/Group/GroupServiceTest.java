@@ -16,6 +16,7 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 
 class GroupServiceTest {
@@ -28,7 +29,7 @@ class GroupServiceTest {
 		persistence = mock(Persistence.class);
 		query = mock(DocumentQuery.class);
 		filter = mock(DocumentFilter.class);
-		when(persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME)).thenReturn(query);
+		when(persistence.newDocumentQuery(AdminDocument.GROUP)).thenReturn(query);
 		when(query.getFilter()).thenReturn(filter);
 	}
 
@@ -41,7 +42,7 @@ class GroupServiceTest {
 		GroupExtension result = service.get("group-id");
 
 		assertThat(result, is(group));
-		verify(persistence).newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		verify(persistence).newDocumentQuery(AdminDocument.GROUP);
 		verify(filter).addEquals(Bean.DOCUMENT_ID, "group-id");
 	}
 
@@ -54,7 +55,7 @@ class GroupServiceTest {
 		List<GroupExtension> result = service.getAll();
 
 		assertThat(result, is(groups));
-		verify(persistence).newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		verify(persistence).newDocumentQuery(AdminDocument.GROUP);
 	}
 
 	@Test

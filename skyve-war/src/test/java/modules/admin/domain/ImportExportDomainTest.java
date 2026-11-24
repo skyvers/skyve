@@ -25,7 +25,7 @@ class ImportExportDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesImportExportBean() {
 		ImportExport bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ImportExport.MODULE_NAME, ImportExport.DOCUMENT_NAME);
+				.build(AdminDocument.IMPORT_EXPORT);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

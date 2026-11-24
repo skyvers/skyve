@@ -14,6 +14,6 @@ public class TagTest extends AbstractDomainTest<Tag> {
 	protected Tag getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			.build(AdminDocument.TAG);
 	}
 }

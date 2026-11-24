@@ -19,9 +19,8 @@ import jakarta.inject.Inject;
 import modules.admin.Communication.CommunicationExtension;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Tag.TagExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Contact;
-import modules.admin.domain.Tag;
 import util.AbstractH2Test;
 
 /**
@@ -40,8 +39,8 @@ class GetResultsH2Test extends AbstractH2Test {
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
-		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		tag = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		communication = db.build(AdminDocument.COMMUNICATION);
+		tag = db.build(AdminDocument.TAG);
 	}
 
 	@Test
@@ -69,7 +68,7 @@ class GetResultsH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension contact = db.build(AdminDocument.CONTACT);
 		contact = CORE.getPersistence().save(contact);
 		
 		TagManager tm = EXT.getTagManager();

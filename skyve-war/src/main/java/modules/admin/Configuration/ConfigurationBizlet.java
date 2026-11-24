@@ -27,6 +27,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.Startup.StartupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Configuration.TwoFactorType;
 import modules.admin.domain.Contact;
@@ -97,14 +98,14 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		}
 		else if (Configuration.passwordResetEmailSubjectPropertyName.equals(attributeName)) {
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(User.MODULE_NAME);
-			Document d = m.getDocument(c, User.DOCUMENT_NAME);
+			Module m = AdminDocument.USER.toModule(c);
+			Document d = AdminDocument.USER.toDocument(c);
 			return ExpressionEvaluator.completeExpression(value, c, m, d);
 		}
 		else if (Configuration.passwordResetEmailBodyPropertyName.equals(attributeName)) {
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(User.MODULE_NAME);
-			Document d = m.getDocument(c, User.DOCUMENT_NAME);
+			Module m = AdminDocument.USER.toModule(c);
+			Document d = AdminDocument.USER.toDocument(c);
 			List<String> result = ExpressionEvaluator.completeExpression(value, c, m, d);
 			if ((value == null) || (RESET_PASSWORD_URL_EXPRESSION.startsWith(value))) {
 				if (result.isEmpty()) {
@@ -280,7 +281,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	public void validate(ConfigurationExtension bean, ValidationException e) throws Exception {
 		String expression = bean.getPasswordResetEmailSubject();
 		if (expression != null) {
-			String error = Binder.validateMessage(expression, User.MODULE_NAME, User.DOCUMENT_NAME);
+			String error = Binder.validateMessage(expression, AdminDocument.USER);
 			if (error != null) {
 				e.getMessages().add(new Message(Configuration.passwordResetEmailSubjectPropertyName, error));
 			}
@@ -288,8 +289,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 
 		expression = bean.getPasswordResetEmailBody();
 		if (expression != null) {
-			String error = Binder.validateMessage(expression.replace(RESET_PASSWORD_URL_EXPRESSION, ""), User.MODULE_NAME,
-					User.DOCUMENT_NAME);
+			String error = Binder.validateMessage(expression.replace(RESET_PASSWORD_URL_EXPRESSION, ""), AdminDocument.USER);
 			if (error != null) {
 				e.getMessages().add(new Message(Configuration.passwordResetEmailBodyPropertyName, error));
 			}

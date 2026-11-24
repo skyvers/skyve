@@ -88,7 +88,7 @@ import jakarta.annotation.Nullable;
  * Usage:
  * Create an object for a CRUD test
  * <code>
- * Contact c = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+ * Contact c = new DataBuilder().fixture(FixtureType.crud).build(AdminDocument.CONTACT);
  * </code>
  * </pre>
  * 

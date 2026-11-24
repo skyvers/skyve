@@ -150,7 +150,7 @@ isc.BizListGrid.addMethods({
 					let contConv = config.contConv || false;
 
 					if (contConv) {
-						const changedOnServer = this._view.gather(false, true)._changed;
+						const changedOnServer = this._view.gather(false)._changed;
 						if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 							isc.say(
                                 isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
@@ -196,7 +196,7 @@ isc.BizListGrid.addMethods({
 			 */
 			click: () => {
 				if (config && config.contConv) {
-					const changedOnServer = this._view.gather(false, true)._changed;
+					const changedOnServer = this._view.gather(false)._changed;
 
 					// Check for unsaved changes
 					if (changedOnServer || this._view._vm.valuesHaveChanged()) {
@@ -283,7 +283,7 @@ isc.BizListGrid.addMethods({
 					// in the same way as when zooming in
 					if (this._view) {
 						// this is an embedded list grid
-						const instance = this._view.gather(false, true); // don't validate
+						const instance = this._view.gather(false); // don't validate
 						if (config && config.contConv) {
 							if (instance._changed || this._view._vm.valuesHaveChanged()) {
 								isc.say(
@@ -2344,7 +2344,7 @@ isc.BizListGrid.addMethods({
 
 		isc.BizUtil.getEditView(module, document, (view) => {
 			if (_view) {
-				const instance = _view.gather(false, true); // Don't validate
+				const instance = _view.gather(false); // Don't validate
 
 				// If continuing the conversation
 				if (contConv) {

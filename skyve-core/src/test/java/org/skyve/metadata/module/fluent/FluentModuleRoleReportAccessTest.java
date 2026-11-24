@@ -1,13 +1,16 @@
 package org.skyve.metadata.module.fluent;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.module.ModuleRoleReportUserAccessMetaData;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 /**
  * Tests for {@link FluentModuleRoleReportAccess}: constructors and setters.
@@ -58,5 +61,16 @@ class FluentModuleRoleReportAccessTest {
 	void getReturnsCorrectType() {
 		FluentModuleRoleReportAccess fa = new FluentModuleRoleReportAccess();
 		assertNotNull(fa.get());
+	}
+
+	@Test
+	void typedFromSetsAllFields() {
+		FluentModuleRoleReportAccess fa = new FluentModuleRoleReportAccess();
+		FluentModuleRoleReportAccess result = fa.from(TestDocument.CONTACT, "rContacts", Set.of("desktop"));
+		assertAll(() -> assertSame(fa, result),
+					() -> assertEquals("admin", fa.get().getModuleName()),
+					() -> assertEquals("Contact", fa.get().getDocumentName()),
+					() -> assertEquals("rContacts", fa.get().getReportName()),
+					() -> assertEquals(1, fa.get().getUxuis().size()));
 	}
 }

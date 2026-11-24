@@ -8,7 +8,7 @@ import org.skyve.web.WebContext;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 
 /**
  * Resends the registration email with the activation code to the user. Used when a user
@@ -31,8 +31,7 @@ public class ResendActivation implements ServerSideAction<SelfRegistrationExtens
 			ContactExtension contact = bean.getUser().getContact();
 			if (contact == null || contact.getName() == null) {
 				// this came from a public page, retrieve the user
-				UserExtension user = CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME,
-						bean.getUser().getBizId());
+				UserExtension user = CORE.getPersistence().retrieve(AdminDocument.USER, bean.getUser().getBizId());
 
 				if (user != null) {
 					bean.setUser(user);

@@ -90,6 +90,8 @@ import org.skyve.impl.metadata.view.reference.ExternalReference;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.metadata.view.View.ViewType;
 
+import modules.admin.domain.AdminDocument;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 class SmartClientViewRendererTest extends AbstractSkyveTest {
@@ -3830,29 +3832,29 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 
 	@Test
 	void renderRealMetadataEditViews() {
-		assertRealMetadataViewRenders("admin", "JobSchedule", "desktop");
-		assertRealMetadataViewRenders("admin", "ReportTemplate", "desktop");
-		assertRealMetadataViewRenders("admin", "Startup", "desktop");
-		assertRealMetadataViewRenders("admin", "UserAccount", "desktop");
-		assertRealMetadataViewRenders("admin", "MonitoringDashboard", "desktop");
-		assertRealMetadataViewRenders("admin", "ControlPanel", "desktop");
-		assertRealMetadataViewRenders("admin", "Tag", "desktop");
-		assertRealMetadataViewRenders("admin", "Communication", "desktop");
-		assertRealMetadataViewRenders("admin", "ImportExport", "desktop");
-		assertRealMetadataViewRenders("admin", "DataMaintenance", "desktop");
-		assertRealMetadataViewRenders("admin", "User", "desktop");
-		assertRealMetadataViewRenders("admin", "UserList", "desktop");
-		assertRealMetadataViewRenders("kitchensink", "KitchenSink", "desktop");
+		assertRealMetadataViewRenders(AdminDocument.JOB_SCHEDULE, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.REPORT_TEMPLATE, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.STARTUP, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.USER_ACCOUNT, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.MONITORING_DASHBOARD, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.CONTROL_PANEL, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.TAG, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.COMMUNICATION, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.IMPORT_EXPORT, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.DATA_MAINTENANCE, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.USER, "desktop");
+		assertRealMetadataViewRenders(AdminDocument.USER_LIST, "desktop");
+		assertRealMetadataViewRenders(KitchensinkDocument.KITCHEN_SINK, "desktop");
 	}
 
-	private void assertRealMetadataViewRenders(String moduleName, String documentName, String uxui) {
-		org.skyve.metadata.module.Module module = c.getModule(moduleName);
-		org.skyve.metadata.model.document.Document document = module.getDocument(c, documentName);
+	private void assertRealMetadataViewRenders(org.skyve.metadata.model.document.ModuleDocument rendered, String uxui) {
+		org.skyve.metadata.module.Module module = rendered.toModule(c);
+		org.skyve.metadata.model.document.Document document = rendered.toDocument(c);
 		org.skyve.metadata.view.View view = document.getView(uxui, c, ViewType.edit.toString());
 
 		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, module, document, view, uxui, false);
 		renderer.visit();
 
-		assertFalse(renderer.getCode().isEmpty(), moduleName + "." + documentName);
+		assertFalse(renderer.getCode().isEmpty(), rendered.moduleName() + "." + rendered.documentName());
 	}
 }

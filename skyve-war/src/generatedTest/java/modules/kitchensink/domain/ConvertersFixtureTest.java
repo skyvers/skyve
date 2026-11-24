@@ -14,6 +14,6 @@ public class ConvertersFixtureTest extends AbstractDomainTest<ConvertersFixture>
 	protected ConvertersFixture getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(ConvertersFixture.MODULE_NAME, ConvertersFixture.DOCUMENT_NAME);
+			.build(KitchensinkDocument.CONVERTERS_FIXTURE);
 	}
 }

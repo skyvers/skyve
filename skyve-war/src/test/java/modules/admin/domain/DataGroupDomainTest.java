@@ -16,7 +16,7 @@ class DataGroupDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		DataGroup bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
+				.build(AdminDocument.DATA_GROUP);
 		assertNotNull(bean);
 	}
 

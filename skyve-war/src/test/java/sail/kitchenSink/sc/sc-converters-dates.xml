@@ -8,7 +8,7 @@
 	seconds, negatives, separators, $, percentages (over 1000% too), rounding, durations rounded to the minute, and
 	the absolute converter of a stored negative. Equals compares the stored value exactly, so a value shown rounded is
 	not filtered by what it shows.
-	Run by SmartClientConvertersSailIT.
+	A member of converters.suite.xml (ConvertersSuiteSailIT).
 -->
 <automation uxui="desktop"
 			userAgentType="desktop"
@@ -16,11 +16,13 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and checks that dates written day first, month first, with month names and year first are shown, typed, saved and filtered in the format each field uses. It types records into the fields and an inline grid row, checks the values as saved and after reopening, then filters the list by each column as its cells show the values.</description>
 	<before>
 		<login user="admin" password="admin" remember="true" />
 		<switchMode />
 	</before>
 	<interaction name="Dates: record a, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose date fields hold 5 June 2026, which reads differently with the day and month swapped, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersDates" />
 			<listGridNew module="kitchensink" query="qConvertersDates" />
@@ -70,6 +72,7 @@
 		</method>
 	</interaction>
 	<interaction name="Dates: record b, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose date fields hold 6 May 2026, the same digits swapped, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersDates" />
 			<listGridNew module="kitchensink" query="qConvertersDates" />
@@ -119,6 +122,7 @@
 		</method>
 	</interaction>
 	<interaction name="Dates: record c, in each field and an inline grid row, checked when saved and reopened">
+		<description>Makes a Converters Fixture record whose date fields hold 25 December 2026, which cannot be read with the month first, and adds an inline grid row with the next record's values. Saves it, and checks every value reads back as saved and again after reopening the record from the list.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersDates" />
 			<listGridNew module="kitchensink" query="qConvertersDates" />
@@ -168,6 +172,7 @@
 		</method>
 	</interaction>
 	<interaction name="Dates: filter the list grid by each column, as its cells show the values">
+		<description>Filters the list grid of Converters Fixtures by each date column, typed as the cells show the values, with equals, less than and greater than, and checks which of the run's records each filter leaves.</description>
 		<method>
 			<navigateList module="kitchensink" query="qConvertersDates" />
 			<listGridClearFilter module="kitchensink" query="qConvertersDates" />

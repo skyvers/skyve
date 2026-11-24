@@ -42,6 +42,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -775,7 +776,34 @@ public class UtilImpl {
                              .findFirst();
         }
 
+        /**
+         * Finds the archive configuration of the referenced document; a typed shortcut for
+         * {@link #findArchiveDocConfig(String, String)}. It matches the module and document names exactly as the
+         * archive configuration writes them, which is normally the owning module. So a document that a module only
+         * references (<code>&lt;document ref="..." moduleRef="..."/&gt;</code>) is found through the referencing
+         * module's enum only if the configuration names that module.
+         *
+         * @param document The compile-time document reference
+         * @return The archive configuration, or an empty optional when the document isn't archived
+         */
+        public @Nonnull Optional<ArchiveDocConfig> findArchiveDocConfig(@Nonnull ModuleDocument document) {
+            return findArchiveDocConfig(document.moduleName(), document.documentName());
+        }
+
         public static record ArchiveDocConfig(@Nonnull String module, @Nonnull String document, @Nonnull String directory, int retainDeletedDocumentsDays) {
+
+            /**
+             * Creates the archive configuration of the referenced document; a typed shortcut for
+             * {@link #ArchiveDocConfig(String, String, String, int)}. The module and document names are recorded as
+             * given, so pass the owning module's constant, such as <code>AdminDocument.MAIL_LOG</code>.
+             *
+             * @param document The compile-time document reference
+             * @param directory The directory, within the content archive directory, of the document's archive files
+             * @param retainDeletedDocumentsDays How many days an archived bean stays in the database before it is deleted
+             */
+            public ArchiveDocConfig(@Nonnull ModuleDocument document, @Nonnull String directory, int retainDeletedDocumentsDays) {
+                this(document.moduleName(), document.documentName(), directory, retainDeletedDocumentsDays);
+            }
 
             /**
              * The directory we will store exported documents in <em>.archive</em> files

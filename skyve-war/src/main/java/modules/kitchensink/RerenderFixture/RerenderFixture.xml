@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="RerenderFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture for a field whose change and blur handlers both rerender the view, as
+			the Biz Hub Apps weekly timesheet's week ending date does: a date shown by a text field.
+
+			Leaving Week Ending Date after a change runs both handlers. The server counts the rerenders it is sent for
+			Week Ending Date, per fixture, outside the conversation (RerenderFixtureBizlet), so that two requests sent
+			at once are counted as two even though the conversation keeps only the last one's changes. Show Rerender
+			Count copies the count into Rerender Count.
+		]]>
+	</documentation>
+	<singularAlias>Rerender Fixture</singularAlias>
+	<pluralAlias>Rerender Fixtures</pluralAlias>
+	<bizKey expression="Rerender Fixture" />
+	<attributes>
+		<date name="weekEndingDate">
+			<displayName>Week Ending Date</displayName>
+			<description>Leaving it after a change runs its change handler and its blur handler, each of which rerenders the view.</description>
+		</date>
+		<integer name="rerenderCount">
+			<displayName>Rerender Count</displayName>
+			<description>The number of rerenders the server was sent for Week Ending Date, as Show Rerender Count last read it.</description>
+		</integer>
+	</attributes>
+</document>

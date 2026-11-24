@@ -9,7 +9,7 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserProxy;
 
 /**
@@ -47,6 +47,6 @@ public class UserProxyExtension extends UserProxy {
 	 * @return User
 	 */
 	public UserExtension toUser() {
-		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, getBizId());
+		return CORE.getPersistence().retrieve(AdminDocument.USER, getBizId());
 	}
 }

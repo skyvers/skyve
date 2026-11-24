@@ -10,6 +10,8 @@ import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DocumentQuery;
 
+import modules.admin.domain.AdminDocument;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.JobSchedule;
@@ -19,8 +21,6 @@ import modules.admin.domain.JobSchedule;
  */
 public class ConfigurationExtension extends Configuration {
 	private static final long serialVersionUID = -5669557826609528645L;
-	private static final String BACKUP_JOB_NAME = ".jBackup";
-	private static final String AVAILABLE_DISK_SPACE_ALARM_JOB_NAME = ".jAvailableDiskSpaceAlarm";
 
 	/**
 	 * The minimum length required for new usernames in the system.
@@ -164,9 +164,9 @@ public class ConfigurationExtension extends Configuration {
 	 * @return the operation result
 	 */
 	public static boolean validBackupSchedule() {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.JOB_SCHEDULE);
 		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
-		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, JobSchedule.MODULE_NAME + BACKUP_JOB_NAME);
+		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, AdminJob.J_BACKUP.scheduledJobName());
 		
 		return  (q.beanResult() != null);
 	}
@@ -177,9 +177,9 @@ public class ConfigurationExtension extends Configuration {
 	 * @return the operation result
 	 */
 	public static boolean validAvailableDiskSpaceAlarmSchedule() {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.JOB_SCHEDULE);
 		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
-		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, JobSchedule.MODULE_NAME + AVAILABLE_DISK_SPACE_ALARM_JOB_NAME);
+		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, AdminJob.J_AVAILABLE_DISK_SPACE_ALARM.scheduledJobName());
 		
 		return  (q.beanResult() != null);
 	}

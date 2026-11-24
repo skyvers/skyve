@@ -18,7 +18,7 @@ class CorruptArchiveErrorDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		CorruptArchiveError bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(CorruptArchiveError.MODULE_NAME, CorruptArchiveError.DOCUMENT_NAME);
+				.build(AdminDocument.CORRUPT_ARCHIVE_ERROR);
 		assertNotNull(bean);
 	}
 

@@ -88,7 +88,7 @@ public class UniqueConstraintOptimisation extends AbstractPersistentBean {
 
 	public static UniqueConstraintOptimisation newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.UNIQUE_CONSTRAINT_OPTIMISATION.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

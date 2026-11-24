@@ -130,6 +130,8 @@ class PrimeFacesFocusSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	private static String automation(String steps) {
 		return "<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-				"<interaction name=\"Focus\"><method>" + steps + "</method></interaction></automation>";
+				"<description>Runs part of the PrimeFaces focus test in the tablet UX/UI as admin: signing in and opening a new kitchensink ActionsFixture, zooming into one of its rows, or signing out. " +
+				"The test checks in the browser that a newly loaded page focuses its first input, and that a rerender after a change leaves the page's scroll position and the focus where the user had them.</description>" +
+				"<interaction name=\"Focus\"><description>Does one stage of the focus test: opens a new view, zooms into a row that the script adds, or signs out.</description><method>" + steps + "</method></interaction></automation>";
 	}
 }

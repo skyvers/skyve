@@ -14,6 +14,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import modules.admin.domain.Contact;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
+import modules.whosin.domain.WhosinDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -80,7 +81,7 @@ public class LoadDemonstrationDataJob extends Job {
 			if (cancelled) {
 				return;
 			}
-			Staff bean = new DataBuilder().fixture(FixtureType.seed).build(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+			Staff bean = new DataBuilder().fixture(FixtureType.seed).build(WhosinDocument.STAFF);
 			bean = CORE.getPersistence().save(bean);
 			CORE.getPersistence().evictCached(bean);
 		}
@@ -250,7 +251,7 @@ public class LoadDemonstrationDataJob extends Job {
 	private void clearPreviousData(@Nonnull Persistence persistence) throws Exception {
 
 		// try to delete all staff (some may fail if users have been created)
-		DocumentQuery qStaff = persistence.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		DocumentQuery qStaff = persistence.newDocumentQuery(WhosinDocument.STAFF);
 		qStaff.getFilter().addEquals(Staff.demoDataPropertyName, Boolean.TRUE);
 
 		List<Staff> allStaff = qStaff.beanResults();
@@ -275,7 +276,7 @@ public class LoadDemonstrationDataJob extends Job {
 		}
 
 		// try to delete all offices (some may fail if users have been created)
-		DocumentQuery qOffice = persistence.newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
+		DocumentQuery qOffice = persistence.newDocumentQuery(WhosinDocument.OFFICE);
 		qOffice.getFilter().addEquals(Office.demoDataPropertyName, Boolean.TRUE);
 
 		List<Office> allOffices = qOffice.beanResults();

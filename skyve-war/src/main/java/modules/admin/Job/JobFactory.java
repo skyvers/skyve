@@ -6,6 +6,7 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Job.actions.CancelJob;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Job;
 
 /**
@@ -20,6 +21,6 @@ public class JobFactory {
 	 */
 	@SkyveFixture(types = FixtureType.crud)
 	public static JobExtension crudInstance() {
-		return new DataBuilder().factoryBuild(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+		return new DataBuilder().factoryBuild(AdminDocument.JOB);
 	}
 }

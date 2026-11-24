@@ -28,6 +28,7 @@ import org.skyve.impl.web.WebContainer;
 import org.skyve.impl.web.service.smartclient.SmartClientEditServlet;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -40,12 +41,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import modules.admin.domain.MonitoringDashboard;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserProxy;
 import modules.kitchensink.domain.ActionsFixture;
 import modules.kitchensink.domain.ActionsFixtureRow;
 import modules.kitchensink.domain.DialogsFixture;
 import modules.kitchensink.domain.DialogsFixtureRow;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.test.AbstractSkyveTest;
 
 /**
@@ -172,15 +174,15 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 
 		assertRefused(client.update("Save"));
 		assertRefused(client.update("OK"));
-		assertEquals(0, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(0, count(KitchensinkDocument.ACTIONS_FIXTURE));
 
 		client.rerenderWith(ActionsFixture.disableSavePropertyName, Boolean.FALSE);
 		JsonNode okayed = client.update("OK");
 		assertEquals(0, status(okayed), okayed::toString);
-		assertEquals(1, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
 		JsonNode saved = client.update("Save");
 		assertEquals(0, status(saved), saved::toString);
-		assertEquals(1, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
 	}
 
 	@Test
@@ -191,13 +193,13 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		SmartClient client = SmartClient.fixture(u);
 		client.fetch(undeletable.getBizId());
 		assertRefused(client.remove(ActionsFixture.DOCUMENT_NAME));
-		assertEquals(2, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(2, count(KitchensinkDocument.ACTIONS_FIXTURE));
 
 		client = SmartClient.fixture(u);
 		client.fetch(deletable.getBizId());
 		JsonNode deleted = client.remove(ActionsFixture.DOCUMENT_NAME);
 		assertEquals(0, status(deleted), deleted::toString);
-		assertEquals(1, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
 	}
 
 	@Test
@@ -209,7 +211,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		JsonNode response = client.request("remove", null, null, null, null, ActionsFixture.DOCUMENT_NAME, fixture.getBizId());
 
 		assertEquals(0, status(response), response::toString);
-		assertEquals(1, count(ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME));
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
 	}
 
 	@Test
@@ -413,20 +415,20 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	@Test
 	void monitoringDashboardSaveStillRunsTheBuiltInSaveThroughItsCustomAction() throws Exception {
 		// Its custom actions Save and Refresh have the class Save, which the client sends as the built-in Save
-		SmartClient client = new SmartClient(u, MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME);
+		SmartClient client = new SmartClient(u, AdminDocument.MONITORING_DASHBOARD);
 		client.fetchNew();
 
 		JsonNode saved = client.update("Save");
 
 		assertEquals(0, status(saved), saved::toString);
-		assertEquals(1, count(MonitoringDashboard.MODULE_NAME, MonitoringDashboard.DOCUMENT_NAME));
+		assertEquals(1, count(AdminDocument.MONITORING_DASHBOARD));
 	}
 
 	@Test
 	void aCustomActionMerelyNamedSaveDoesNotTakeOverTheBuiltInSave() throws Exception {
 		// No view declares such an action, so add one to DialogsFixture's views for this test only: it is named Save but
 		// has another class and no trigger, while <defaults/> offers the built-in Save
-		SmartClient client = new SmartClient(u, DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME);
+		SmartClient client = new SmartClient(u, KitchensinkDocument.DIALOGS_FIXTURE);
 		String uxui = UserAgent.getSelection(client.newRequest()).getUxUi().getName();
 		Document document = c.getModule(DialogsFixture.MODULE_NAME).getDocument(c, DialogsFixture.DOCUMENT_NAME);
 		ActionImpl namedSave = new ActionImpl();
@@ -444,7 +446,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 			JsonNode saved = client.update(ImplicitActionName.Save.name());
 
 			assertEquals(0, status(saved), saved::toString);
-			assertEquals(1, count(DialogsFixture.MODULE_NAME, DialogsFixture.DOCUMENT_NAME));
+			assertEquals(1, count(KitchensinkDocument.DIALOGS_FIXTURE));
 		}
 		finally {
 			for (ViewImpl view : views) {
@@ -456,7 +458,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	@Test
 	void adminUserNewIsACustomActionCheckedInTheCreateView() throws Exception {
 		// Only OK, Save, ZoomOut and Print are built-ins to the servlet, so New is the create view's custom action
-		SmartClient client = new SmartClient(u, modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		SmartClient client = new SmartClient(u, AdminDocument.USER);
 		client.fetchNew();
 		client.set(modules.admin.domain.User.searchContactNamePropertyName, "Actions Fixture Contact");
 		client.set(modules.admin.domain.User.searchEmailPropertyName, "actions.fixture@skyve.org");
@@ -468,7 +470,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 
 	@Test
 	void aDeleteOfANewUserIsRefusedAsItsCreateViewOffersNoDelete() throws Exception {
-		SmartClient client = new SmartClient(u, modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		SmartClient client = new SmartClient(u, AdminDocument.USER);
 		client.fetchNew();
 
 		assertRefused(client.remove(modules.admin.domain.User.DOCUMENT_NAME));
@@ -477,7 +479,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	@Test
 	void aDeleteIsCheckedInTheBeansOwnViewNotTheRequestedSupertypes() throws Exception {
 		// admin.User extends UserProxy, whose default view offers Delete; the new user's create view does not
-		SmartClient client = new SmartClient(u, modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		SmartClient client = new SmartClient(u, AdminDocument.USER);
 		client.fetchNew();
 
 		assertRefused(client.remove(UserProxy.DOCUMENT_NAME));
@@ -532,13 +534,13 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	/**
 	 * Counts a document's beans in the database with a new persistence, as each request closes the thread's persistence.
 	 */
-	private int count(String moduleName, String documentName) {
+	private int count(ModuleDocument document) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(u);
 		persistence.evictAllCached();
 		persistence.begin();
 		try {
-			Number result = persistence.newDocumentQuery(moduleName, documentName)
+			Number result = persistence.newDocumentQuery(document)
 											.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "count")
 											.scalarResult(Number.class);
 			assertNotNull(result);
@@ -682,15 +684,15 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		private String webId;
 		private Integer csrf;
 
-		private SmartClient(User user, String module, String document) {
-			this.module = module;
-			this.document = document;
+		private SmartClient(User user, ModuleDocument edited) {
+			this.module = edited.moduleName();
+			this.document = edited.documentName();
 			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 			StateUtil.addSession(user.getId(), session);
 		}
 
 		private static SmartClient fixture(User user) {
-			return new SmartClient(user, ActionsFixture.MODULE_NAME, ActionsFixture.DOCUMENT_NAME);
+			return new SmartClient(user, KitchensinkDocument.ACTIONS_FIXTURE);
 		}
 
 		private void fetchNew() throws Exception {

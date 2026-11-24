@@ -1,7 +1,7 @@
 package modules.admin.User.actions;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -21,6 +21,6 @@ public class SignOutEverywhereTest extends AbstractActionTest<UserExtension, Sig
 	protected UserExtension getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+			.build(AdminDocument.USER);
 	}
 }

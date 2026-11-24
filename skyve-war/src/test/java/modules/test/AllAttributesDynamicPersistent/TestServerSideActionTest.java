@@ -10,13 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.metadata.user.User;
 
+import modules.test.domain.TestDocument;
+
 @SuppressWarnings("static-method")
 class TestServerSideActionTest {
 
 	@Test
 	void executeReturnsBeanResult() throws Exception {
 		TestServerSideAction action = new TestServerSideAction();
-		DynamicPersistentBean bean = new DynamicPersistentBean("test", "AllAttributesDynamicPersistent", new HashMap<>());
+		DynamicPersistentBean bean = new DynamicPersistentBean(TestDocument.ALL_ATTRIBUTES_DYNAMIC_PERSISTENT, new HashMap<>());
 		var result = action.execute(bean, null);
 		assertNotNull(result);
 		assertNotNull(result.getBean());
@@ -25,7 +27,7 @@ class TestServerSideActionTest {
 	@Test
 	void testDynamicImageGetImageReturnsBufferedImage() throws Exception {
 		TestDynamicImage image = new TestDynamicImage();
-		var bufferedImage = image.getImage(new DynamicPersistentBean("test", "AllAttributesDynamicPersistent", new HashMap<>()), 100, 100, mock(User.class));
+		var bufferedImage = image.getImage(new DynamicPersistentBean(TestDocument.ALL_ATTRIBUTES_DYNAMIC_PERSISTENT, new HashMap<>()), 100, 100, mock(User.class));
 		assertNotNull(bufferedImage);
 	}
 

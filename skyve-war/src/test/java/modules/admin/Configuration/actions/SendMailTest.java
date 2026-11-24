@@ -8,15 +8,12 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.OutputStream;
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.skyve.web.WebContext;
 
@@ -64,32 +61,11 @@ class SendMailTest {
 
 		new SendMail().execute(bean, webContext);
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("from@skyve.org"));
-		assertThat(capture.lastSend.getSubject(), is("Subject"));
-		assertThat(capture.lastSend.getBody(), is("<html><head/><body>Body</body></html>"));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("to@skyve.org"));
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("from@skyve.org"));
+		assertThat(capture.getLastSent().getSubject(), is("Subject"));
+		assertThat(capture.getLastSent().getBody(), is("<html><head/><body>Body</body></html>"));
 		verifyNoInteractions(webContext);
-	}
-
-	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// no-op
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// no-op
-		}
 	}
 }

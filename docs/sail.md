@@ -318,10 +318,11 @@ screenshots of every step, a video of each script and the failures, under the
 
 ```text
 skyve-war/target/sail/
+  index.html                        every run, newest first: open this in a browser
   failures/                         a screenshot (.png) and page (.html) for each failure
     recordings-contacts.xml-mwk2437ma-01-Contacts_create-step04.png
   media/
-    index.html                      every run, newest first: open this in a browser
+    runs-order.js                   the runs in the list's order, for each run's previous and next run buttons
     20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
       player.html                   the video, captioned with the step that was running
@@ -329,11 +330,24 @@ skyve-war/target/sail/
 ```
 
 - The list of runs shows each session (one `mvn` run) newest first, and its
-  runs in the order they ran: under each suite file's name, with a
-  workflow's legs grouped together. Each run is named by its first
+  runs in the order they ran: a suite's runs under a heading for the suite,
+  and under it each member file's name, with a workflow's legs grouped
+  together. Each run is named by its first
   interaction, with its outcome, steps and time. "Failed only" and a filter
   box narrow it.
 - The film strip highlights failed steps, and a link jumps to the first one.
+- The film strip and the video player have ‹ Run and Run › buttons that open
+  the previous and next run in the list's order, on from one session to the
+  next as the list reads (its video from the video player, its film strip from
+  the film strip, or its other page when it has only one), and show the run's
+  place in its session as the list's # column numbers it, such as "Run 3 of
+  12". They come from `runs-order.js`, which is rewritten with the list; a run
+  page from before it shows no buttons.
+- A script's [descriptions](#descriptions) tell the story of the run: the
+  list of runs shows the suite's under the suite, the workflow's under the
+  workflow and the automation's under each run; the film strip shows the
+  suite's, the workflow's and the automation's above the steps, and each
+  interaction's under its name.
 - The video player has play, pause, previous and next step, a speed control
   and a list of the steps, in words, to jump to.
 - The other values are `failures` (failures only), `snapshots` (failures and
@@ -593,7 +607,7 @@ script from the test classpath and runs it with an interpreted executor:
 | `util.sail.SailSettings` | Resolves every SAIL setting from `-D`, the environment, the test's code, the properties file, the browser configuration and the scripts; see [Settings](#settings). |
 | `util.sail.SailServerLock` | A cross-JVM file lock per base URL, so that only one SAIL IT at a time uses a server; see [One test per server](#one-test-per-server). |
 | `util.sail.SailMedia` | Step snapshots, the film strip, and the video and its player; see [Snapshots and video](#snapshots-and-video). |
-| `util.sail.SailRunPages`, `util.sail.SailRunsList`, `util.sail.SailStepWords`, `util.sail.SailMediaHtml` | The media pages: a run's film strip and player, each directory's list of runs, each step in words, and the pages' shared parts. Their CSS and JavaScript are files in `skyve-war/src/test/resources/util/sail/media/`, inlined into each page. |
+| `util.sail.SailRunPages`, `util.sail.SailRunsList`, `util.sail.SailStepWords`, `util.sail.SailMediaHtml` | The media pages: a run's film strip and player, each directory's list of runs, each step in words, and the pages' shared parts. Their CSS and JavaScript are files in `skyve-war/src/test/resources/util/sail/media/`, inlined into each page; the data a page needs is a script beside it that it loads (`video.js` for the player, the directory's `runs-order.js` for the previous and next run buttons). |
 | `util.sail.SailLoad` | Runs SAIL as many virtual users at once, with a summary, a report and thresholds; see [Load Testing](#load-testing). |
 | `sail.SailRunIT` | The generic runner: runs the suites and scripts that `sail.run` names, with no Java; see [For BAs and testers](#for-bas-and-testers). |
 | `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, the [script and call steps](#scripts-and-calls) and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
@@ -755,8 +769,9 @@ see [Examples](#examples).
 | `userAgentType` | yes | `desktop`, `tablet`, `phone` or `other`. It selects the device variant of the views built in the test JVM. |
 | `testStrategy` | no | `Assert`, `Verify` or `None`; see [Test Strategies](#test-strategies-and-failure-reports). If it is absent, the automation takes its [workflow's](#workflows) default, else its [suite's](#suites), else Assert. A run's `sail.testStrategy` overrides all of these, except in a locked suite member. |
 
-The children are an optional `<before>`, one or more `<interaction>` elements
-and an optional `<after>`.
+The children are an optional `<description>`
+([Descriptions](#descriptions)), an optional `<before>`, one or more
+`<interaction>` elements and an optional `<after>`.
 
 ### Workflows
 
@@ -782,7 +797,9 @@ A workflow is either several script files or one file whose root is
 ```
 
 The `<workflow>`'s optional `testStrategy` is the default for its automations
-that state none; an automation's own `testStrategy` wins.
+that state none; an automation's own `testStrategy` wins. Its optional
+`<description>`, before the automations, says what the workflow tests
+([Descriptions](#descriptions)).
 
 An IT runs a workflow with `util.AbstractInterpretedSailWorkflow`:
 
@@ -855,6 +872,7 @@ such requirement.
 |---|---|
 | `suite@testStrategy` | The default strategy for the automations of unlocked members, when neither the automation nor its workflow states one |
 | `suite@evidence` | `none`, `failures`, `snapshots`, `video` or `all`: the evidence the suite asks its run to keep. A run's `sail.evidence` replaces it; see [Settings](#settings). |
+| `description` | What the suite tests, in words, before the `<viewRoles>`. At most one. See [Descriptions](#descriptions). |
 | `viewRoles@user`, `role` | The roles the views are built with for a user that the members sign in as, as `viewRoles(...)` registers them ([The test user](#the-test-user)). One `<viewRoles>` per user, with at least one `<role>`. The user can hold `{run}` and `{var:name}`. |
 | `setUp@file`, `@requires` | A set-up member. Zero or more. |
 | `member@file`, `@requires`, `@lockTestStrategy` | An ordinary member. At least one. |
@@ -997,8 +1015,9 @@ file instead.
 
 An `<interaction name="...">` is the unit of a script and appears in failure
 messages. Its steps go in `<method>`. It can also have its own `<before>` and
-`<after>`. Each of `<before>`, `<method>` and `<after>` takes any sequence of
-the steps in the [op-code reference](#op-code-reference).
+`<after>`, and, first, a `<description>` ([Descriptions](#descriptions)).
+Each of `<before>`, `<method>` and `<after>` takes any sequence of the steps
+in the [op-code reference](#op-code-reference).
 
 - The automation's `<before>` runs once, then each interaction, then the
   automation's `<after>`. A step that throws in the automation's `<before>` or
@@ -1008,6 +1027,65 @@ the steps in the [op-code reference](#op-code-reference).
 - After an interaction that did not complete, the context stack is cleared, so
   the next interaction starts clean. Begin each interaction with a navigation
   step.
+
+### Descriptions
+
+A `<description>` says, in words, what a suite, a workflow, an automation or
+an interaction is for, so that someone reading the results, who may never
+see the XML, can follow the story of the testing: who does what, in which UI,
+and what is checked. It is optional, at most one, and the first child of its
+element:
+
+```xml
+<workflow xmlns="http://www.skyve.org/xml/sail">
+	<description>
+		Ben claims a taxi fare with a receipt, and Rob approves it.
+
+		The claim then shows on the next pay run.
+	</description>
+	<automation uxui="external" userAgentType="desktop">
+		<description>Ben lodges the claim in the external UX/UI.</description>
+		<interaction name="Ben lodges the claim">
+			<description>Signs in as staff, adds the line, uploads the receipt and submits.</description>
+			<method>...</method>
+		</interaction>
+	</automation>
+</workflow>
+```
+
+- It is plain text. A blank line starts a new paragraph. Other line breaks and
+  indents are spaces, so write it indented like the rest of the file.
+- It is shown as written: `{run}` and `{var:name}` are not substituted, so it
+  reads the same in every run. Use a [`comment`](#other-steps) step for a line
+  that shows the run's values.
+- A workflow of several files has no `<workflow>` element to describe it:
+  each file's `<automation>` describes its leg. When several `<workflow>`
+  files run as one workflow, their descriptions are shown together, each
+  once, in order.
+- It is not a step: it has no number, no outcome and no screenshot, and it
+  does nothing in the browser.
+- An XML comment is still the place for notes to the script's maintainers
+  (why the order matters, which settings to use). The description is for the
+  reader of the results.
+
+Where it shows:
+
+| Description of | List of runs (`index.html`) | Film strip and video player | Build log |
+|---|---|---|---|
+| The suite | Under a heading for the suite, over its members' runs | Above the steps, headed "Suite" and the suite's file | When the suite starts, and again just before its summary, as `SAIL suite <file> description: <paragraph>` |
+| The workflow | Under the workflow's heading; on its run for a workflow of one | Above the steps, headed "Workflow" | When the workflow starts, as `SAIL workflow description: <paragraph>` |
+| The automation | Under the run's title | Above the steps, headed "This run" | After the settings, as `  Automation: <paragraph>` |
+| The interaction | | Under the interaction's name, in the film strip and in the player's list of steps | Under `Interaction: <name>`, as `  About: <paragraph>` |
+
+In the video player, the suite's, workflow's and automation's descriptions are
+folded under "What this run tests", so that the video keeps the window's
+height. The list of runs' filter also matches the suite's and the workflow's
+descriptions.
+
+`Descriptions.normalise` (skyve-core,
+`org.skyve.metadata.sail.language`) tidies the text as it is read, and
+`getDescription()` on `Suite`, `Workflow`, `Automation` and `Interaction`
+returns it (or `null`).
 
 ### Contexts
 
@@ -1949,9 +2027,8 @@ ITs where you meant to run unit tests.
 |---|---|---|---|
 | `KitchenSinkSuiteSailIT` | `sail/kitchenSink/kitchensink.suite.xml`: the PF and SC conformance scripts, the PF row link script, the SC find script and a one-file workflow; see [Kitchen sink: conformance](#kitchen-sink-conformance). It supplies `{var:password}` in code. | both | `sail` `smoke` |
 | `PrimeFacesKitchenSinkSailIT` | the kitchen sink checks that need Java: a switch to SmartClient with PrimeFaces' user menu and `<switchMode/>` back (`switchModeFromSmartClient`), the find and option steps' failures (`unmatchedOptionsColumnsAndRowsFail`), and the window steps' and `listGridTool`'s failures (`windowAndToolFailures`) | PF, tablet | `sail` `smoke` |
-| `PrimeFacesConvertersSailIT` | `sail/kitchenSink/pf/pf-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then Vue list grid and data table filters | PF, tablet | `sail` |
+| `ConvertersSuiteSailIT` | `sail/kitchenSink/converters.suite.xml`: a member per group of converters and renderer (`pf/pf-converters-*.xml`, `sc/sc-converters-*.xml`): entry in fields and inline grid cells, then Vue list grid and data table filters (PF) or list grid filters (SC); see [Kitchen sink: converters](#kitchen-sink-converters) | both, PF tablet | `sail` |
 | `SmartClientKitchenSinkSailIT` | inline scripts that check the find steps' failures (`findFailures`) and the window steps' failures (`windowFailures`) | SC | `sail` `smoke` |
-| `SmartClientConvertersSailIT` | `sail/kitchenSink/sc/sc-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then list grid filters | SC | `sail` |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/workflow-1..3`: a workflow of three files (PF tablet, SC, PF tablet); the one-file workflow is a member of the kitchen sink suite | both | `sail` `smoke` |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests, one per strategy; refuses a `sail.testStrategy` override | PF, tablet | `sail` `smoke` |
 | `PrimeFacesFocusSailIT` | where a page puts the focus: a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet | `sail` |
@@ -1960,9 +2037,9 @@ ITs where you meant to run unit tests.
 | `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close icons hidden so that the upload step cannot close the page itself; a growl pushed just before the messages and one pushed after them all stay showing. One inline script per UX/UI | PF, tablet, phone and external | `sail` |
 | `AdminSuiteSailIT` | `sail/admin/admin.suite.xml`: the admin module in both renderers, PF tablet and phone and SC, in a backup and restore bracket; see [Admin: application suite](#admin-application-suite) | both | `sail` `admin` `destructive` |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC | `sail` |
-| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once | SC | `sail` `admin` |
 | `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept | SC | `sail` |
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC | `sail` |
+| `SmartClientRerenderOnceSailIT` | the Rerender Fixture's Week Ending Date, which mirrors the Biz Hub Apps weekly timesheet's week ending date (a date in a text field whose change and blur handlers both rerender): a date entered and left with Tab sends its two rerenders one after the other, as before 16 November 2026, never two at once on one conversation as the fast-typing change did (see SC-8 under [Runtime Bugs Found](#runtime-bugs-found)). It counts the view's requests in flight in the browser, without holding answers, and checks the most at once is 1, and that the server, counting outside the conversation, saw both rerenders | SC | `sail` |
 | `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC | `sail` |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC | `sail` `admin` `recording` |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), `sc-recorder-round-trip-converters.xml` (dates, times and numbers on other converters than the defaults, and a decimal with no converter), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC | `sail` `recording` |
@@ -1978,7 +2055,7 @@ ITs where you meant to run unit tests.
 | `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
 | `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
-| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, file and workflow headings and sessions with nothing to show. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
+| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown, as it finished (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, suite, file and workflow headings and sessions with nothing to show, and the filter matches the suite's, workflow's and runs' descriptions. A run page's previous and next run buttons: to the neighbours' pages of the same kind (else the other), across sessions, with the run's place in its session, opened by URL and from the file system; none without `runs-order.js`. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2164,6 +2241,12 @@ class ContactsSailIT extends AbstractPrimeFacesInterpretedSail {
   applies. It is for a browser that is not a SAIL run's, such as
   `org.skyve.util.deployed.DeployedBrowser`'s, so that no SAIL setting can send
   it, and its credentials, to another server.
+- An IT that serves its own pages (a `HttpServer` in the test, such as
+  `StandardCallsSailIT`) and sets the base URL in code is still outranked by a
+  run's `sail.baseUrl`, which every SAIL run gives: give its scripts' URLs
+  absolutely (`{var:origin}/page`), or use `fixed()` for a configuration of its
+  own. A relative URL, such as a `SwitchTab` call's, resolves against the run's
+  base URL, the Skyve server.
 
 ### Running safely
 
@@ -2252,7 +2335,7 @@ strip and the player into the same folder.
   under their interactions, each with its number, what it does in words, the
   step as SAIL XML, its outcome (with the failure), its duration and its
   screenshot. Failed steps are highlighted, and a link jumps to the first
-  failure.
+  failure. ‹ Run and Run › open the previous and next run's film strip.
 - **Video (`sail.videoDir`).** The executor records Chrome's DevTools
   screencast (`Page.startScreencast`: JPEG, quality 60, at most 1280×800),
   saving each frame with the time Chrome drew it, and each step's start and end.
@@ -2261,22 +2344,37 @@ strip and the player into the same folder.
   what it does in words, any failure, and the step as SAIL. It has play and
   pause, previous and next step, a speed of 0.5x to 8x and a slider. Beside
   the frames, the steps are listed in words under their interactions; clicking
-  one shows its first frame. Space plays and pauses, and the arrow keys move a
+  one, or moving a step, shows it as it finished (its last frame, as the film
+  strip's screenshot shows it), and Play goes on from there (from the start
+  when that is the video's end). Space plays and pauses, and the arrow keys move a
   step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
-  Selenium was built for. Frames are written and acknowledged on a thread of
-  their own, so the test does not wait for them. A browser without DevTools
+  Selenium was built for. It is the `SCREENCAST` [capability](#capabilities) of the
+  browser's control, which runs it on the control's own DevTools session for the
+  window; the video opens no connection or session of its own, because a second
+  DevTools session on a page makes any document loaded after the browser goes
+  offline report `navigator.onLine === true` (its requests still fail), so video
+  would change what a test sees. For the same reason, a Chrome run with video
+  makes the control, and so connects to DevTools, at its first step. The control
+  acknowledges each frame as it arrives, and the frames are written on a thread of
+  their own, so the test does not wait for them. A browser without the capability
   (not Chromium) has no video; the run carries on and the trace says so.
 - **Folders.** Each automation run gets its own folder under each directory,
   named by its start time, the test (`Class.method`) and, in a suite, the
   member's file. Suites, workflows and ITs with several tests therefore keep
   every run. Each directory's `index.html` lists the runs by session (the
-  JVM's run of tests), newest first; in a session, the runs are in the order
-  they ran, under their suite file (the script that labelled them) and, for
-  a workflow's legs, under the workflow. Each run shows its first
-  interaction, outcome, steps and time. This comes from each run's
+  JVM's run of tests), newest first. For the default directory
+  (`target/sail/media`, from [`sail.evidence`](#settings)) the list is one
+  folder up, in `target/sail`, beside `media/` and `failures/`, so that it is
+  the one page to open; it removes a list that an earlier version left in
+  `media/`. For a directory that is set, the list is in the directory. In a
+  session, the runs are in the order they ran, under their suite and its
+  member file (the script that labelled them) and, for a workflow's legs, under the workflow. Each run shows its
+  first interaction, outcome, steps and time, and its
+  [description](#descriptions). This comes from each run's
   `run.json`; runs written before that file existed come last, by their
-  folders' names. The pages are static files that open from the file
+  folders' names. Beside it, `runs-order.js` holds the runs in the same order,
+  for each run page's previous and next run buttons. The pages are static files that open from the file
   system, light or dark as the system is. When both
   properties name the same directory, a run's film strip and player are in one
   folder and link to each other.
@@ -2384,8 +2482,9 @@ Firefox) without changing a call.
 | `TABS` | `Tabs`: open, switch, close, visit a new tab and return | yes (WebDriver) | yes |
 | `KEYS` | `Keys`: trusted key presses and chords | yes (WebDriver) | yes |
 | `WINDOW` | `Window`: resize | yes (WebDriver) | yes |
+| `SCREENCAST` | `PageScreencast`: record a window as a stream of images (the SAIL video) | yes | no |
 
-Chromium supports all twelve. They are tested on Chrome; Edge and a remote (grid)
+Chromium supports all thirteen. They are tested on Chrome; Edge and a remote (grid)
 Chromium without a DevTools endpoint are not yet verified.
 
 A custom `<call>` can use them too:
@@ -2966,13 +3065,21 @@ Kitchen sink fixtures for the newer steps:
   would match if day and month were swapped, and `dateTimeAsDate` by day with
   each operator; both recorder round trips record and replay such filters
   unedited.
+- `RerenderFixture`, which has no menu item, mirrors the Biz Hub Apps weekly
+  timesheet's week ending date: Week Ending Date is a date shown by a text
+  field whose change handler and blur handler both rerender the view. Its
+  Bizlet counts the rerenders the server is sent for Week Ending Date outside
+  the conversation, so two sent at once count as two, and Show Rerender Count
+  shows the count, for `SmartClientRerenderOnceSailIT`.
 
 `KitchenSinkWorkflowSailIT` and the suite's workflow member are the
 conformance for [workflows](#workflows): in the three files, PrimeFaces makes a
 lookup value and keeps its number, then SmartClient finds it by the number and
 `{run}` and changes it, and PrimeFaces finds the change and deletes it.
 
-**Converters.** `kitchensink.ConvertersFixture` has an attribute for each of the
+### Kitchen sink: converters
+
+`kitchensink.ConvertersFixture` has an attribute for each of the
 60 converters (`ConverterName`), named after it in lower camel case
 (`DD_MMM_YYYY_HH24_MI` is `ddMmmYyyyHh24Mi`) and labelled with the converter's
 name, of the type the converter takes, and `plainDecimal2`, a decimal with no
@@ -2992,8 +3099,12 @@ is saved again with OK, which stores its magnitude in PrimeFaces (the absolute
 column's `lessThan 0` filter finds no row) and keeps the negative in SmartClient
 (it finds the record, as does `equals -7.50`).
 
-`PrimeFacesConvertersSailIT` and `SmartClientConvertersSailIT` run a script per
-group (`pf/pf-converters-<group>.xml`, `sc/sc-converters-<group>.xml`): records
+The converters suite, `sail/kitchenSink/converters.suite.xml`, which
+`ConvertersSuiteSailIT` runs (tag `sail`), has a member per group and renderer
+(`pf/pf-converters-<group>.xml`, `sc/sc-converters-<group>.xml`), each
+independent with its own run token, so it needs no bracket;
+`-Dsail.suite.only=pf/` runs one renderer's, and
+`-Dsail.suite.only=pf/pf-converters-dates` one script. In each script, records
 a, b and c (and d and e in the numbers group) are typed into every field as a
 user types them, and into an inline grid row with the next record's values (so
 that a cell's value differs from its field's); both are checked with `testValue`
@@ -3336,6 +3447,8 @@ that show it, relative to the repository root:
 | Mechanism | Shown in |
 |---|---|
 | Every element and attribute of `sail.xsd`, or the reason one is unused | `skyve-war/src/test/java/sail/SailLanguageCoverageTest.java` (its allow-list, 33 entries, each with its reason) |
+| [Descriptions](#descriptions) | Every shipped suite and SAIL file, and the scripts built in the ITs under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/kitchenSink/kitchensink.suite.xml` (a suite's, in paragraphs), `skyve-war/src/test/java/sail/kitchenSink/workflow/kitchensink-workflow.xml` (a workflow's and its automations') and `skyve-war/src/test/java/sail/kitchenSink/pf/PrimeFacesActionUploadSailIT.java` (a script built in Java) |
+| A suite of independent scripts per renderer | `skyve-war/src/test/java/sail/kitchenSink/converters.suite.xml` |
 | Op-codes: [Session](#session) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Login", "Switch mode" and "Logout"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Login" (with `switchMode`) and "Logout" |
 | Op-codes: [Navigation](#navigation) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Windows, back and refresh", "Menus", "Contexts, links, maps and scripts" (`navigateMap`); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Windows, back, refresh and list grid tools", "A tree and a calendar", "Menus" |
 | Op-codes: [Contexts](#contexts-1) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Links: a link in page markup, and tokens in href and bizId" |
@@ -3366,7 +3479,8 @@ that show it, relative to the repository root:
 | Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java`, and the two under `skyve-war/src/test/java/util/sail/`: `SelenideFocusProbeSailIT.java` and `PrimeFacesSelenideClickSailIT.java` |
 | The Maven profile | the `sail` profile in `pom.xml` |
 | Snapshots, the film strip, video, `keepMedia` and media units | `skyve-war/src/test/java/util/sail/SailMediaTest.java` |
-| The video player's controls and the list of runs' filters, in a browser | `skyve-war/src/test/java/util/sail/SailMediaPagesSailIT.java` |
+| The video player's controls, the list of runs' filters and the previous and next run buttons, in a browser | `skyve-war/src/test/java/util/sail/SailMediaPagesSailIT.java` |
+| The runs' order for the previous and next run buttons (`runs-order.js`): its order, deleted runs, separate snapshot and video directories | `skyve-war/src/test/java/util/sail/SailRunNavTest.java` |
 | The media pages' CSS and JavaScript | `skyve-war/src/test/resources/util/sail/media/` |
 | A suite's browser lifecycle: handed on, stopped after a failure, closed at the end | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
 | A click on a covered element | `skyve-war/src/test/java/util/sail/PrimeFacesSelenideClickSailIT.java` |
@@ -3467,7 +3581,7 @@ caused by it says so (see [Lost OS focus](#test-strategies-and-failure-reports))
 
 The SAIL recorder writes a script of what a user does in SmartClient or PrimeFaces. The script is a first draft: an
 editor (a person or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not
-matter. The plan it was built to is [plan_sail_recorder.md](ai/plan_sail_recorder.md).
+matter.
 
 ### The gate
 
@@ -3851,9 +3965,42 @@ Java through `SailRunIT`, alone or as a member of a suite file
 
 ## Runtime Bugs Found
 
-The suites found Skyve runtime bugs that are outside SAIL's scope. All are now
-fixed, or were found to be by design. Their reproductions, causes and fixes were
-in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git history.
+The suites found Skyve runtime bugs that are outside SAIL's scope. All but one
+are now fixed, or were found to be by design. Their reproductions, causes and
+fixes were in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git
+history.
+
+**SC-8 (open): the User wizard's password field loses fast typing.** In
+SmartClient, a burst of keys typed into the User wizard's new password, whose
+change handler rerenders, keeps only the first key. The first key's change
+handler sends the rerender, and SmartClient's prompt for the request puts up a
+click mask that takes the focus, so the keys after it are dropped. Typing at
+human speed works. It was fixed in `c42551e257` (with follow-ups in
+`4e518f6c2e` and `8bac256689`): a typed item whose change handler called the
+server changed on commit and deferred its server events as a blur handler's
+do. Mike reverted that fix for this release: the deferred change handler raced
+the field's blur rerender, so a field with a rerender in both its change and
+blur handlers sent its two rerenders at once on one conversation. That broke
+the Biz Hub Apps weekly timesheet's W6b workflow: its week ending date has a
+rerender in both handlers, the rerender rebuilds the timesheet's lines, and the
+view then showed lines the conversation did not hold. Before it, and again now,
+typing a value and leaving with Tab sends the change's rerender at once and the
+blur's after its 100 ms deferral, when the first has been answered; nothing
+makes the deferred rerender wait, so a server slower than that could still
+overlap them. The revert also takes out the follow-ups' commit of a field's
+typed text before a gather, so a save, action or zoom made while a date, time
+or number item's text is still being typed gathers the value from before the
+typing, as before 16 Nov (SmartClient commits those items' text only when they
+are left). The change and blur handling is to be redone as a whole after the
+release; `SmartClientRerenderOnceSailIT` checks that the Rerender Fixture,
+which mirrors the Apps week ending date, sends its change and blur rerenders
+one after the other, never at once.
+
+*Workaround in the suites.* The SmartClient executor types a field with a
+change handler one key at a time, waiting for what each key starts before it
+types the next, then leaves the field with Tab (see `SmartClientSelenide.text`).
+A script that types into such a field keeps every key; only a real user, or a
+test that sends a burst of keys itself, sees the bug.
 
 ## Java Tests from the Control Panel
 
@@ -4068,6 +4215,11 @@ Report any runtime bug the suites find as a Skyve issue. Finally, run
 
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
+
+- `<description>` is new and optional on `<suite>`, `<workflow>`,
+  `<automation>` and `<interaction>` ([Descriptions](#descriptions)). A
+  script that uses it needs this version's `sail.xsd`: an older Skyve rejects
+  it when the script loads.
 
 - **Breaking:** `Executor` has 20 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,

@@ -14,6 +14,6 @@ public class DocumentNumberTest extends AbstractDomainTest<DocumentNumber> {
 	protected DocumentNumber getBean() throws Exception {
 		return new DataBuilder()
 			.fixture(FixtureType.crud)
-			.build(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
+			.build(AdminDocument.DOCUMENT_NUMBER);
 	}
 }

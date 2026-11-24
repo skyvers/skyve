@@ -48,6 +48,7 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
+import modules.test.domain.TestDocument;
 
 @SuppressWarnings({"java:S5778", "java:S5961", "java:S1874", "java:S1130", "java:S2699", "java:S8692", "null"}) // system clock OK
 class PersistenceTests extends AbstractSkyveTestDispose {
@@ -1068,7 +1069,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		test = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, test.getBizId());
 		assertNotNull(test);
 		assertEquals(test, test.getEmbeddedAssociation().getParent());
 	}
@@ -1078,7 +1079,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		test = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, test.getBizId());
 		assertNotNull(test);
 		assertNull(test.getEmbeddedAssociation());
 	}
@@ -1089,7 +1090,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 
 		p.evictAllCached();
-		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		test = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, test.getBizId());
 		assertNotNull(test);
 		assertNotNull(test.getEmbeddedAssociation());
 
@@ -1097,7 +1098,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		
 		p.evictAllCached();
-		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		test = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, test.getBizId());
 		assertNotNull(test);
 		assertNull(test.getEmbeddedAssociation());
 	}
@@ -1107,7 +1108,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		p.save(test);
 
-		DocumentQuery q = p.newDocumentQuery(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		Polygon poly = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-180, -360), new Coordinate(-180, 360), new Coordinate(180, 360), new Coordinate(180, -360), new Coordinate(-180, -360)});
 		q.getFilter().addContains(AllAttributesPersistent.geometryPropertyName, poly);
 		q.beanResults();
@@ -1398,9 +1399,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 				DocumentPermissionScope.customer,
 				persistence -> {
 					try {
-						AllAttributesPersistent result = persistence.retrieve(
-								AllAttributesPersistent.MODULE_NAME,
-								AllAttributesPersistent.DOCUMENT_NAME,
+						AllAttributesPersistent result = persistence.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 								bizId);
 						return result != null ? result.getBizId() : null;
 					}
@@ -1466,9 +1465,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testSharedCacheBeanByIds() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		saved = p.save(saved);
-		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheBean(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		boolean cached = p.sharedCacheBean(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				saved.getBizId());
 		assertFalse(cached);
 	}
@@ -1487,9 +1484,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testSharedCacheCollectionByIds() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
 		saved = p.save(saved);
-		boolean cached = ((AbstractHibernatePersistence) p).sharedCacheCollection(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		boolean cached = p.sharedCacheCollection(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.aggregatedCollectionPropertyName,
 				saved.getBizId());
 		assertFalse(cached);
@@ -1506,9 +1501,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testEvictSharedCacheBeansByModuleDocument() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		((AbstractHibernatePersistence) p).evictSharedCacheBeans(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		p.evictSharedCacheBeans(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 	}
 
 	@Test
@@ -1522,9 +1515,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testEvictSharedCachedBeanByIds() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		saved = p.save(saved);
-		((AbstractHibernatePersistence) p).evictSharedCachedBean(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		p.evictSharedCachedBean(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				saved.getBizId());
 	}
 
@@ -1539,9 +1530,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testEvictSharedCacheCollectionsByModuleDocumentCollection() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
 		p.save(saved);
-		((AbstractHibernatePersistence) p).evictSharedCacheCollections(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		p.evictSharedCacheCollections(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.aggregatedCollectionPropertyName);
 	}
 
@@ -1558,9 +1547,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testEvictSharedCacheCollectionByIds() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 2);
 		saved = p.save(saved);
-		((AbstractHibernatePersistence) p).evictSharedCacheCollection(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME,
+		p.evictSharedCacheCollection(TestDocument.ALL_ATTRIBUTES_PERSISTENT,
 				AllAttributesPersistent.aggregatedCollectionPropertyName,
 				saved.getBizId());
 	}
@@ -1589,9 +1576,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryBeanResultsWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		List<AllAttributesPersistent> results = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME)
+		List<AllAttributesPersistent> results = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT)
 				.beanResults();
 		assertFalse(results.isEmpty());
 	}
@@ -1615,9 +1600,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
 		int count = 0;
-		try (AutoClosingIterable<AllAttributesPersistent> i = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME)
+		try (AutoClosingIterable<AllAttributesPersistent> i = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT)
 				.beanIterable()) {
 			for (@SuppressWarnings("unused") AllAttributesPersistent bean : i) {
 				count++;
@@ -1630,9 +1613,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryProjectedResultsWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		List<?> results = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME)
+		List<?> results = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT)
 				.projectedResults();
 		assertFalse(results.isEmpty());
 	}
@@ -1642,9 +1623,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
 		int count = 0;
-		try (AutoClosingIterable<?> i = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME)
+		try (AutoClosingIterable<?> i = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT)
 				.projectedIterable()) {
 			for (@SuppressWarnings("unused") Object bean : i) {
 				count++;
@@ -1657,9 +1636,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryScalarResultsWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		DocumentQuery dq = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQuery dq = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, Bean.BIZ_KEY);
 		List<String> results = dq.scalarResults(String.class);
 		assertFalse(results.isEmpty());
@@ -1669,9 +1646,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryScalarIterableWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		DocumentQuery dq = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQuery dq = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, Bean.BIZ_KEY);
 		try (AutoClosingIterable<String> i = dq.scalarIterable(String.class)) {
 			boolean found = false;
@@ -1687,9 +1662,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryTupleResultsWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		DocumentQuery dq = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQuery dq = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.DOCUMENT_ID, "a");
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, "b");
 		List<Object[]> results = dq.tupleResults();
@@ -1701,9 +1674,7 @@ class PersistenceTests extends AbstractSkyveTestDispose {
 	void testDocumentQueryTupleIterableWithData() throws Exception {
 		AllAttributesPersistent saved = Util.constructRandomInstance(u, m, aapd, 1);
 		p.save(saved);
-		DocumentQuery dq = p.newDocumentQuery(
-				AllAttributesPersistent.MODULE_NAME,
-				AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQuery dq = p.newDocumentQuery(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.DOCUMENT_ID, "a");
 		dq.addBoundProjection(DocumentQuery.THIS_ALIAS, Bean.BIZ_KEY, "b");
 		int count = 0;

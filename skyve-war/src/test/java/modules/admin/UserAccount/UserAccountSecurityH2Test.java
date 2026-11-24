@@ -29,7 +29,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserAccount;
 import modules.admin.domain.UserLoginRecord;
 import modules.admin.domain.UserRole;
@@ -60,20 +60,20 @@ class UserAccountSecurityH2Test extends AbstractH2Test {
 		boolean originalAccessControl = UtilImpl.ACCESS_CONTROL;
 		try {
 			DataBuilder builder = new DataBuilder().fixture(FixtureType.crud);
-			UserExtension accountUser = builder.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+			UserExtension accountUser = builder.build(AdminDocument.USER);
 			accountUser.setUserName("account-" + roleName);
 			accountUser.getGroups().clear();
 			accountUser.getRoles().clear();
-			UserRole role = builder.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+			UserRole role = builder.build(AdminDocument.USER_ROLE);
 			role.setRoleName("admin." + roleName);
 			accountUser.addRolesElement(role);
 			accountUser = persistence.save(accountUser);
 
-			UserLoginRecord ownLogin = builder.build(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+			UserLoginRecord ownLogin = builder.build(AdminDocument.USER_LOGIN_RECORD);
 			ownLogin.setBizUserId(accountUser.getBizId());
 			ownLogin.setUserName(accountUser.getUserName());
 			ownLogin = persistence.save(ownLogin);
-			UserLoginRecord otherLogin = builder.build(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+			UserLoginRecord otherLogin = builder.build(AdminDocument.USER_LOGIN_RECORD);
 			otherLogin.setBizUserId(originalUser.getId());
 			otherLogin.setUserName(originalUser.getName());
 			otherLogin = persistence.save(otherLogin);
@@ -86,9 +86,8 @@ class UserAccountSecurityH2Test extends AbstractH2Test {
 			UtilImpl.ACCESS_CONTROL = true;
 			ProvidedRepositoryFactory.get().resetMenus(user);
 			persistence.setUser(user);
-			Document loginDocument = user.getCustomer().getModule(UserLoginRecord.MODULE_NAME)
-					.getDocument(user.getCustomer(), UserLoginRecord.DOCUMENT_NAME);
-			assertEquals(DocumentPermissionScope.user, user.getScope(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME));
+			Document loginDocument = AdminDocument.USER_LOGIN_RECORD.toDocument(user.getCustomer());
+			assertEquals(DocumentPermissionScope.user, user.getScope(AdminDocument.USER_LOGIN_RECORD));
 			assertFalse(user.canCreateDocument(loginDocument));
 			assertFalse(user.canUpdateDocument(loginDocument));
 			assertFalse(user.canDeleteDocument(loginDocument));
@@ -98,7 +97,7 @@ class UserAccountSecurityH2Test extends AbstractH2Test {
 					UserAgentType.desktop);
 			WebContainer.setHttpServletRequestResponse(request, new MockHttpServletResponse());
 			String uxui = UserAgent.getSelection(request).getUxUi().getName();
-			assertTrue(user.canAccess(UserAccess.singular(UserAccount.MODULE_NAME, UserAccount.DOCUMENT_NAME), uxui));
+			assertTrue(user.canAccess(UserAccess.singular(AdminDocument.USER_ACCOUNT), uxui));
 
 			// Exercise the same query-access and document-read checks that failed when rendering Account.
 			SkyveLazyDataModel model = new SkyveLazyDataModel(mock(FacesView.class), UserAccount.MODULE_NAME,
@@ -109,8 +108,7 @@ class UserAccountSecurityH2Test extends AbstractH2Test {
 			assertEquals(ownLogin.getBizId(), rows.get(0).getBean().getBizId());
 
 			// User scope must also isolate records without the Account query's explicit owner filter.
-			List<UserLoginRecord> visible = persistence.newDocumentQuery(UserLoginRecord.MODULE_NAME,
-					UserLoginRecord.DOCUMENT_NAME).beanResults();
+			List<UserLoginRecord> visible = persistence.newDocumentQuery(AdminDocument.USER_LOGIN_RECORD).beanResults();
 			assertEquals(1, visible.size());
 			assertEquals(ownLogin.getBizId(), visible.get(0).getBizId());
 			assertFalse(user.canReadBean(otherLogin.getBizId(), otherLogin.getBizModule(), otherLogin.getBizDocument(),

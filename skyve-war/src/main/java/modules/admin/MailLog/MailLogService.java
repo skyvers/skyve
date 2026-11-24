@@ -6,6 +6,7 @@ import org.skyve.impl.archive.support.ArchiveRetriever;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.util.Util;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.MailLog;
 
 /**
@@ -35,6 +36,6 @@ public class MailLogService {
 	 */
 	public Optional<ArchiveDocConfig> mailLogDocConfig() {
 		return Util.getArchiveConfig()
-					.findArchiveDocConfig(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME);
+					.findArchiveDocConfig(AdminDocument.MAIL_LOG);
 	}
 }

@@ -55,7 +55,7 @@ public abstract class OverrideExtended extends AbstractPersistentBean {
 
 	public static OverrideExtendedExtension newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return TestDocument.OVERRIDE_EXTENDED.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

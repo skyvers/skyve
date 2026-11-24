@@ -20,7 +20,7 @@ class UserListDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() throws Exception {
 		UserList bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(UserList.MODULE_NAME, UserList.DOCUMENT_NAME);
+				.build(AdminDocument.USER_LIST);
 		assertNotNull(bean);
 	}
 

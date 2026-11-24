@@ -15,6 +15,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.kitchensink.domain.LookupDescription;
 import modules.kitchensink.domain.ModelLookupFixture;
 import modules.kitchensink.domain.ModelLookupRow;
@@ -45,8 +46,7 @@ class ModelLookupFixtureH2Test extends AbstractH2Test {
 		fixture = persistence.save(fixture);
 		persistence.flush();
 		persistence.evictAllCached();
-		fixture = java.util.Objects.requireNonNull(persistence.retrieve(ModelLookupFixture.MODULE_NAME,
-				ModelLookupFixture.DOCUMENT_NAME, fixture.getBizId()));
+		fixture = java.util.Objects.requireNonNull(persistence.retrieve(KitchensinkDocument.MODEL_LOOKUP_FIXTURE, fixture.getBizId()));
 		assertEquals(value.getBizId(), fixture.getSelection().getBizId());
 		assertEquals(singleValue.getBizId(), fixture.getSingleSelection().getBizId());
 		assertEquals(singleValue.getBizId(), fixture.getRows().get(0).getSingleSelection().getBizId());

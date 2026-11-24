@@ -16,7 +16,7 @@ class CountryDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		Country bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Country.MODULE_NAME, Country.DOCUMENT_NAME);
+				.build(AdminDocument.COUNTRY);
 		assertNotNull(bean);
 	}
 

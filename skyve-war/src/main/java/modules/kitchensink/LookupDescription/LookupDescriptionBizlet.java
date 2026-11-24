@@ -4,6 +4,7 @@ import org.skyve.CORE;
 import org.skyve.metadata.model.document.Bizlet;
 
 import jakarta.annotation.Nonnull;
+import modules.kitchensink.domain.KitchensinkDocument;
 import modules.kitchensink.domain.LookupDescription;
 
 /**
@@ -21,8 +22,7 @@ public class LookupDescriptionBizlet extends Bizlet<LookupDescription> {
 	@Override
 	public void preSave(@Nonnull LookupDescription bean) throws Exception {
 		if (bean.getNumber() == null) {
-			bean.setNumber(CORE.getNumberGenerator().nextInt(LookupDescription.MODULE_NAME,
-																LookupDescription.DOCUMENT_NAME,
+			bean.setNumber(CORE.getNumberGenerator().nextInt(KitchensinkDocument.LOOKUP_DESCRIPTION,
 																LookupDescription.numberPropertyName));
 		}
 	}

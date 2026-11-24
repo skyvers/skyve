@@ -17,6 +17,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.AssignableRole;
 import org.skyve.metadata.user.User;
@@ -28,6 +29,7 @@ import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
@@ -740,6 +742,11 @@ public class ModulesUtil {
 		return bean;
 	}
 
+	/** short-hand way of finding a bean using a legacy key; a typed shortcut for {@link #lookupBean(String, String, String, Object)} */
+	public static Bean lookupBean(ModuleDocument document, String propertyName, Object objValue) {
+		return lookupBean(document.moduleName(), document.documentName(), propertyName, objValue);
+	}
+
 	/**
 	 * Returns the persistent table name for the specified module and document.
 	 */
@@ -752,6 +759,14 @@ public class ModulesUtil {
 	}
 
 	/**
+	 * Returns the persistent table name for the specified document; a typed shortcut for
+	 * {@link #getPersistentIdentifier(String, String)}.
+	 */
+	public static String getPersistentIdentifier(final ModuleDocument document) {
+		return getPersistentIdentifier(document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Configure a permissions group with at least the roleNames specified
 	 * 
 	 * @param name
@@ -759,7 +774,7 @@ public class ModulesUtil {
 	 */
 	public static GroupExtension configureGroup(String name, String... roleNames) {
 		// Configure required Staff permissions group
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(AdminDocument.GROUP);
 		qGroup.getFilter().addEquals(Group.namePropertyName, name);
 		boolean saveRequired = false;
 		GroupExtension g = qGroup.beanResult();

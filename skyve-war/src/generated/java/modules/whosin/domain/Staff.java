@@ -248,7 +248,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 
 	public static Staff newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return WhosinDocument.STAFF.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;
@@ -549,7 +549,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 
 		if (bizParentId != null) {
 			Persistence p = CORE.getPersistence();
-			DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+			DocumentQuery q = p.newDocumentQuery(WhosinDocument.STAFF);
 			q.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);
 			result = q.retrieveBean();
 		}
@@ -561,7 +561,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	@XmlTransient
 	public List<Staff> getChildren() {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(WhosinDocument.STAFF);
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}

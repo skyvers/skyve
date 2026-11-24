@@ -40,19 +40,23 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 
 	/** Signs in, switches to SmartClient and opens the Control Panel's SAIL tab. */
 	private static final String SIGN_IN = HEAD +
+			"<description>Signs in as admin in the SmartClient UI and opens the SAIL tab of the Control Panel, ready for recording to start. The recorder test runs it first. It checks nothing itself.</description>" +
 			"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
-			"<interaction name=\"Control Panel\"><method>" + TO_CONTROL_PANEL + "</method></interaction>" +
+			"<interaction name=\"Control Panel\"><description>Opens the Control Panel and selects its SAIL tab.</description><method>" + TO_CONTROL_PANEL + "</method></interaction>" +
 			TAIL;
 	private static final String START = HEAD +
-			"<interaction name=\"Start recording\"><method>" + TO_CONTROL_PANEL + "<action name=\"StartSAILRecording\" /></method></interaction>" +
+			"<description>Opens the SAIL tab of the Control Panel in the SmartClient UI and starts the recorder, as a user would. It checks nothing itself.</description>" +
+			"<interaction name=\"Start recording\"><description>Opens the SAIL tab of the Control Panel and runs its StartSAILRecording action.</description><method>" + TO_CONTROL_PANEL + "<action name=\"StartSAILRecording\" /></method></interaction>" +
 			TAIL;
 	private static final String STOP = HEAD +
-			"<interaction name=\"Stop recording\"><method>" + TO_CONTROL_PANEL + "<action name=\"StopSAILRecording\" /></method></interaction>" +
+			"<description>Opens the SAIL tab of the Control Panel in the SmartClient UI and stops the recorder, as a user would. It checks nothing itself.</description>" +
+			"<interaction name=\"Stop recording\"><description>Opens the SAIL tab of the Control Panel and runs its StopSAILRecording action.</description><method>" + TO_CONTROL_PANEL + "<action name=\"StopSAILRecording\" /></method></interaction>" +
 			TAIL;
 
 	/** Contacts: create, find, change and delete (declined, then confirmed), from the SmartClient admin suite. */
 	private static final String CONTACTS = HEAD +
-			"<interaction name=\"Contacts: create, find, change and delete\"><method>" +
+			"<description>Records and replays the admin Contacts workflow in the SmartClient UI, signed in as admin. A contact is created, found, changed and deleted, and the test checks that the recording of those gestures replays unedited.</description>" +
+			"<interaction name=\"Contacts: create, find, change and delete\"><description>Creates a contact and saves it, finds it in the Contacts list, changes its mobile number and saves, declines a delete and then confirms one. Checks the saved values and that no row for the contact remains.</description><method>" +
 			"<navigateMenu module=\"admin\" item=\"Contacts\" />" +
 			"<listGridNew module=\"admin\" document=\"Contact\" />" +
 			"<dataEnter binding=\"name\" value=\"SAIL Recorded Contact {run}\" />" +
@@ -220,7 +224,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		awaitRecorder();
 
 		// a save that validation refuses shows the error on the field: check it in Check mode
-		sailString(HEAD + "<interaction name=\"New lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the SmartClient UI. Starts a new lookup value and tries to save it with no description, which the form refuses.</description>" +
+					"<interaction name=\"New lookup value\"><description>Opens the Lookup values list, starts a new lookup value, saves it with nothing entered, and checks that the save fails.</description><method>" +
 					"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" +
 					"<listGridNew module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<save testSuccess=\"false\" />" +
@@ -233,14 +238,16 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		assertNotEquals(Boolean.TRUE, js("return SKYVE.SailRecorder.checking();"), "Esc leaves Check mode");
 
 		// enter and save the value, then alt-click its field to check it
-		sailString(HEAD + "<interaction name=\"Lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the SmartClient UI. Enters a lookup value's description and saves it.</description>" +
+					"<interaction name=\"Lookup value\"><description>Enters a description for the lookup value and saves it.</description><method>" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<dataEnter binding=\"description\" value=\"" + value + "\" />" +
 					"<save />" +
 					"</method></interaction>" + TAIL);
 		click(field("description"), true);
 		awaitRecorder();
-		sailString(HEAD + "<interaction name=\"Back to the list\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the SmartClient UI. Returns from the lookup value to its list.</description>" +
+					"<interaction name=\"Back to the list\"><description>Closes the lookup value to go back to its list.</description><method>" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<ok />" +
 					"</method></interaction>" + TAIL);
@@ -268,7 +275,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		awaitPanel();
 		panel("collapse");
 		// leave no lookup value behind
-		sailString(HEAD + "<interaction name=\"Delete the lookup value\"><method>" +
+		sailString(HEAD + "<description>Part of the recorder test of checks made through the recorder's panel, in the SmartClient UI. Deletes the lookup value that the test made, so that none is left behind.</description>" +
+					"<interaction name=\"Delete the lookup value\"><description>Opens the lookup value from its list and deletes it.</description><method>" +
 					"<pushListContext module=\"kitchensink\" document=\"LookupDescription\" />" +
 					"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + value + "\" />" +
 					"<delete />" +
@@ -317,7 +325,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 						.append("<dataEnter binding=\"description\" value=\"").append(description).append("\" />")
 						.append("<save /><ok />");
 			}
-			sailString(HEAD + "<interaction name=\"Lookup values, then a fixture with members\"><method>" +
+			sailString(HEAD + "<description>Part of the recorder test of an ordered list membership, in the SmartClient UI. Makes three lookup values and a new Ordered Grid Fixture whose members are two of them.</description>" +
+					"<interaction name=\"Lookup values, then a fixture with members\"><description>Saves three lookup values, then saves a new Ordered Grid Fixture with the first two as its members.</description><method>" +
 						"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" + lookups +
 						"<navigateMenu module=\"kitchensink\" item=\"Ordered Grid Fixtures\" />" +
 						"<listGridNew module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
@@ -326,7 +335,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 						"<save />" +
 						"</method></interaction>" + TAIL);
 			dragCandidate("members", c, 0);
-			sailString(HEAD + "<interaction name=\"Reorder, save and reopen\"><method>" +
+			sailString(HEAD + "<description>Part of the recorder test of an ordered list membership, in the SmartClient UI. Moves a member to the top of the fixture's members, saves, and reopens the fixture.</description>" +
+					"<interaction name=\"Reorder, save and reopen\"><description>Moves the second member to the top, checks the order of the three members, saves, and reopens the fixture from its list.</description><method>" +
 						"<pushEditContext module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
 						"<listMembershipMove binding=\"members\" rowContaining=\"" + b + "\" to=\"0\" />" +
 						"<testValue binding=\"members\" value=\"" + b + "|" + c + "|" + a + "\" />" +
@@ -342,7 +352,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 				deletes.append("<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"").append(description).append("\" />")
 						.append("<delete />");
 			}
-			sailString(HEAD + "<interaction name=\"Delete the fixture and the lookup values\"><method>" +
+			sailString(HEAD + "<description>Part of the recorder test of an ordered list membership, in the SmartClient UI. Deletes the fixture and the three lookup values that the test made.</description>" +
+					"<interaction name=\"Delete the fixture and the lookup values\"><description>Deletes the fixture and then the three lookup values.</description><method>" +
 						"<pushEditContext module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
 						"<delete />" +
 						"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" + deletes +

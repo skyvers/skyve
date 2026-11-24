@@ -23,14 +23,7 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.devtools.Command;
-import org.openqa.selenium.devtools.Connection;
-import org.openqa.selenium.devtools.Event;
-import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.SeleniumCdpConnection;
-import org.openqa.selenium.devtools.idealized.target.model.SessionID;
 import org.openqa.selenium.json.Json;
-import org.openqa.selenium.json.JsonInput;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
@@ -38,6 +31,9 @@ import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import util.sail.browser.Capability;
+import util.sail.browser.PageScreencast;
+import util.sail.browser.SailBrowserControl;
 
 /**
  * Step snapshots and a video of one automation run, for a person to look through what a SAIL run did.
@@ -56,18 +52,23 @@ import jakarta.annotation.Nullable;
  * Each automation run gets its own folder under each directory, named by its time, test and (for a suite file) the
  * script, so suites, workflows and ITs with several tests keep every run, with a {@value #RUN_JSON} summary of it.
  * Each directory gets an {@code index.html} listing its runs by what they do (their first interaction), with their
- * outcomes, and filters. Everything is static HTML that opens from the file system, light or dark as the system is.
+ * outcomes, and filters, and a {@value #RUNS_ORDER_JS} of the runs in that order, from which each run's pages make
+ * their previous and next run buttons. The default directory's list is one folder up, in the evidence folder beside
+ * {@code media/} and {@code failures/} (see {@link SailSettings#runsListDir(Path)}), so that it is the page to open. Everything is static HTML that opens from the file system, light or dark as the system is.
  * This class records the run; {@link SailRunPages} writes the film strip and player, {@link SailRunsList} the list of
  * runs, {@link SailStepWords} each step's words, and {@link SailMediaHtml} holds their shared parts and the CSS and
  * JavaScript (in {@code util/sail/media/}).
+ * The pages tell the run's story from its script's descriptions ({@link Story}): the suite's (see
+ * {@link #suite(String, String)}), the workflow's (see {@link #beginUnit(String)}), the automation's and each
+ * interaction's.
  * The run's pages have a Settings button that shows its settings that do not come from their defaults, with their
  * sources. With {@value SailSettings#KEEP_MEDIA}{@code =failed}, a run that passed deletes its folders when it ends.
  * <p>
  * Recordings show what the browser showed: a run against real data records real data.
  * <p>
- * Threading: an instance belongs to the thread running its automation. Screencast frames arrive on the CDP
- * connection's thread, which acknowledges each without waiting and hands it to a single worker thread to write, so the
- * test thread never waits for them until the run ends.
+ * Threading: an instance belongs to the thread running its automation. Screencast frames arrive on the browser
+ * control's DevTools thread, which acknowledges each without waiting and hands it to a single worker thread to write,
+ * so the test thread never waits for them until the run ends.
  */
 public final class SailMedia {
 	/**
@@ -100,10 +101,14 @@ public final class SailMedia {
 	private static final Pattern METHOD_CONTENT = Pattern.compile("<(?:\\w+:)?method>(.*)</(?:\\w+:)?method>", Pattern.DOTALL);
 	/** Each run folder's summary of the run, which the list of runs reads (see {@link #runJson}). */
 	static final String RUN_JSON = "run.json";
+	/** Each directory's runs in the list's order, beside its list, for the run pages' previous and next run buttons. */
+	static final String RUNS_ORDER_JS = "runs-order.js";
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
+	/** The suite running on this thread, for its runs' pages; see {@link #suite(String, String)}. */
+	private static final ThreadLocal<SuiteStory> SUITE = new ThreadLocal<>();
 	/**
-	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit()} and removed by
+	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit(String)} and removed by
 	 * {@link #endUnit(boolean)}, which its caller calls in a {@code finally}.
 	 */
 	private static final ThreadLocal<Unit> UNIT = new ThreadLocal<>();
@@ -112,15 +117,43 @@ public final class SailMedia {
 	 * this class was loaded, as a folder time.
 	 */
 	static final String SESSION = FOLDER_TIME.format(LocalDateTime.now());
-	/** Numbers the units (see {@link #beginUnit()}) of this session. */
+	/** Numbers the units (see {@link #beginUnit(String)}) of this session. */
 	private static final AtomicInteger UNITS = new AtomicInteger();
 
-	/** A unit (a workflow): its number in the session, how many runs (legs) it has started, and its finished runs. */
+	/**
+	 * A unit (a workflow): its number in the session, its description, how many runs (legs) it has started, and its
+	 * finished runs.
+	 */
 	private static final class Unit {
 		private final int number = UNITS.incrementAndGet();
+		private final String description;
 		private int legs = 0;
 		/** Its finished runs, whose media is kept or deleted together. */
 		private final List<SailMedia> runs = new ArrayList<>();
+
+		private Unit(@Nullable String description) {
+			this.description = description;
+		}
+	}
+
+	/** The suite a run is a member of: its file, and its description. */
+	private record SuiteStory(@Nonnull String name, @Nullable String description) {
+		// a value
+	}
+
+	/**
+	 * What the run's script says it is for, in words: each a {@code <description>}, tidied (see
+	 * {@link org.skyve.metadata.sail.language.Descriptions}); null where there is none.
+	 *
+	 * @param suite	the suite the run is a member of, or null
+	 * @param suiteDescription	the suite's description
+	 * @param workflowDescription	the description of the workflow the run is a leg of
+	 * @param description	the automation's description
+	 */
+	record Story(@Nullable String suite,
+					@Nullable String suiteDescription,
+					@Nullable String workflowDescription,
+					@Nullable String description) {
 	}
 
 	/**
@@ -135,8 +168,8 @@ public final class SailMedia {
 	}
 
 	/**
-	 * One executed step: where it ran, what it was (in words, see {@link SailStepWords#summary(Step)}, and as SAIL), when,
-	 * how it went, and its snapshot.
+	 * One executed step: where it ran (and what its interaction is for, in words), what it was (in words, see
+	 * {@link SailStepWords#summary(Step)}, and as SAIL), when, how it went, and its snapshot.
 	 */
 	record StepRecord(int sequence,
 						@Nonnull String procedure,
@@ -147,7 +180,8 @@ public final class SailMedia {
 						long endMillis,
 						@Nullable String failure,
 						@Nullable String screenshot,
-						@Nullable String source) {
+						@Nullable String source,
+						@Nullable String procedureDescription) {
 		boolean failed() {
 			return failure != null;
 		}
@@ -168,6 +202,7 @@ public final class SailMedia {
 	 * @param started	when it started, as shown
 	 * @param uxui	the automation's UX/UI
 	 * @param settings	its settings that do not come from their defaults, each with its source (see {@link SailSettings#describe()})
+	 * @param story	what its suite, workflow and automation say they are for
 	 */
 	record RunInfo(@Nonnull String name,
 					@Nonnull String title,
@@ -175,8 +210,8 @@ public final class SailMedia {
 					@Nullable String label,
 					@Nonnull String started,
 					@Nonnull String uxui,
-					@Nonnull List<String> settings) {
-		// a value
+					@Nonnull List<String> settings,
+					@Nonnull Story story) {
 	}
 
 	private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
@@ -185,6 +220,9 @@ public final class SailMedia {
 	private final Place place;
 	private final Path snapshotRun;
 	private final Path videoRun;
+	/** Where the snapshot and video directories' lists of runs go (see {@link SailSettings#runsListDir(Path)}). */
+	private final Path snapshotList;
+	private final Path videoList;
 	private final boolean saveSource;
 	private final SailSettings.KeepMedia keepMedia;
 	/** Whether the run passed with no failed step, once it has finished. */
@@ -199,6 +237,7 @@ public final class SailMedia {
 	// the step that is running
 	private int sequence = 0;
 	private String procedure;
+	private String procedureDescription;
 	private int number;
 	private String stepSummary;
 	private String xml;
@@ -218,6 +257,8 @@ public final class SailMedia {
 		this.place = (unit == null) ? new Place(SESSION, 0, 0) : new Place(SESSION, unit.number, ++unit.legs);
 		this.snapshotRun = snapshotRun;
 		this.videoRun = videoRun;
+		this.snapshotList = (snapshotRun == null) ? null : settings.runsListDir(snapshotRun.getParent());
+		this.videoList = (videoRun == null) ? null : settings.runsListDir(videoRun.getParent());
 		this.saveSource = settings.snapshotSource();
 		this.keepMedia = settings.keepMedia();
 	}
@@ -261,7 +302,8 @@ public final class SailMedia {
 		String label = LABEL.get();
 		// a load run's virtual users start runs at the same time: their folders name the user and iteration
 		String name = sanitise(FOLDER_TIME.format(now) + '-' + SailLoadProbe.fileLabel() + test + ((label == null) ? "" : '-' + label), 120);
-		RunInfo info = new RunInfo(name, title(automation, test), test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
+		RunInfo info = new RunInfo(name, title(automation, test), test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe(),
+									story(automation));
 		try {
 			SailMedia result = new SailMedia(selenide,
 												automation,
@@ -277,6 +319,22 @@ public final class SailMedia {
 			selenide.trace("Could not make the SAIL media folders, so this run has none: " + e);
 			return null;
 		}
+	}
+
+	/**
+	 * Returns what the run's suite, workflow and automation say they are for: the suite and the unit (a workflow)
+	 * running on this thread, and the automation.
+	 *
+	 * @param automation	the automation
+	 * @return the story
+	 */
+	static @Nonnull Story story(@Nonnull Automation automation) {
+		SuiteStory suite = SUITE.get();
+		Unit unit = UNIT.get();
+		return new Story((suite == null) ? null : suite.name(),
+							(suite == null) ? null : suite.description(),
+							(unit == null) ? null : unit.description,
+							automation.getDescription());
 	}
 
 	/**
@@ -328,12 +386,14 @@ public final class SailMedia {
 	 * Notes that a step starts, and starts or restarts the screencast if the browser has started or been replaced.
 	 *
 	 * @param procedureName	the interaction or procedure
+	 * @param description	what the interaction is for, in words, or null
 	 * @param stepNumber	the step's number in it, from 1
 	 * @param step	the step
 	 */
-	void stepStarted(@Nonnull String procedureName, int stepNumber, @Nonnull Step step) {
+	void stepStarted(@Nonnull String procedureName, @Nullable String description, int stepNumber, @Nonnull Step step) {
 		sequence++;
 		procedure = procedureName;
+		procedureDescription = description;
 		number = stepNumber;
 		try {
 			stepSummary = SailStepWords.summary(step);
@@ -392,8 +452,24 @@ public final class SailMedia {
 			}
 		}
 		steps.add(new StepRecord(sequence, procedure, number, stepSummary, xml, startMillis, endMillis,
-									(failure == null) ? null : hidePasswords(failure), screenshot, source));
+									(failure == null) ? null : hidePasswords(failure), screenshot, source, procedureDescription));
 		xml = null;
+	}
+
+	/**
+	 * Names the suite that the runs started on this thread are members of, for their pages: its file, and what it is
+	 * for. A suite sets it while it runs; {@code null} clears it.
+	 *
+	 * @param name	the suite's file, or null
+	 * @param description	its description, or null
+	 */
+	static void suite(@Nullable String name, @Nullable String description) {
+		if (name == null) {
+			SUITE.remove();
+		}
+		else {
+			SUITE.set(new SuiteStory(name, description));
+		}
 	}
 
 	/**
@@ -408,12 +484,15 @@ public final class SailMedia {
 	/**
 	 * Starts a unit of automation runs on this thread, such as a workflow, whose media is kept or deleted together: with
 	 * {@value SailSettings#KEEP_MEDIA}{@code =failed}, a passed run's folders are deleted only when the whole unit
-	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself.
+	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself. The unit's description (a
+	 * workflow's) is what its runs' pages show for it.
 	 *
 	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
+	 *
+	 * @param description	the unit's description, or null
 	 */
-	static void beginUnit() {
-		UNIT.set(new Unit());
+	static void beginUnit(@Nullable String description) {
+		UNIT.set(new Unit(description));
 	}
 
 	/**
@@ -446,7 +525,7 @@ public final class SailMedia {
 	/**
 	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs.
 	 * Then, when the run passed and {@value SailSettings#KEEP_MEDIA} is {@code failed}, deletes the run's folders:
-	 * at once, or when its unit ends (see {@link #beginUnit()}).
+	 * at once, or when its unit ends (see {@link #beginUnit(String)}).
 	 *
 	 * <p>Side effects: writes, and may delete, files in the run's folders, and rewrites each directory's list of runs.
 	 *
@@ -476,9 +555,10 @@ public final class SailMedia {
 			String summary = runJson(info, place, steps, passed);
 			if (filmStrip != null) {
 				String playerLink = (player == null) ? null : link(snapshotRun, player);
-				Files.writeString(filmStrip, SailRunPages.filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
+				Files.writeString(filmStrip, SailRunPages.filmStripHtml(info, steps, playerLink, link(snapshotRun, snapshotList.resolve("index.html"))),
+									StandardCharsets.UTF_8);
 				Files.writeString(snapshotRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
-				writeRunsIndex(snapshotRun.getParent());
+				writeRunsIndex(snapshotRun.getParent(), snapshotList);
 			}
 			if (player != null) {
 				String filmStripLink = (filmStrip == null) ? null : link(videoRun, filmStrip);
@@ -487,9 +567,10 @@ public final class SailMedia {
 					written = new ArrayList<>(frames);
 				}
 				Files.writeString(videoRun.resolve("video.js"), SailRunPages.videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
-				Files.writeString(player, SailRunPages.playerHtml(info, steps, filmStripLink), StandardCharsets.UTF_8);
+				Files.writeString(player, SailRunPages.playerHtml(info, steps, filmStripLink, link(videoRun, videoList.resolve("index.html"))),
+									StandardCharsets.UTF_8);
 				Files.writeString(videoRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
-				writeRunsIndex(videoRun.getParent());
+				writeRunsIndex(videoRun.getParent(), videoList);
 			}
 			selenide.trace("SAIL media written: " + steps.size() + " steps" +
 							((videoRun == null) ? "" : ", " + frames.size() + " video frames") +
@@ -505,34 +586,48 @@ public final class SailMedia {
 	 * Deletes the run's folders, and lists the runs left in each directory that had a list.
 	 */
 	private void delete() {
-		List<Path> folders = new ArrayList<>(2);
+		Map<Path, Path> folders = new LinkedHashMap<>(4);
 		if (snapshotRun != null) {
-			folders.add(snapshotRun);
+			folders.put(snapshotRun, snapshotList);
 		}
-		if ((videoRun != null) && (! videoRun.equals(snapshotRun))) {
-			folders.add(videoRun);
+		if (videoRun != null) {
+			folders.putIfAbsent(videoRun, videoList);
 		}
-		for (Path folder : folders) {
+		for (Map.Entry<Path, Path> folder : folders.entrySet()) {
+			Path run = folder.getKey();
+			Path list = folder.getValue();
 			try {
-				org.skyve.util.FileUtil.delete(folder.toFile());
-				if (Files.exists(folder.getParent().resolve("index.html"))) {
-					writeRunsIndex(folder.getParent());
+				org.skyve.util.FileUtil.delete(run.toFile());
+				if (Files.exists(list.resolve("index.html"))) {
+					writeRunsIndex(run.getParent(), list);
 				}
 			}
 			catch (IOException | RuntimeException e) {
-				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + folder + ": " + e);
+				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + run + ": " + e);
 				return;
 			}
 		}
-		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders);
+		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders.keySet());
 	}
 
 	/**
-	 * Rewrites a directory's list of runs. Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one
-	 * directory at the same time, and two writers of one file would garble it.
+	 * Rewrites a directory's list of runs, in its list folder (the directory, or for the default one the evidence folder
+	 * above it; see {@link SailSettings#runsListDir(Path)}), and its runs' order for the run pages' previous and next run
+	 * buttons ({@value #RUNS_ORDER_JS}), which stays in the directory beside the runs. A list moved up removes the one
+	 * an earlier version left in the directory, so that there is one page to open. Synchronised: a load run's virtual
+	 * users ({@link SailLoad}) end runs in one directory at the same time, and two writers of one file would garble it.
+	 *
+	 * @param directory	the directory of runs
+	 * @param list	the folder for its list of runs
 	 */
-	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
-		Files.writeString(directory.resolve("index.html"), SailRunsList.runsIndexHtml(directory), StandardCharsets.UTF_8);
+	private static synchronized void writeRunsIndex(@Nonnull Path directory, @Nonnull Path list) throws IOException {
+		List<SailRunsList.ListedRun> runs = SailRunsList.listedRuns(directory);
+		String runsLink = list.equals(directory) ? "" : link(list, directory) + '/';
+		Files.writeString(list.resolve("index.html"), SailRunsList.runsIndexHtml(runs, runsLink), StandardCharsets.UTF_8);
+		Files.writeString(directory.resolve(RUNS_ORDER_JS), SailRunsList.runsOrderScript(runs), StandardCharsets.UTF_8);
+		if (! runsLink.isEmpty()) {
+			Files.deleteIfExists(directory.resolve("index.html"));
+		}
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {
@@ -670,39 +765,42 @@ public final class SailMedia {
 		run.put("steps", Integer.valueOf(steps.size()));
 		run.put("failed", Long.valueOf(steps.stream().filter(StepRecord::failed).count()));
 		run.put("millis", Long.valueOf(runMillis(steps)));
+		Story story = info.story();
+		run.put("suite", story.suite());
+		run.put("suiteDescription", story.suiteDescription());
+		run.put("workflowDescription", story.workflowDescription());
+		run.put("description", story.description());
 		return new Json().toJson(run);
 	}
 
 	/**
 	 * Chrome's DevTools screencast of one browser window: each frame is written to {@code frames/} with the time Chrome
-	 * drew it, and acknowledged so that Chrome sends the next.
+	 * drew it. The browser's control ({@link SailBrowserControl}, capability {@link Capability#SCREENCAST}) records it
+	 * and acknowledges each frame so that Chrome sends the next; this writes them.
 	 * <p>
-	 * It opens its own CDP connection ({@link SeleniumCdpConnection}) and speaks raw CDP: it attaches to the window's
-	 * target with {@code Target.attachToTarget}, then sends {@code Page.*} commands and listens for
-	 * {@code Page.screencastFrame} by name. Selenium's typed DevTools would need a {@code selenium-devtools} module for
-	 * the browser's version, and Chrome is newer than the newest on the classpath, where Selenium falls back to a no-op.
+	 * It opens no DevTools connection or session of its own, on purpose: a second session attached to a page makes
+	 * any document loaded after the browser goes offline report {@code navigator.onLine === true}, though its
+	 * requests fail, so video would change what a test sees. The control's own session for the window carries the
+	 * screencast instead (see {@link PageScreencast}). A browser whose control lacks the capability (not Chromium) has
+	 * no video.
 	 */
 	static final class Screencast {
-		@SuppressWarnings("resource") // closed by stop()
-		private final Connection connection;
-		private final SessionID session;
+		private final PageScreencast recorder;
 		private final Path folder;
 		private final List<Frame> frames;
 		private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
-		/** Writes frames in order, off the test thread and off the CDP connection's thread. */
+		/** Writes frames in order, off the test thread and off the control's DevTools thread. */
 		private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
 			Thread result = new Thread(r, "sail-screencast");
 			result.setDaemon(true);
 			return result;
 		});
 
-		private Screencast(@Nonnull Connection connection,
-							@Nonnull SessionID session,
+		private Screencast(@Nonnull PageScreencast recorder,
 							@Nonnull Path folder,
 							@Nonnull List<Frame> frames,
 							@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
-			this.connection = connection;
-			this.session = session;
+			this.recorder = recorder;
 			this.folder = folder;
 			this.frames = frames;
 			this.selenide = selenide;
@@ -715,68 +813,65 @@ public final class SailMedia {
 		 * @param folder	the run's video folder
 		 * @param frames	the run's frames, which this adds to (guarded by itself)
 		 * @param selenide	for the trace
-		 * @return the screencast, or null when the browser has no CDP (not Chromium) or it cannot start
+		 * @return the screencast, or null when the browser has no screencast (not Chromium) or it cannot start
 		 */
-		@SuppressWarnings("resource") // the connection is the screencast's, which stop() closes; closed here if it cannot start
 		static @Nullable Screencast start(@Nonnull WebDriver driver,
 											@Nonnull Path folder,
 											@Nonnull List<Frame> frames,
 											@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
-			if (! (driver instanceof HasDevTools)) {
-				selenide.trace("SAIL video is not supported for " + driver.getClass().getSimpleName() +
-								" (it needs Chromium's DevTools); carrying on without it");
-				return null;
-			}
-			Connection connection = null;
 			try {
-				connection = SeleniumCdpConnection.create(driver).orElse(null);
-				if (connection == null) {
-					selenide.trace("SAIL video is not supported: the browser offers no CDP connection; carrying on without it");
-					return null;
-				}
-				// A Chrome window handle is its CDP target id
-				Map<String, Object> attached = connection.sendAndWait(null,
-																		new Command<Map<String, Object>>("Target.attachToTarget",
-																											Map.of("targetId", driver.getWindowHandle(),
-																													"flatten", Boolean.TRUE),
-																											Json.MAP_TYPE),
-																		selenide.timeout());
-				SessionID session = new SessionID(String.valueOf(attached.get("sessionId")));
-				Screencast result = new Screencast(connection, session, folder, frames, selenide);
-				connection.addListener(new Event<>("Page.screencastFrame", Screencast::readFrame), (sequence, frame) -> result.received(frame));
-				connection.sendAndWait(session,
-										new Command<>("Page.startScreencast", Map.of("format", FRAME_FORMAT,
-																					"quality", Integer.valueOf(FRAME_QUALITY),
-																					"maxWidth", Integer.valueOf(FRAME_MAX_WIDTH),
-																					"maxHeight", Integer.valueOf(FRAME_MAX_HEIGHT))),
-										selenide.timeout());
-				selenide.trace(String.format("SAIL video: Chrome DevTools screencast over raw CDP, %s quality %d, at most %dx%d",
-												FRAME_FORMAT, Integer.valueOf(FRAME_QUALITY), Integer.valueOf(FRAME_MAX_WIDTH), Integer.valueOf(FRAME_MAX_HEIGHT)));
-				return result;
+				// For Chromium this makes the control, which connects to DevTools and attaches to the page
+				SailBrowserControl control = SailBrowserControl.of(driver);
+				return start(control, driver.getWindowHandle(), folder, frames, selenide);
 			}
 			catch (RuntimeException e) {
 				selenide.trace("SAIL video could not start, so this run has none: " + e);
-				if (connection != null) {
-					connection.close();
-				}
 				return null;
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		private static @Nonnull Map<String, Object> readFrame(@Nonnull JsonInput input) {
-			return (Map<String, Object>) input.read(Json.MAP_TYPE);
+		/**
+		 * Starts the screencast of a window of a browser that has one.
+		 *
+		 * @param control	the browser's control
+		 * @param windowHandle	the window
+		 * @param folder	the run's video folder
+		 * @param frames	the run's frames, which this adds to (guarded by itself)
+		 * @param selenide	for the trace
+		 * @return the screencast, or null when the control has no screencast or it cannot start
+		 */
+		static @Nullable Screencast start(@Nonnull SailBrowserControl control,
+											@Nonnull String windowHandle,
+											@Nonnull Path folder,
+											@Nonnull List<Frame> frames,
+											@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide) {
+			if (! control.supports(Capability.SCREENCAST)) {
+				selenide.trace("SAIL video is not supported for " + control.browser() +
+								" (it needs Chromium's DevTools); carrying on without it");
+				return null;
+			}
+			PageScreencast recorder = control.require(PageScreencast.class, "SAIL video");
+			Screencast result = new Screencast(recorder, folder, frames, selenide);
+			try {
+				recorder.startScreencast(windowHandle,
+											new PageScreencast.Options(FRAME_FORMAT, FRAME_QUALITY, FRAME_MAX_WIDTH, FRAME_MAX_HEIGHT),
+											result::received);
+			}
+			catch (RuntimeException e) {
+				selenide.trace("SAIL video could not start, so this run has none: " + e);
+				result.worker.shutdown();
+				return null;
+			}
+			selenide.trace(String.format("SAIL video: Chrome DevTools screencast on the browser control's own page session, %s quality %d, at most %dx%d",
+											FRAME_FORMAT, Integer.valueOf(FRAME_QUALITY), Integer.valueOf(FRAME_MAX_WIDTH), Integer.valueOf(FRAME_MAX_HEIGHT)));
+			return result;
 		}
 
 		/**
-		 * Called on the CDP connection's thread for each frame: acknowledges it (asynchronously, so that Chrome sends the
-		 * next one) and hands it to the worker to write.
+		 * Called on the control's DevTools thread for each frame, which the control has acknowledged already: hands it
+		 * to the worker to write.
 		 */
-		private void received(@Nonnull Map<String, Object> frame) {
-			Object sessionId = frame.get("sessionId");
-			if (sessionId != null) {
-				connection.send(session, new Command<>("Page.screencastFrameAck", Map.of("sessionId", sessionId)));
-			}
+		private void received(@Nonnull PageScreencast.Image frame) {
 			try {
 				worker.execute(() -> write(frame));
 			}
@@ -785,20 +880,15 @@ public final class SailMedia {
 			}
 		}
 
-		private void write(@Nonnull Map<String, Object> frame) {
+		private void write(@Nonnull PageScreencast.Image frame) {
 			try {
-				Object data = frame.get("data");
-				Object metadata = frame.get("metadata");
-				Object timestamp = (metadata instanceof Map<?, ?> m) ? m.get("timestamp") : null;
-				long millis = (timestamp instanceof Number n) ? Math.round(n.doubleValue() * 1000.0) : System.currentTimeMillis();
-				if (data instanceof String base64) {
-					String file;
-					synchronized (frames) {
-						file = String.format("frames/%06d.jpg", Integer.valueOf(frames.size() + 1));
-						frames.add(new Frame(file, millis));
-					}
-					Files.write(folder.resolve(file), Base64.getDecoder().decode(base64));
+				byte[] image = Base64.getDecoder().decode(frame.base64());
+				String file;
+				synchronized (frames) {
+					file = String.format("frames/%06d.jpg", Integer.valueOf(frames.size() + 1));
+					frames.add(new Frame(file, frame.millis()));
 				}
+				Files.write(folder.resolve(file), image);
 			}
 			catch (IOException | RuntimeException e) {
 				selenide.trace("Could not save a SAIL video frame: " + e);
@@ -806,11 +896,11 @@ public final class SailMedia {
 		}
 
 		/**
-		 * Stops the screencast, waits for the frames already received to be written, and closes the connection.
+		 * Stops the screencast and waits for the frames already received to be written.
 		 */
 		void stop() {
 			try {
-				connection.sendAndWait(session, new Command<>("Page.stopScreencast", Map.of()), selenide.timeout());
+				recorder.stopScreencast();
 			}
 			catch (RuntimeException e) { // the browser has gone
 				selenide.trace("Could not stop the SAIL video screencast: " + e);
@@ -825,7 +915,6 @@ public final class SailMedia {
 			catch (@SuppressWarnings("unused") InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			connection.close();
 		}
 	}
 }

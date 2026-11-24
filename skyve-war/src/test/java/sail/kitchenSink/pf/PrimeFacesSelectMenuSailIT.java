@@ -42,7 +42,9 @@ class PrimeFacesSelectMenuSailIT extends AbstractPrimeFacesInterpretedSail {
 	@Test
 	void aPickedItemClosesTheDropDownWithinTheStep() {
 		sailString("<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-					"<interaction name=\"Select menu\"><method>" +
+					"<description>Signs in as admin in the PrimeFaces tablet UX/UI and picks an item from a select menu low in the Data Maintenance view, with the menu's drop down slowed down. " +
+					"Checks that the step that picks the item ends only when the drop down has closed, so that the page does not move under the next step.</description>" +
+					"<interaction name=\"Select menu\"><description>Opens the Data Refresh tab of Data Maintenance and picks an Evict Option while the drop down is still opening.</description><method>" +
 					"<login user=\"admin\" password=\"admin\" />" +
 					"<testSuccess />" +
 					"<navigateEdit module=\"admin\" document=\"DataMaintenance\" />" +
@@ -77,7 +79,8 @@ class PrimeFacesSelectMenuSailIT extends AbstractPrimeFacesInterpretedSail {
 					() -> assertEquals(atStepEnd.get("focus"), focus, "the focus stays where it was when the step ended"));
 
 		sailString("<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
-					"<interaction name=\"Sign out\"><method><logout /></method></interaction></automation>");
+					"<description>Signs out the admin user who the first script signed in, to end the session cleanly.</description>" +
+					"<interaction name=\"Sign out\"><description>Signs out.</description><method><logout /></method></interaction></automation>");
 	}
 
 	private static Object js(String script) {

@@ -17,6 +17,7 @@ import org.skyve.util.IPGeolocation;
 import org.skyve.util.SecurityUtil;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminJob;
 import modules.admin.domain.Startup;
 import modules.admin.domain.UserLoginRecord;
@@ -99,7 +100,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				Integer ipAddressHistoryCountConfig = startup.getIpAddressHistoryCheckCount();
 				int ipAddressHistoryCount = ipAddressHistoryCountConfig != null ? ipAddressHistoryCountConfig.intValue() : 1;
 
-				DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+				DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.USER_LOGIN_RECORD);
 				q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, userName);
 				q.addBoundOrdering(UserLoginRecord.loginDateTimePropertyName, SortDirection.descending);
 				q.setMaxResults(ipAddressHistoryCount);

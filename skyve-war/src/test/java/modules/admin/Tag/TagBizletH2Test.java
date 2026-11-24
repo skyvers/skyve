@@ -19,6 +19,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Tag;
 import util.AbstractH2Test;
 
@@ -38,7 +39,7 @@ class TagBizletH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.TAG);
 		webContext = new MockWebContext();
 	}
 

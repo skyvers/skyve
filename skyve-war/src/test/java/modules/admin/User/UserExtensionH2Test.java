@@ -13,7 +13,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.UserProxy.UserProxyExtension;
-import modules.admin.domain.User;
+import modules.admin.domain.AdminDocument;
 import util.AbstractH2Test;
 
 class UserExtensionH2Test extends AbstractH2Test {
@@ -22,7 +22,7 @@ class UserExtensionH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
-		bean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		bean = db.build(AdminDocument.USER);
 		// create the test data
 		bean = CORE.getPersistence().save(bean);
 	}
@@ -49,7 +49,7 @@ class UserExtensionH2Test extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("boxing")
 	void testToProxyDoesNotCreateDuplicates() {
-		int initalSize = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults().size();
+		int initalSize = CORE.getPersistence().newDocumentQuery(AdminDocument.USER).beanResults().size();
 
 		// call the method under test
 		UserProxyExtension result = bean.toUserProxy();
@@ -57,7 +57,7 @@ class UserExtensionH2Test extends AbstractH2Test {
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults().size(),
+		assertThat(CORE.getPersistence().newDocumentQuery(AdminDocument.USER).beanResults().size(),
 					is(initalSize));
 	}
 

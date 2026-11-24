@@ -8,12 +8,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and truncates all the data except the bootstrap user, as the last member before the restore, but only once a backup to restore exists.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Check that the backup to restore exists">
+		<description>Opens Data Maintenance and checks a backup is listed, so that the restore has something to bring back.</description>
 		<method>
 			<comment>Truncate only when 99-restore.xml has its backup to restore: 00-backup.xml's, the newest</comment>
 			<navigateEdit module="admin" document="DataMaintenance" />
@@ -22,6 +24,7 @@
 		</method>
 	</interaction>
 	<interaction name="Truncate all the data, keeping the bootstrap user">
+		<description>Presses Truncate on the Data tab, which deletes every row of the customer's data.</description>
 		<method>
 			<comment>Truncate deletes every row of the customer's data; 99-restore.xml puts it back</comment>
 			<tabSelect path="Data" />
@@ -32,6 +35,7 @@
 		</method>
 	</interaction>
 	<interaction name="Check the truncate">
+		<description>Signs in again, because the truncate ends the session, and checks that the Data Groups list is empty, which includes the marker left earlier.</description>
 		<method>
 			<comment>Truncating re-creates the bootstrap user, which ends this session: sign in again</comment>
 			<logout />

@@ -27,7 +27,7 @@ class ReportTemplateDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesReportTemplateBean() {
 		ReportTemplate bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+				.build(AdminDocument.REPORT_TEMPLATE);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

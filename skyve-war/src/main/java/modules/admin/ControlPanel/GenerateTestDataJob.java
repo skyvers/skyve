@@ -19,6 +19,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.PushMessage;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
@@ -100,7 +101,7 @@ public class GenerateTestDataJob extends CancellableJob {
 		Tag tag = null;
 
 		if (Boolean.TRUE.equals(bean.getTestTagGeneratedData())) {
-			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			DocumentQuery q = pers.newDocumentQuery(AdminDocument.TAG);
 			q.getFilter().addEquals(Tag.namePropertyName, bean.getTestTagName());
 			tag = q.beanResult();
 

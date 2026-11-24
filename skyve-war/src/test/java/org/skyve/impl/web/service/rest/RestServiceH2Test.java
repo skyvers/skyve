@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.TestDocument;
 
 class RestServiceH2Test extends AbstractSkyveTest {
 
@@ -45,7 +46,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void insertJsonPostPersistsAndReturnsInsertedBean() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("insert-" + System.nanoTime());
 		String json = JSON.marshall(c, bean);
 
@@ -66,7 +67,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void updateJsonPostUpdatesPersistedBeanAndReturnsUpdatedJson() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("before-" + System.nanoTime());
 		bean = p.save(bean);
 		String updatedText = "after-" + System.nanoTime();
@@ -91,7 +92,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void deleteJsonDeleteRemovesPersistedBeanAndReturnsEmptyJsonObject() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("delete-" + System.nanoTime());
 		bean = p.save(bean);
 		String json = JSON.marshall(c, bean);
@@ -109,7 +110,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void queryReturnsJsonForDefaultDocumentQuery() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("rest-query-" + System.nanoTime());
 		p.save(bean);
 
@@ -128,7 +129,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void queryNullifiesFlagCommentWhenUserCannotFlag() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+												 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("rest-query-cannot-flag-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -157,7 +158,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveJsonByIdReturnsJsonForPersistedBean() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-json-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -175,7 +176,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveJsonByIdReturnsNullWhenUserCannotReadDocument() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+												 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-json-denied-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -203,7 +204,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveXmlByIdReturnsBeanForPersistedBean() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-xml-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -221,7 +222,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveXmlByIdReturnsNullWhenUserCannotReadDocument() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+												 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-xml-denied-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -249,7 +250,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveJsonListReturnsJsonForPersistedRows() {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+													 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-list-" + System.nanoTime());
 		p.save(bean);
 
@@ -268,7 +269,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void retrieveJsonListReturnsNullWhenUserCannotReadDocument() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+												 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("retrieve-list-denied-" + System.nanoTime());
 		bean = p.save(bean);
 
@@ -297,7 +298,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 	@Test
 	void queryReturnsNullWhenUserCannotReadDocument() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+												 .build(TestDocument.ALL_ATTRIBUTES_PERSISTENT);
 		bean.setText("query-denied-" + System.nanoTime());
 		bean = p.save(bean);
 

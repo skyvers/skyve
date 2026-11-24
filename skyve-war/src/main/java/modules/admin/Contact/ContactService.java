@@ -5,6 +5,7 @@ import org.skyve.persistence.Persistence;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 
 /**
@@ -35,7 +36,7 @@ public class ContactService {
 	 */
 	public Contact getCurrentUserContact() {
 		User user = persistence.getUser();
-		Contact contact = persistence.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, user.getContactId());
+		Contact contact = persistence.retrieve(AdminDocument.CONTACT, user.getContactId());
 
 		return contact;
 	}

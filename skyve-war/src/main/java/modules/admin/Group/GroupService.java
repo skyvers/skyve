@@ -8,6 +8,7 @@ import org.skyve.persistence.Persistence;
 
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Group;
 
 /**
@@ -27,8 +28,7 @@ public class GroupService {
 	 * @return the matching group, or {@code null} when no record exists
 	 */
 	public GroupExtension get(String bizId) {
-		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME,
-				Group.DOCUMENT_NAME);
+		final DocumentQuery query = persistence.newDocumentQuery(AdminDocument.GROUP);
 		query.getFilter()
 				.addEquals(Bean.DOCUMENT_ID, bizId);
 		return query.beanResult();
@@ -40,8 +40,7 @@ public class GroupService {
 	 * @return all group records for the customer context
 	 */
 	public List<GroupExtension> getAll() {
-		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME,
-				Group.DOCUMENT_NAME);
+		final DocumentQuery query = persistence.newDocumentQuery(AdminDocument.GROUP);
 		return query.beanResults();
 	}
 
@@ -53,7 +52,7 @@ public class GroupService {
 	 * @return the first matching group, or {@code null} when no match exists
 	 */
 	public GroupExtension findByName(String groupName) {
-		final DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		final DocumentQuery query = persistence.newDocumentQuery(AdminDocument.GROUP);
 		query.getFilter().addEquals(Group.namePropertyName, groupName);
 		query.setMaxResults(1);
 		return query.beanResult();

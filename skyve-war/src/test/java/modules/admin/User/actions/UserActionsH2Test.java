@@ -20,6 +20,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
@@ -40,7 +41,7 @@ class UserActionsH2Test extends AbstractH2Test {
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
-		userBean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		userBean = db.build(AdminDocument.USER);
 		webContext = new MockWebContext();
 	}
 

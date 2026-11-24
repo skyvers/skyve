@@ -13,6 +13,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminJob;
 import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
@@ -55,7 +56,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 */
 	public static DocumentQuery getAuditQuery(Persistence pers, DataMaintenance bean) {
 
-		DocumentQuery qAudits = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery qAudits = pers.newDocumentQuery(AdminDocument.AUDIT);
 		if (bean.getAuditModuleName() != null) {
 			qAudits.getFilter().addEquals(Audit.auditModuleNamePropertyName, bean.getAuditModuleName());
 		}

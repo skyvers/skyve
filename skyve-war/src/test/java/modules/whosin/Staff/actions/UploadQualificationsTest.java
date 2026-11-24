@@ -23,9 +23,11 @@ import org.skyve.impl.bizport.CSVLoader;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.WebFileInputStream;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.StaffQualification;
+import modules.whosin.domain.WhosinDocument;
 
 @SuppressWarnings("static-method")
 class UploadQualificationsTest {
@@ -42,6 +44,7 @@ class UploadQualificationsTest {
 		assertSame(staff, returned);
 		assertEquals(LoaderActivityType.CREATE_ALL, loader.activityType);
 		assertEquals(Integer.valueOf(0), loader.sheetIndex);
+		assertSame(WhosinDocument.STAFF_QUALIFICATION, loader.document);
 		assertEquals(Boolean.TRUE, Boolean.valueOf(loader.debugMode));
 		assertEquals(1, loader.dataIndex);
 		assertEquals(List.of(StaffQualification.namePropertyName,
@@ -67,6 +70,7 @@ class UploadQualificationsTest {
 		action.upload(staff, upload("qualifications.csv"), new UploadException(), null);
 
 		assertEquals(LoaderActivityType.CREATE_ALL, loader.activityType);
+		assertSame(WhosinDocument.STAFF_QUALIFICATION, loader.document);
 		assertEquals(Boolean.TRUE, Boolean.valueOf(loader.debugMode));
 		assertEquals(1, loader.dataIndex);
 		assertEquals(2, staff.getQualifications().size());
@@ -153,10 +157,10 @@ class UploadQualificationsTest {
 				InputStream is,
 				int sheetIndex,
 				UploadException exception,
-				String moduleName,
-				String documentName) {
+				ModuleDocument document) {
 			loader.activityType = activityType;
 			loader.sheetIndex = Integer.valueOf(sheetIndex);
+			loader.document = document;
 			return loader;
 		}
 
@@ -164,10 +168,10 @@ class UploadQualificationsTest {
 		protected QualificationLoader newCSVLoader(LoaderActivityType activityType,
 				InputStream is,
 				UploadException exception,
-				String moduleName,
-				String documentName,
+				ModuleDocument document,
 				String... bindings) {
 			loader.activityType = activityType;
+			loader.document = document;
 			loader.bindings = List.of(bindings);
 			return loader;
 		}
@@ -176,6 +180,7 @@ class UploadQualificationsTest {
 	private static class FakeQualificationLoader implements UploadQualifications.QualificationLoader {
 		private final List<StaffQualification> results;
 		private LoaderActivityType activityType;
+		private ModuleDocument document;
 		private Integer sheetIndex;
 		private List<String> bindings = List.of();
 		private boolean debugMode;

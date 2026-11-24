@@ -17,6 +17,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.UserAgentType;
 
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.User;
 
 public class GenerateSAILSuite extends Job {
@@ -32,7 +33,7 @@ public class GenerateSAILSuite extends Job {
 
 		// iterate through each combination of user, module, uxui and deviceagent
 		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		DocumentQuery q = pers.newDocumentQuery(AdminDocument.USER);
 		List<User> users = q.beanResults();
 
 		for (User user : users) {

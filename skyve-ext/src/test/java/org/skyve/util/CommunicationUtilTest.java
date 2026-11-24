@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -46,6 +45,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -515,15 +515,15 @@ class CommunicationUtilTest {
 		CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT,
 				new MailAttachment[] { new MailAttachment("extra.txt", "extra".getBytes(StandardCharsets.UTF_8), org.skyve.content.MimeType.plain) });
 
-		assertThat(mailService.sendCount, is(1));
-		assertThat(mailService.lastSend.getSenderEmailAddress(), is("sender@example.com"));
-		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("alt@example.com", "to@example.com")));
-		assertThat(mailService.lastSend.getCcEmailAddresses(), is(java.util.Set.of("cc@example.com")));
-		assertThat(mailService.lastSend.getBccEmailAddresses(), is(java.util.Set.of("admin@example.com")));
-		assertThat(mailService.lastSend.getSubject(), is("Subject"));
-		assertThat(mailService.lastSend.getBody(), containsString("<html><body>Body<br>"));
-		assertThat(mailService.lastSend.getBody(), containsString("google.com/calendar/render"));
-		assertThat(mailService.lastSend.getAttachments().size(), is(3));
+		assertThat(mailService.getSent().size(), is(1));
+		assertThat(mailService.getLastSent().getSenderEmailAddress(), is("sender@example.com"));
+		assertThat(mailService.getLastSent().getRecipientEmailAddresses(), is(java.util.Set.of("alt@example.com", "to@example.com")));
+		assertThat(mailService.getLastSent().getCcEmailAddresses(), is(java.util.Set.of("cc@example.com")));
+		assertThat(mailService.getLastSent().getBccEmailAddresses(), is(java.util.Set.of("admin@example.com")));
+		assertThat(mailService.getLastSent().getSubject(), is("Subject"));
+		assertThat(mailService.getLastSent().getBody(), containsString("<html><body>Body<br>"));
+		assertThat(mailService.getLastSent().getBody(), containsString("google.com/calendar/render"));
+		assertThat(mailService.getLastSent().getAttachments().size(), is(3));
 		verify(webContext).growl(MessageSeverity.info, CommunicationUtil.SENT_SUCCESSFULLY_MESSAGE);
 	}
 
@@ -542,10 +542,10 @@ class CommunicationUtilTest {
 
 		CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null);
 
-		assertThat(mailService.sendCount, is(1));
-		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("override@example.com")));
-		assertThat(mailService.lastSend.getCcEmailAddresses(), is(java.util.Set.of("override-cc@example.com")));
-		assertThat(mailService.lastSend.getBody(), is("<main>Body</main>"));
+		assertThat(mailService.getSent().size(), is(1));
+		assertThat(mailService.getLastSent().getRecipientEmailAddresses(), is(java.util.Set.of("override@example.com")));
+		assertThat(mailService.getLastSent().getCcEmailAddresses(), is(java.util.Set.of("override-cc@example.com")));
+		assertThat(mailService.getLastSent().getBody(), is("<main>Body</main>"));
 	}
 
 	@Test
@@ -558,8 +558,8 @@ class CommunicationUtilTest {
 
 		CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, ResponseMode.EXPLICIT, null);
 
-		assertThat(mailService.sendCount, is(0));
-		assertThat(mailService.writeCount, is(0));
+		assertThat(mailService.getSent().size(), is(0));
+		assertThat(mailService.getWritten().size(), is(0));
 	}
 
 	@Test
@@ -574,9 +574,9 @@ class CommunicationUtilTest {
 
 		String result = CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null);
 
-		assertThat(mailService.writeCount, is(1));
-		assertThat(mailService.lastWrite.getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
-		assertThat(mailService.lastWrite.getBody(), containsString("<html><body>Body<br>"));
+		assertThat(mailService.getWritten().size(), is(1));
+		assertThat(mailService.getLastWritten().getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
+		assertThat(mailService.getLastWritten().getBody(), containsString("<html><body>Body<br>"));
 		assertThat(result, containsString("to_example_com"));
 		assertTrue(Files.exists(Path.of(result)));
 	}
@@ -592,9 +592,9 @@ class CommunicationUtilTest {
 		CommunicationUtil.sendFailSafeSystemCommunication("Existing", "Default subject", "Default body", ResponseMode.EXPLICIT, null);
 		CommunicationUtil.sendFailSafeSystemCommunication("Existing", "to@example.com", null, "Default subject", "Default body", ResponseMode.EXPLICIT, null);
 
-		assertThat(mailService.sendCount, is(2));
-		assertThat(mailService.lastSend.getSenderEmailAddress(), is("sender@example.com"));
-		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
+		assertThat(mailService.getSent().size(), is(2));
+		assertThat(mailService.getLastSent().getSenderEmailAddress(), is("sender@example.com"));
+		assertThat(mailService.getLastSent().getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
 	}
 
 	@Test
@@ -706,7 +706,7 @@ class CommunicationUtilTest {
 
 		assertThrows(ValidationException.class,
 				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
-		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+		assertThat(Integer.valueOf(mailService.getSent().size()), is(Integer.valueOf(0)));
 	}
 
 	@Test
@@ -720,7 +720,7 @@ class CommunicationUtilTest {
 
 		assertThrows(ValidationException.class,
 				() -> CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
-		assertThat(Integer.valueOf(mailService.writeCount), is(Integer.valueOf(0)));
+		assertThat(Integer.valueOf(mailService.getWritten().size()), is(Integer.valueOf(0)));
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
@@ -740,7 +740,7 @@ class CommunicationUtilTest {
 				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
 
 		assertThat(e.getMessage(), is("Admin user admin-user has no contact"));
-		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+		assertThat(Integer.valueOf(mailService.getSent().size()), is(Integer.valueOf(0)));
 	}
 
 	@Test
@@ -757,7 +757,7 @@ class CommunicationUtilTest {
 				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
 
 		assertThat(e.getMessage(), is("The communication template has no template"));
-		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+		assertThat(Integer.valueOf(mailService.getSent().size()), is(Integer.valueOf(0)));
 	}
 
 	@SuppressWarnings("boxing")
@@ -949,30 +949,6 @@ class CommunicationUtilTest {
 	void testResponseModeEnumsAreAccessible() {
 		assertThat(CommunicationUtil.ResponseMode.EXPLICIT, notNullValue());
 		assertThat(CommunicationUtil.ResponseMode.SILENT, notNullValue());
-	}
-
-	private static class CaptureMailService implements MailService {
-		int sendCount;
-		int writeCount;
-		Mail lastSend;
-		Mail lastWrite;
-
-		@Override
-		public void writeMail(@jakarta.annotation.Nonnull Mail mail, @jakarta.annotation.Nonnull OutputStream out) {
-			writeCount++;
-			lastWrite = mail;
-		}
-
-		@Override
-		public void sendMail(@jakarta.annotation.Nonnull Mail mail) {
-			sendCount++;
-			lastSend = mail;
-		}
-
-		@Override
-		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
-			// not used by these tests
-		}
 	}
 
 	public static class CaptureContentManager extends NoOpContentManager {

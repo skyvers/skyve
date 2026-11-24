@@ -174,7 +174,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	public static UserMonthlyHits newInstance() {
 		try {
-			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+			return AdminDocument.USER_MONTHLY_HITS.toDocument(CORE.getUser().getCustomer()).newInstance(CORE.getUser());
 		}
 		catch (RuntimeException e) {
 			throw e;

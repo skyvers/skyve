@@ -25,7 +25,7 @@ class TagDomainTest extends AbstractH2Test {
 	void dataBuilderPopulatesTagBean() {
 		Tag bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+				.build(AdminDocument.TAG);
 		assertNotNull(bean);
 		assertNotNull(bean.getBizId());
 	}

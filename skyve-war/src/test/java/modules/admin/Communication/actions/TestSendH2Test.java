@@ -25,10 +25,8 @@ import modules.admin.Contact.ContactExtension;
 import modules.admin.Tag.TagExtension;
 import modules.admin.User.UserService;
 import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Contact;
-import modules.admin.domain.Tag;
-import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
 /**
@@ -50,8 +48,8 @@ class TestSendH2Test extends AbstractH2Test {
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 
-		communication = db.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		tag = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		communication = db.build(AdminDocument.COMMUNICATION);
+		tag = db.build(AdminDocument.TAG);
 	}
 
 	@Test
@@ -81,7 +79,7 @@ class TestSendH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension taggedContact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension taggedContact = db.build(AdminDocument.CONTACT);
 		taggedContact = CORE.getPersistence().save(taggedContact);
 		TagManager tm = EXT.getTagManager();
 		tm.tag(tag.getBizId(), taggedContact);
@@ -113,7 +111,7 @@ class TestSendH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension taggedContact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension taggedContact = db.build(AdminDocument.CONTACT);
 		taggedContact = CORE.getPersistence().save(taggedContact);
 		TagManager tm = EXT.getTagManager();
 		tm.tag(tag.getBizId(), taggedContact);
@@ -141,7 +139,7 @@ class TestSendH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension taggedContact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension taggedContact = db.build(AdminDocument.CONTACT);
 		taggedContact = CORE.getPersistence().save(taggedContact);
 		TagManager tm = EXT.getTagManager();
 		tm.tag(tag.getBizId(), taggedContact);
@@ -172,7 +170,7 @@ class TestSendH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension taggedContact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension taggedContact = db.build(AdminDocument.CONTACT);
 		taggedContact = CORE.getPersistence().save(taggedContact);
 		TagManager tm = EXT.getTagManager();
 		tm.tag(tag.getBizId(), taggedContact);
@@ -199,7 +197,7 @@ class TestSendH2Test extends AbstractH2Test {
 		setupValidCommunication();
 		
 		// Create and tag a contact
-		ContactExtension taggedContact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		ContactExtension taggedContact = db.build(AdminDocument.CONTACT);
 		taggedContact = CORE.getPersistence().save(taggedContact);
 		TagManager tm = EXT.getTagManager();
 		tm.tag(tag.getBizId(), taggedContact);
@@ -242,14 +240,14 @@ class TestSendH2Test extends AbstractH2Test {
 			// Get or create UserProxy for current user
 			UserProxyExtension userProxy = userService.currentAdminUserProxy();
 			if (userProxy == null) {
-				userProxy = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+				userProxy = db.build(AdminDocument.USER_PROXY);
 				userProxy.setBizId(CORE.getPersistence().getUser().getId());
 			}
 			
 			// Ensure the user proxy has a contact with an email
 			ContactExtension contact = userProxy.getContact();
 			if (contact == null) {
-				contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+				contact = db.build(AdminDocument.CONTACT);
 			}
 			if (contact.getEmail1() == null) {
 				contact.setEmail1("testuser@example.com");

@@ -24,7 +24,7 @@ of hand-building fixtures in each test.
 - **H2 tests** must use `DataBuilder` or factory fixtures for all domain object creation.
 - **Mockito-only tests** must mock Skyve documents; avoid calling `newInstance()` unless strictly required.
 - **For CDI-managed classes in H2 tests (actions/services/bizlets/etc.), prefer `@Inject` over `new`.** Constructing with `new` bypasses CDI wiring and any future injected dependencies.
-- Use `db.build(<MODULE>, <DOC>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
+- Use `db.build(<Module>Document.<DOCUMENT>)` for general objects, and `db.factoryBuild(...)` for complex or linked fixtures.
 
 ### Minimal example
 ```java
@@ -38,8 +38,8 @@ class ExampleH2Test extends AbstractH2Test {
 
   @Test
   void createsValidDomainInstances() {
-    Account acc = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
-    DocumentQuery q = CORE.getPersistence().newDocumentQuery(Account.MODULE_NAME, Account.DOCUMENT_NAME);
+    Account acc = CORE.getPersistence().save(db.build(SalesDocument.ACCOUNT));
+    DocumentQuery q = CORE.getPersistence().newDocumentQuery(SalesDocument.ACCOUNT);
     q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
     assertThat(q.scalarResult(Number.class).intValue(), is(1));
   }
@@ -51,10 +51,13 @@ class ExampleH2Test extends AbstractH2Test {
     ```java
     DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
     ```
-  - Build instances using module/document names:
+  - Build instances using the module's generated document enum (`<Module>Document`, see
+    [typed-metadata-references.md](../typed-metadata-references.md)):
     ```java
-    Account account = CORE.getPersistence().save(db.build(Account.MODULE_NAME, Account.DOCUMENT_NAME));
+    Account account = CORE.getPersistence().save(db.build(SalesDocument.ACCOUNT));
     ```
+  - When a test mocks `Persistence`, stub the form the code under test calls; see
+    [Testing with mocks](../typed-metadata-references.md#testing-with-mocks).
   - This ensures values comply with masks, validators and relationships without
     needing custom private helper methods everywhere.
 
@@ -104,7 +107,7 @@ Pure Mockito unit tests
 
 `docs/ai/test-patterns.md` captures reusable test patterns seen across Skyve repositories, generalised for framework and application work.
 
-Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [docs/coverage-plan.md](../coverage-plan.md).
+Use the smallest pattern that proves the behaviour. For the active coverage improvement plan, target packages, and skip list, see [coverage-plan.md](coverage-plan.md).
 
 ## Test Placement Decision
 
@@ -385,6 +388,12 @@ Builders that create real JSF/PrimeFaces components (e.g. `TabularLayoutBuilder`
 - Tooling: H2 test base + `@Mock` for persistence wrappers/reporting APIs.
 - Guidance: Use when pure unit tests are too synthetic and full integration is too heavy.
 
+## Capturing Mail
+
+- Use `org.skyve.impl.mail.CaptureMailService` (in `skyve-ext` main, so every module and assembled app can see it); do not write another nested fake.
+- Either `MailServiceStaticSingleton.set(capture)` and restore in `@AfterEach`, or `capture.install()` / `capture.uninstall()`, which also switch off `SMTP_TEST_BOGUS_SEND` and `SMTP_TEST_RECIPIENT` so the real recipients are recorded, and put everything back afterwards.
+- Assert on `getSent()` / `getLastSent()`, `getBulkSent()` / `getLastBulkSent()` and `getWritten()` / `getLastWritten()`; the `getLast...` methods throw when nothing was recorded.
+
 ## skyve-war as a Full-Stack Test Harness
 
 `skyve-war` is the assembled reference application and the only module that runs with the full Skyve metadata context: real customer metadata, the complete test module domain, a real `SessionFactory`, and a `SuperUser` with access to all documents. Tests that need any of those things belong here.
@@ -450,10 +459,7 @@ public class MyTests extends AbstractSkyveTestDispose {
 
         // act
         AllAttributesPersistent saved = p.save(bean);
-        AllAttributesPersistent retrieved = p.retrieve(
-                AllAttributesPersistent.MODULE_NAME,
-                AllAttributesPersistent.DOCUMENT_NAME,
-                saved.getBizId());
+        AllAttributesPersistent retrieved = p.retrieve(TestDocument.ALL_ATTRIBUTES_PERSISTENT, saved.getBizId());
 
         // assert
         Assert.assertNotNull(retrieved);

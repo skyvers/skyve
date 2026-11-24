@@ -7,12 +7,14 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Signs in as admin in SmartClient (desktop UX/UI) and leaves a data group behind after the backups, as a marker that only a successful restore can remove.</description>
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
 		<switchMode />
 	</before>
 	<interaction name="Leave a marker that the restore must remove">
+		<description>Creates a data group named SAIL restore marker and checks it is listed, so the restore at the end of the suite can prove it took the data back to the backup.</description>
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
 			<listGridNew module="admin" document="DataGroup" />

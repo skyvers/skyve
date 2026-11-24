@@ -9,7 +9,9 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Used by the recorder round-trip test: a user in an already signed-in PrimeFaces (tablet UX/UI) session makes a lookup value, opens it from two list grids, fills in widgets and runs actions, while the recorder writes a script of what was done, which is then replayed.</description>
 	<interaction name="Lookup values">
+		<description>Creates a lookup value whose description sorts first in its list.</description>
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
@@ -19,6 +21,7 @@
 		</method>
 	</interaction>
 	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
+		<description>Opens that lookup value from both the Vue list grid and the PrimeFaces data table on the List Grid Fixture, checks its description each time, then deletes it from the Lookup values list.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL Recorded {run}" />
@@ -33,6 +36,7 @@
 		</method>
 	</interaction>
 	<interaction name="Widgets">
+		<description>Fills in checkbox, combo, radio, number, text and memo widgets on the Kitchen Sink Widgets tab and checks the combo and text values.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<tabSelect path="Widgets" />
@@ -49,6 +53,7 @@
 		</method>
 	</interaction>
 	<interaction name="Actions and tabs">
+		<description>Runs the Actions Fixture's toolbar, form button and tab button actions, checking the outcome each time.</description>
 		<method>
 			<navigateEdit module="kitchensink" document="ActionsFixture" />
 			<action name="RunFromToolbar" />

@@ -29,6 +29,11 @@
 <suite xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 		xmlns="http://www.skyve.org/xml/sail"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<description>Exercises the admin module as a user would meet it: every admin menu item and the actions behind it, in both the PrimeFaces tablet UX/UI (with one smoke script on a phone) and the SmartClient desktop UX/UI. The members cover signing in and out, contacts and communications, security administration, DevOps tools, reports, import and export, tags, operations, the user list, and the destructive maintenance actions.
+
+		The suite protects the data it changes. Three set-ups run first: one checks that no earlier run left its restore marker, one backs up the data in each UI, and one leaves a marker that only a restore can remove. Each member signs in as admin (or as a user it makes), makes what it needs with names unique to the run, and cleans up after itself. Last, a restore puts the backup back, and both UIs check that the marker has gone and the backups are deleted.
+
+		A pass means every menu item opens and behaves in both UIs, each create, change and delete shows up where the user would look for it, and the data is back as the suite found it. If a set-up fails, no member runs.</description>
 	<viewRoles user="sail{run}">
 		<!-- 03-security-admin.xml makes this user in a group with these roles, then signs in as them -->
 		<role>admin.BasicUser</role>

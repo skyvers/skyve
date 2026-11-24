@@ -11,7 +11,6 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
@@ -19,6 +18,7 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
@@ -41,8 +41,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(ChangePassword.MODULE_NAME);
-		Document changePasswordDocument = module.getDocument(customer, ChangePassword.DOCUMENT_NAME);
+		Document changePasswordDocument = AdminDocument.CHANGE_PASSWORD.toDocument(customer);
 		BeanValidator.validateBeanAgainstDocument(changePasswordDocument, bean);
 
 		String oldPassword = bean.getOldPassword();
@@ -68,7 +67,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			throw new ValidationException(message);
 		}
 
-		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
+		Document userDocument = AdminDocument.USER.toDocument(customer);
 		modules.admin.domain.User userBean = persistence.retrieveAndLock(userDocument, user.getId());
 
 		// The old password is required (and must be right) for every change but a reset by token,

@@ -18,7 +18,7 @@ class ChangePasswordDomainTest extends AbstractH2Test {
 	void dataBuilderCreatesBean() {
 		ChangePassword bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ChangePassword.MODULE_NAME, ChangePassword.DOCUMENT_NAME);
+				.build(AdminDocument.CHANGE_PASSWORD);
 		assertNotNull(bean);
 	}
 

@@ -26,7 +26,7 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
 	void dataBuilderCreatesControlPanel() {
 		ControlPanel bean = new DataBuilder()
 				.fixture(FixtureType.crud)
-				.build(ControlPanel.MODULE_NAME, ControlPanel.DOCUMENT_NAME);
+				.build(AdminDocument.CONTROL_PANEL);
 		assertNotNull(bean);
 	}
 

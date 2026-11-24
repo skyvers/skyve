@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 
 import jakarta.servlet.http.HttpServletResponse;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.UserRole;
 import util.AbstractH2Test;
 
@@ -86,11 +87,11 @@ class RestServiceSelfEscalationH2Test extends AbstractH2Test {
 		AbstractPersistence p = AbstractPersistence.get();
 		User original = p.getUser();
 		DataBuilder builder = new DataBuilder().fixture(FixtureType.crud);
-		UserExtension me = builder.build("admin", "User");
+		UserExtension me = builder.build(AdminDocument.USER);
 		me.setUserName("rest-escalate-me");
 		me.getGroups().clear();
 		me.getRoles().clear();
-		UserRole role = builder.build(UserRole.MODULE_NAME, UserRole.DOCUMENT_NAME);
+		UserRole role = builder.build(AdminDocument.USER_ROLE);
 		role.setRoleName("admin.AppUser");
 		me.addRolesElement(role);
 		me = p.save(me);
@@ -99,7 +100,7 @@ class RestServiceSelfEscalationH2Test extends AbstractH2Test {
 		User asAppUser = me.toMetaDataUser();
 		p.setUser(asAppUser);
 		try {
-			UserExtension mine = Objects.requireNonNull(p.retrieve("admin", "User", me.getBizId()));
+			UserExtension mine = Objects.requireNonNull(p.retrieve(AdminDocument.USER, me.getBizId()));
 			UserRole extra = UserRole.newInstance();
 			extra.setRoleName("admin.SecurityAdministrator");
 			mine.addRolesElement(extra);

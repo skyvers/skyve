@@ -42,6 +42,8 @@ abstract class CrossBrowserSelenium {
 															"OptimizationHintsFetching",
 															"OptimizationTargetPrediction",
 															"OptimizationHints");
+	/** The page every browser opens on when it starts, whatever its profile. */
+	static final String START_PAGE = "about:blank";
 
 	protected WebDriver driver;
 	protected BrowserConfiguration configuration;
@@ -483,5 +485,9 @@ abstract class CrossBrowserSelenium {
 		if (resolution != null) {
 			manage.window().setSize(resolution);
 		}
+
+		// Chrome and Edge with a profile (--user-data-dir) open on their new tab page (a search page) instead of the
+		// blank page they open on without one, and a profile's startup page cannot be set from outside the browser.
+		driver.get(START_PAGE);
 	}
 }

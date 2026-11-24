@@ -13,6 +13,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.domain.AdminDocument;
 import modules.admin.domain.AdminJob;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Tag;
@@ -39,7 +40,7 @@ public class DeleteTestData implements ServerSideAction<ControlPanelExtension> {
 		JobMetaData job = AdminJob.J_DELETE_ALL_TAGGED_DATA_FOR_TAG.toJob(customer);
 		
 		// Retrieve the Tag for the delete
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AdminDocument.TAG);
 		q.getFilter().addEquals(Tag.namePropertyName, bean.getTestTagName());
 		Tag tagForDelete = q.beanResult();
 		if(tagForDelete!=null) {
