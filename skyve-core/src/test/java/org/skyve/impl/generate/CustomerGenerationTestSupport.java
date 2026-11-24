@@ -14,7 +14,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
  * directory, and reads back what it wrote, for the tests of its customer output.
  */
 final class CustomerGenerationTestSupport {
-	/** The module the tests generate, which is excluded from domain test generation. */
+	/** The module the tests generate, which is excluded from domain test generation unless a test asks for tests. */
 	static final String MODULE = "sales";
 
 	private CustomerGenerationTestSupport() {
@@ -28,6 +28,18 @@ final class CustomerGenerationTestSupport {
 	 * @param validate	Whether to validate the metadata.
 	 */
 	static void generate(String srcPath, Path generatedSrc, Path generatedTest, ProvidedRepository repo, boolean validate) throws Exception {
+		generate(srcPath, generatedSrc, generatedTest, repo, validate, new String[] {MODULE});
+	}
+
+	/**
+	 * Runs a writing generator over the repository, generating domain and action tests for the modules not excluded.
+	 *
+	 * @param srcPath	The source path, where hand-written extensions are, ending with '/', or "".
+	 * @param validate	Whether to validate the metadata.
+	 * @param excludedModules	The modules to generate no tests for, or null for none.
+	 */
+	static void generate(String srcPath, Path generatedSrc, Path generatedTest, ProvidedRepository repo, boolean validate, String[] excludedModules)
+	throws Exception {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
 				false,
 				false,
@@ -36,7 +48,7 @@ final class CustomerGenerationTestSupport {
 				generatedSrc.toString() + '/',
 				"",
 				generatedTest.toString() + '/',
-				new String[] {MODULE});
+				excludedModules);
 		gen.repository = repo;
 		gen.validate = validate;
 		gen.generate();

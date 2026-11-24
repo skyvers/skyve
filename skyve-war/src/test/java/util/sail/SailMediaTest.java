@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Map;
 
@@ -209,6 +210,48 @@ class SailMediaTest {
 					() -> assertTrue(list.contains("1 runs"), list),
 					() -> assertTrue(list.contains("media/" + failed.getFileName() + "/index.html"), list),
 					() -> assertFalse(Files.exists(media.resolve("index.html")), "no list in media/"));
+	}
+
+	/** With keepMedia=failed and only a video directory, a passed run's video folder is deleted and its list rewritten. */
+	@Test
+	void aPassedVideoOnlyRunIsDeleted(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings videoOnly = SailSettings.resolve(environment, List.of(SailSettings.code().videoDir(Path.of("video"))
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path video = base.resolve("video");
+		Path passed = run(videoOnly, video, "videoOnly", null, true);
+		String list = Files.readString(video.resolve("index.html"));
+		assertAll(() -> assertFalse(Files.exists(passed), "a passed run's video folder is deleted"),
+					() -> assertTrue(list.contains("0 runs"), list));
+	}
+
+	/**
+	 * When a passed run's folder can't be deleted, as its directory of runs is read-only, the run is kept and the unit
+	 * ends without failing.
+	 */
+	@Test
+	void aPassedRunWhoseFolderCannotBeDeletedIsKept(@TempDir Path base) throws IOException {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media"))
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path media = base.resolve("media");
+		Path kept;
+		SailMedia.beginUnit(null);
+		try {
+			kept = run(failedOnly, media, "undeletable", null, true);
+			Files.setPosixFilePermissions(media, PosixFilePermissions.fromString("r-xr-xr-x"));
+		}
+		finally {
+			try {
+				SailMedia.endUnit(true);
+			}
+			finally {
+				if (Files.exists(media)) {
+					Files.setPosixFilePermissions(media, PosixFilePermissions.fromString("rwxr-xr-x"));
+				}
+			}
+		}
+		assertTrue(Files.exists(kept), "the run's folder is kept when it can't be deleted");
 	}
 
 	/** Runs one step in a run's media, labelled, and ends it; returns the run's folder. */
