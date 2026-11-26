@@ -1,0 +1,21 @@
+/*
+ * The PrimeFlex 3.3 rules this bundle relies on, copied as they are, in place of the whole of PrimeFlex
+ * (318 KB, loaded on every view with the Vue list grid on).
+ *
+ * - flex, flex-row, flex-column, gap-2, gap-3, gap-5 and justify-content-center are used by ListGrid.vue and
+ *   SnapshotPicker.vue.
+ * - field (and its label and small) is on top-labelled form fields (ResponsiveLayoutBuilder); PrimeFlex styled them
+ *   on views with the Vue list grid on, so they keep the same spacing.
+ *
+ * A class from the rest of PrimeFlex has no effect here; add its rule from primeflex.css if one is needed.
+ */
+.flex{display:flex !important}
+.flex-row{flex-direction:row !important}
+.flex-column{flex-direction:column !important}
+.justify-content-center{justify-content:center !important}
+.gap-2{gap:.5rem !important}
+.gap-3{gap:1rem !important}
+.gap-5{gap:2rem !important}
+.field{margin-bottom:1rem}
+.field>label{display:inline-block;margin-bottom:.5rem}
+.field>small{margin-top:.25rem}

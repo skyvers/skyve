@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { formatServerDate } from './DateFormat';
 
 
 const COMMON = {
@@ -9,9 +9,8 @@ const COMMON = {
 
 /**
  * Creates a function that formats a date or time value from the server (ISO 8601) as the Java converter of
- * the same name does: the format is the converter's pattern (Luxon and Java's SimpleDateFormat read the
- * letters used here the same way), in English, as the Java converters format in Locale.ENGLISH
- * (so 'Sep' and 'PM' whatever the browser's language).
+ * the same name does: the format is the converter's pattern (SimpleDateFormat letters - see DateFormat.js),
+ * in English, as the Java converters format in Locale.ENGLISH (so 'Sep' and 'PM' whatever the browser's language).
  */
 function _createDateFormatter(format) {
 
@@ -21,8 +20,7 @@ function _createDateFormatter(format) {
             return "";
         }
 
-        const dt = DateTime.fromISO(stringValue, { locale: 'en-US' });
-        return dt.toFormat(format);
+        return formatServerDate(stringValue, format);
     };
 }
 

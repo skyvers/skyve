@@ -1,8 +1,9 @@
 // Lara theme in the primevue cascade layer - see theme.css
 import "./theme.css";
 import "primevue/resources/primevue.min.css";
-import "primeflex/primeflex.css";
-import "primeicons/primeicons.css";
+// The few PrimeFlex rules used (see primeflex.css). No primeicons stylesheet: PrimeFaces adds its own to every page,
+// with the same icons, and the fonts were already PrimeFaces' copies.
+import "./primeflex.css";
 
 import { createApp, h, reactive } from 'vue'
 import ListGrid from './ListGrid.vue'

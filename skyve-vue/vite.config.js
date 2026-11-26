@@ -4,8 +4,20 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
+// PrimeFaces adds the icon stylesheet to a Skyve page, so the bundle leaves it out; the dev page (npm run dev) has no
+// PrimeFaces, so it gets primeicons here. (index.html is the build's entry, so a <link> there would be bundled.)
+const devIcons = {
+    name: 'skyve-dev-primeicons',
+    apply: 'serve',
+    transformIndexHtml: () => [{
+        tag: 'link',
+        attrs: { rel: 'stylesheet', href: '/node_modules/primeicons/primeicons.css' },
+        injectTo: 'head'
+    }]
+};
+
 export default defineConfig({
-    plugins: [vue()],
+    plugins: [vue(), devIcons],
     build: {
         // skyve.js is loaded by Faces as a classic <script>, not a module.
         // Wrap it in an IIFE so its minified top-level names (eg L, $) stay private

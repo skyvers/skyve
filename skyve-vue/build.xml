@@ -2,21 +2,12 @@
 <!DOCTYPE project>
 <project name="build-vue" default="copy-artifacts" basedir=".">
 	<property name="skyvevueDir" value="../skyve-web/src/main/resources/META-INF/resources/skyve/vue" />
-	<!-- skyve.css is served from jakarta.faces.resource/vue/ so this URL is relative to that -->
-	<property name="primefacesResourcePrefix" value="../primeicons/" />
-	<property name="primefacesResourceSuffix" value=".xhtml?ln=primefaces&amp;v=13.0.10&amp;e=13.0.14" />
 	<target name="copy-artifacts" depends="build-vue">
 		<echo>Copying dist/assets directory to skyve-web</echo>
 		<copy  todir="${skyvevueDir}" verbose="true">
 			<fileset dir="./dist/assets" includes="skyve.js,skyve.css" />
 		</copy>
-		<replace file="${skyvevueDir}/skyve.css">
-			<replacefilter token="./primeicons.eot" value="${primefacesResourcePrefix}primeicons.eot${primefacesResourceSuffix}" />
-			<replacefilter token="./primeicons.woff2" value="${primefacesResourcePrefix}primeicons.woff2${primefacesResourceSuffix}" />
-			<replacefilter token="./primeicons.woff" value="${primefacesResourcePrefix}primeicons.woff${primefacesResourceSuffix}" />
-			<replacefilter token="./primeicons.ttf" value="${primefacesResourcePrefix}primeicons.ttf${primefacesResourceSuffix}" />
-			<replacefilter token="./primeicons.svg" value="${primefacesResourcePrefix}primeicons.svg${primefacesResourceSuffix}" />
-		</replace>
+		<!-- No primeicons stylesheet or fonts: PrimeFaces adds its own primeicons.css to every page -->
 		<!-- Drop the Lara theme's Inter font - the templates use their own font (see alignFont() in main.js) -->
 		<replaceregexp file="${skyvevueDir}/skyve.css" match="@font-face\{font-family:Inter var;[^}]*\}" replace="" flags="g" />
 	</target>
