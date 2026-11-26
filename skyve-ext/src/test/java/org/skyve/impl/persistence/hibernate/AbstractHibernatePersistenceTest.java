@@ -386,6 +386,20 @@ class AbstractHibernatePersistenceTest {
 	}
 
 	@Test
+	void testRollbackEndsARollbackOnlyTransaction() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			persistence.setRollbackOnly();
+			persistence.rollback();
+			assertFalse(persistence.getEntityManager().getTransaction().isActive());
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
 	void testEvictSharedCacheBeansAllDoesNotThrow() {
 		TestHibernatePersistence persistence = new TestHibernatePersistence();
 		try {

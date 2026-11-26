@@ -1107,24 +1107,21 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	@Override
 	public final void rollback() {
-		boolean rollbackOnly = false;
 		try {
 			if (em != null) {
 				EntityTransaction et = em.getTransaction();
+				// Roll back a rollback-only transaction too, otherwise it stays active and the next begin() joins it
 				if ((et != null) && et.isActive()) {
-					rollbackOnly = et.getRollbackOnly();
-					if (! rollbackOnly) {
-						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
-		                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-		                // These methods are deprecated, as beginning and ending a transaction has the same effect.
-						et.rollback();
-					}
+					// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+	                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+	                // These methods are deprecated, as beginning and ending a transaction has the same effect.
+					et.rollback();
 				}
 			}
 		}
 		finally {
 			try {
-				if ((! rollbackOnly) && (dynamicPersistence != null)) {
+				if (dynamicPersistence != null) {
 					dynamicPersistence.rollback();
 				}
 			}
