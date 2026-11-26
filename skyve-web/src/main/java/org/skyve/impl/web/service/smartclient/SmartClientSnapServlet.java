@@ -252,8 +252,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 		sb.append('[');
 		List<Bean> results = q.projectedResults();
 		for (Bean bean : results) {
-			String escapedCode = OWASP.escapeJsStringWithHtmlFormatting((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
-			String escapedDescription = OWASP.escapeJsStringWithHtmlFormatting((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
+			// Plain JSON for both clients: SmartClient evaluates it and Vue parses it, and each escapes the name for display
+			String escapedCode = OWASP.escapeJsonString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
+			String escapedDescription = OWASP.escapeJsonString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
 			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 			if (snapshot != null) {
 				snapshot = smartClientRequest ? SnapshotAdapter.toSmartClient(snapshot) : SnapshotAdapter.toVue(snapshot);

@@ -746,47 +746,46 @@ isc.BizListGrid.addMethods({
 								},
 							];
 
-							// Populate menu with snapshots if data exists
+							// Populate menu with snapshots if data exists.
+							// The handlers are closures over the snapshot, not code strings, so a name or criteria
+							// value with a quote or backslash in it cannot break them; names are text, so escape them.
 							if (data) {
 								for (let i = 0, l = data.length; i < l; i++) {
 									menu.add({ isSeparator: true });
 									const snap = data[i];
 									const enabled = me.snapId == snap.bizId;
 									const entry = {
-										title: snap.name,
+										title: snap.name.asHTML(),
 										icon: "icons/snap.png",
-										click:
-											me._snapMenuButton.ID +
-											"._setSnap('" +
-											snap.bizId +
-											"','" +
-											snap.name +
-											"','" +
-											JSON.stringify(snap.snapshot.criteria) +
-											"','" +
-											snap.snapshot.advancedCriteriaStyle +
-											"','" +
-											snap.snapshot.fieldState +
-											"','" +
-											snap.snapshot.sortState +
-											"','" +
-											snap.snapshot.groupState +
-											"','" +
-											snap.snapshot.summaryType +
-											"')",
+										click: function () {
+											me._snapMenuButton._setSnap(
+												snap.bizId,
+												snap.name,
+												snap.snapshot.criteria,
+												snap.snapshot.advancedCriteriaStyle,
+												snap.snapshot.fieldState,
+												snap.snapshot.sortState,
+												snap.snapshot.groupState,
+												snap.snapshot.summaryType,
+											);
+										},
 										submenu: [
 											{
 												title:
                                                     isc.i18nMessages.bizListGrid_ToolbarMenuUpdateSnapshot +
 													(enabled ? "" : isc.i18nMessages.bizListGrid_ToolbarMenuFirstSelectSnapshot),
 												icon: "icons/snap_edit.png",
-												click: me._snapMenuButton.ID + "._updateSnap('" + snap.bizId + "')",
+												click: function () {
+													me._snapMenuButton._updateSnap(snap.bizId);
+												},
 												enabled: enabled,
 											},
 											{
 												title: isc.i18nMessages.bizListGrid_ToolbarMenuDeleteSnapshot,
 												icon: "icons/snap_delete.png",
-												click: me._snapMenuButton.ID + "._deleteSnap('" + snap.bizId + "')",
+												click: function () {
+													me._snapMenuButton._deleteSnap(snap.bizId);
+												},
 											},
 										],
 									};
@@ -849,7 +848,7 @@ isc.BizListGrid.addMethods({
 
 									// Update the snapId and menu button title
 									this.snapId = data.bizId;
-									this._snapMenuButton.setTitle(value);
+									this._snapMenuButton.setTitle(value.asHTML());
 								}
 							},
 						});
@@ -863,8 +862,8 @@ isc.BizListGrid.addMethods({
 		 * Sets the snapshot configuration for the grid and updates the UI accordingly.
 		 *
 		 * @param {string} snapId - the ID of the snapshot to be applied.
-		 * @param {string} title - the title of the snapshot.
-		 * @param {string} criteria - the criteria in JSON format to be applied to the filter.
+		 * @param {string} title - the snapshot's name, as text.
+		 * @param {object} criteria - the criteria to be applied to the filter; copied, so the caller's stays as it is.
 		 * @param {string} advancedCriteriaStyle - the style for advanced criteria.
 		 * @param {object} fieldState - the field state to be applied to the grid.
 		 * @param {object} sortState - the sort state to be applied to the grid.
@@ -883,10 +882,10 @@ isc.BizListGrid.addMethods({
 		) => {
 			// Set the snapshot ID and update the title
 			this.snapId = snapId;
-			this._snapMenuButton.setTitle(title ? title : isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot);
+			this._snapMenuButton.setTitle(title ? title.asHTML() : isc.i18nMessages.bizListGrid_ToolbarMenuNoSnapshot);
 
-			// Parse criteria if defined, or set as an empty object
-			criteria = criteria ? JSON.parse(criteria) : {};
+			// Copy the criteria (a menu item applies the same snapshot each time it is chosen), or use an empty object
+			criteria = criteria ? isc.clone(criteria) : {};
 
 			// Handle advanced criteria
 			if (criteria.operator) {

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -111,6 +115,41 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("d", "admin_qContacts")).doGet();
 
 		assertTrue(listed.body().startsWith("[{\"bizId\":\"" + snapId + "\",\"name\":\"Starts with AA\",\"snapshot\":{"), listed.body());
+	}
+
+	/**
+	 * Names with an apostrophe, a quotation mark or a reverse solidus come back unchanged in valid JSON, for SmartClient
+	 * (which evaluates the list) and for Vue (which parses it as JSON). Before, an apostrophe was sent as {@code \'},
+	 * which broke Vue's list, and a quotation mark as {@code &quot;}.
+	 */
+	@Test
+	void snapshotNamesAreListedAsJsonForBothClients() throws Exception {
+		List<String> names = List.of("Mike's view", "Say \"hi\"", "back\\slash");
+		for (String name : names) {
+			service(newRequest(u)
+					.withCsrfToken()
+					.param("a", "N")
+					.param("t", "sc")
+					.param("d", "admin_qContacts")
+					.param("n", name)
+					.param("s", SNAPSHOT)).doPost();
+			AbstractPersistence.get().setUser(u);
+		}
+
+		ObjectMapper mapper = new ObjectMapper();
+		for (String type : new String[] { "sc", "vue" }) {
+			String body = service(newRequest(u)
+					.param("a", "L")
+					.param("t", type)
+					.param("d", "admin_qContacts")).doGet().body();
+			AbstractPersistence.get().setUser(u);
+
+			List<String> listedNames = new ArrayList<>();
+			for (JsonNode snap : mapper.readTree(body)) {
+				listedNames.add(snap.get("name").asText());
+			}
+			assertEquals(names.stream().sorted().toList(), listedNames.stream().sorted().toList(), body);
+		}
 	}
 
 	@Test
