@@ -81,9 +81,11 @@ scheduled. C3 and C4 are outlined.
 14. **Push carries no content.** A cockpit push item says only what changed (activity, messages and which thread, or
     inbox). The client then fetches counts or new messages over HTTP. A dropped push costs freshness, never
     correctness, and content never sits in the push queue.
-15. **Pushes are sent after the transaction commits.** Add a post-commit callback to the `Persistence` interface (a
-    default method), implemented where `commit` and `rollback` are, in skyve-ext's `AbstractHibernatePersistence`, and
-    delegated by `PersistenceInjectable`. It runs after a successful commit and is dropped on rollback. Without it, a user can fetch counts before the row is visible and the
+15. **Pushes are sent after the transaction commits**, from a new Bizlet hook, `postCommit(T bean)` (Mike, 26 November
+    2026, in place of a callback on `Persistence`). It covers the same beans as `postSave`: each bean whose `postSave`
+    ran in the transaction is passed to its bizlet's `postCommit` once the commit succeeds, and none are on rollback.
+    The cockpit's admin bizlets (`Notification` and `Reminder`, and `Message` in C2) push from it, and applications get
+    the hook for their own after-commit work. Without it, a user can fetch counts before the row is visible and the
     badge lags until the next event.
 16. **The archive gains a per-document rule for when a row may be exported**, as a default method on the existing
     `DocumentConverter` interface. Audit and mail logs keep exporting every row at the next run.
@@ -235,11 +237,11 @@ scheduled. C3 and C4 are outlined.
 
 | Module | Changes |
 |---|---|
-| `skyve-core` | Domain interfaces for the new admin documents; `<cockpitRoles>` in `CustomerMetaData` and `CustomerImpl`, `User.canUseCockpit()` and both copies of `customer.xsd` (`skyve-core/src/test/resources/schemas`, `skyve-war/src/main/java/schemas`); the installation-wide cockpit settings in `UtilImpl`; the post-commit callback as a default method on the `Persistence` interface; `canUseCockpit()` in `UserImpl` and `SuperUser` |
-| `skyve-ext` | The post-commit callback in `AbstractHibernatePersistence` and `PersistenceInjectable`; `canUseCockpit()` in `UserInjectable`; the `Cockpit` interface, its implementation and `CockpitStaticSingleton` (notifications, reminders, counts; messages in C2), reached through `EXT.getCockpit()`; the cockpit push item on `PushMessage`; the export rule on `DocumentConverter` and its use in `ExportDocumentsToArchiveJob`; the message converter and the merged read; `InboxProvider` (C3) |
+| `skyve-core` | Domain interfaces for the new admin documents; `<cockpitRoles>` in `CustomerMetaData` and `CustomerImpl`, `User.canUseCockpit()` and both copies of `customer.xsd` (`skyve-core/src/test/resources/schemas`, `skyve-war/src/main/java/schemas`); the installation-wide cockpit settings in `UtilImpl`; `Bizlet.postCommit(T bean)`, doing nothing by default as the other hooks do; `canUseCockpit()` in `UserImpl` and `SuperUser` |
+| `skyve-ext` | `AbstractHibernatePersistence` noting each bean as its `postSave` runs and calling `postCommit` after the commit; `canUseCockpit()` in `UserInjectable`; the `Cockpit` interface, its implementation and `CockpitStaticSingleton` (notifications, reminders, counts; messages in C2), reached through `EXT.getCockpit()`; the cockpit push item on `PushMessage`; the export rule on `DocumentConverter` and its use in `ExportDocumentsToArchiveJob`; the message converter and the merged read; `InboxProvider` (C3) |
 | `skyve-web` | `CockpitServlet` at `/cockpit/*` (declared in skyve-war's `web.xml`); an open hook on `sse/connect.xhtml`; the `SKYVE.listgrid`/`SKYVE.cockpit` call queue in `common/util.js` (C0) and the cockpit item in `desktop/util.js` and `prime/pf.js`; the SmartClient docked panel and badge in `header.js`; the renderers' cockpit flag in `DesktopView` and `HarnessView`; the PrimeFaces `<cockpit:panel/>` composite component; the rebuilt `skyve-min.js` bundles |
 | `skyve-vue` | The ES-module build (C0): entry modules, lazy chunks, the list grid moved onto it; `build.xml` copying the whole output; the cockpit entry module and `window.SKYVE.cockpit` (C1) |
-| `skyve-war` | Admin documents, generated domain and the reminder job; `CockpitServlet`'s declaration in `web.xml` and its matcher in `SpringSecurityConfig`; the editorial template (and the Vue list grid's tags in all four `view.xhtml`) and `desktop/home.xhtml`; i18n keys; the sample `skyve.json`; H2 and SAIL tests |
+| `skyve-war` | Admin documents, their bizlets (`postCommit` pushes), generated domain and the reminder job; `CockpitServlet`'s declaration in `web.xml` and its matcher in `SpringSecurityConfig`; the editorial template (and the Vue list grid's tags in all four `view.xhtml`) and `desktop/home.xhtml`; i18n keys; the sample `skyve.json`; H2 and SAIL tests |
 
 ## Dependencies
 
@@ -506,7 +508,8 @@ It follows `SmartClientSnapServlet`:
   user (`WebUtil.getValidatedSessionUser`, which `/sse` uses, does not), and refuses public users and users without
   `canUseCockpit()`;
 - it reads the path after `/cockpit/` and the HTTP method to choose the call;
-- it begins and commits its own persistence per request, and runs the post-commit pushes after the commit;
+- it begins and commits its own persistence per request. Beans it saves push through their bizlets' `postCommit`;
+  changes it makes without saving a bean (a bulk "mark all read") push directly after its commit;
 - it answers JSON written with Skyve's `JSON` utility;
 - mutating calls are to be CSRF-checked once that is settled (see Open decisions);
 - it uses only `GET` and `POST`. `SpringSecurityConfig` gets `.requestMatchers("/cockpit/**").authenticated()` with
@@ -551,6 +554,9 @@ C2 adds threads, messages, members and the user directory.
   templates and `home.xhtml` that do not pass it stay valid). The client fetches counts each time the stream opens.
 - The push handlers call `SKYVE.cockpit.changed(item)`; before the cockpit entry has loaded, the stub from
   `common/util.js` queues it.
+- **One transaction, one push per user.** Saving fifty notifications for one user calls `postCommit` fifty times.
+  Each receiver's queue in `SseClientHandler` collapses a cockpit item identical to one still waiting to be sent, so
+  the user gets one push; pushes carry no content, so nothing is lost.
 - **A cockpit push always names its users.** `EXT.push` broadcasts when a message names none, so the cockpit's push
   helper refuses an empty user list.
 
@@ -567,7 +573,8 @@ C2 adds threads, messages, members and the user directory.
   EXT.getCockpit().remind(user).at(due).text("Chase the invoice").about(invoice).save();
   ```
 
-  `send()` and `save()` write in the caller's transaction and push after it commits. Persistence `save` does not check
+  `send()` and `save()` save in the caller's transaction; `NotificationBizlet.postCommit` (and `ReminderBizlet`'s)
+  pushes to the bean's user once it commits, so a rollback sends nothing. Persistence `save` does not check
   document privileges, so any caller can write them. A `Notification` or `Reminder` takes the *recipient's*
   `bizUserId` and `bizDataGroupId`, not the caller's (a new bean takes the current user's), so the recipient's
   data-group-scoped queries find it. No role gets privileges on either document: users reach them only through
@@ -762,7 +769,7 @@ and Mike settle the next phases (Q&A track below), so that C2 and C3 are ready t
   cockpit keeps the badge inside it current and toggles the panel on click); `context({module, document, bizId,
   bizKey, webId} | null)`; `changed(item)`; `open()`, `close()`.
 - The renderers' flag: `isc.BizUtil.canUseCockpit` (SmartClient) and `HarnessView.isCanUseCockpit()` (PrimeFaces).
-- The post-commit callback: `Persistence.afterCommit(Runnable)`.
+- The after-commit hook: `Bizlet.postCommit(T bean)`, called as described in C1 step 2.
 - The `/cockpit` calls and JSON shapes in [Server endpoints](#server-endpoints).
 
 **Streams.**
@@ -772,9 +779,9 @@ and Mike settle the next phases (Q&A track below), so that C2 and C3 are ready t
 | S1 `c0-vue` | C0 steps 1 to 4, 6, 7 | `skyve-vue/` (except `src/cockpit/`), `skyve-web/src/js/common/util.js`, `ConverterRegistrationTest` | Nothing |
 | S2 `c0-web` | C0 steps 5, 8, 9 | The four `view.xhtml`, `ThemeFaceletsStructureTest`, `undertow-handlers.conf`, `docs/skyve-12-changes.md` | Nothing (the entry names are fixed above); its browser checks run once S1 is merged |
 | S3 `c1-switch` | C1 steps 1 and 3 | Customer XML and schemas, `CustomerMetaData`, `CustomerImpl`, `User` and its implementations, `UserTest`, `DesktopView`, `HarnessView`, `skyve.json`, the admin documents, generated domain | Nothing |
-| S4 `c1-commit` | C1 step 2 | `Persistence`, `AbstractHibernatePersistence`, `PersistenceInjectable`, their tests | Nothing |
+| S4 `c1-commit` | C1 step 2 | `Bizlet`, `AbstractHibernatePersistence`, their tests | Nothing |
 | S5 `c1-panel` | C1 step 7, against the JSON shapes with a stand-in server on the dev page | `skyve-vue/src/cockpit/` and the `cockpit.js` entry's body | Nothing; merged after S1 |
-| S6 `c1-server` | C1 steps 4, 5 (the push item), 6, 10 | skyve-ext's cockpit package, `EXT`, `PushMessage`, `CockpitServlet`, `web.xml`, `SpringSecurityConfig` and the tests that list servlets, `QuartzJobScheduler`, `docs/theme-resolution.md` | S3, S4 |
+| S6 `c1-server` | C1 steps 4, 5 (the push item, the bizlets' `postCommit`, `SseClientHandler`), 6, 10 | skyve-ext's cockpit package, `EXT`, `PushMessage`, `SseClientHandler`, the admin bizlets' `postCommit`, `CockpitServlet`, `web.xml`, `SpringSecurityConfig` and the tests that list servlets, `QuartzJobScheduler`, `docs/theme-resolution.md` | S3, S4 |
 | S7 `c1-wiring` | C1 steps 5 (the client side), 8, 9 | `sse/connect.xhtml`, `desktop/util.js`, `prime/pf.js`, `header.js`, `desktop/home.xhtml`, editorial's `template.xhtml` and `head-resources.xhtml`, the `<cockpit:panel/>` composite, the template structure tests | S1, S3 (flags), S5 (API); `view.xhtml` stays S2's |
 
 **Order.**
@@ -852,16 +859,23 @@ reminders; Skyve and applications can notify and remind users from code.
    - the `demo` customer (which the kitchen-sink SAIL suite signs in to) given a cockpit role;
    - the installation-wide setting `cockpit.notificationRetentionDays` (default 30), read into `UtilImpl` and
      documented in the sample `skyve.json`.
-2. The post-commit callback, `Persistence.afterCommit(Runnable)`: a default method on `Persistence`, implemented in `AbstractHibernatePersistence` (where
-   `commit` and `rollback` are, both `final`) and delegated by `PersistenceInjectable`. Callbacks registered in a
-   transaction run once, in order, after the commit that ends it, and are dropped by `rollback`; `commit(false)`
-   (commit and carry on) runs and clears them; a callback registered while callbacks run waits for the next commit;
-   an exception in one is logged and does not stop the rest. Tests for each.
+2. The after-commit hook, `Bizlet.postCommit(T bean)`: a method on `Bizlet` that does nothing by default, as
+   `postSave` does. In `AbstractHibernatePersistence`, where `postSave` is called (about line 2123), note the bean and
+   its bizlet; after `commit` succeeds (`commit` and `rollback` are both there, and `final`), call `postCommit` for each
+   noted bean in the order saved, then clear the list; `rollback` clears it without calling. The rules:
+   - the same beans as `postSave`, child beans in a saved graph included; bulk SQL and deletes are not covered;
+   - `commit(false)` (commit and carry on) calls and clears them, as a final commit does;
+   - a bean saved inside `postCommit` is in the next transaction, and its `postCommit` runs when that one commits;
+   - an exception in one is logged and does not stop the rest (the transaction has already committed);
+   - the bean is as it was saved; `postCommit` must not lazy-load, since `commit(true)` closes the session.
+
+   Tests for each rule.
 3. Admin documents `Notification` and `Reminder` in `admin.xml` (no role privileges, see [Notifications and
-   reminders](#notifications-and-reminders-c1)), their interfaces in skyve-core; generate the domain with
+   reminders](#notifications-and-reminders-c1)), their interfaces in skyve-core, and empty bizlets for step 5; generate the domain with
    `DomainGenerator` and commit `src/generated` and `src/generatedTest`.
 4. The `Cockpit` interface, its implementation, `CockpitStaticSingleton` (set in `SkyveContextListener`) and `EXT.getCockpit()`: notify, remind, counts, mark read, reminder firing and the purge.
-5. The cockpit push item (refusing an empty user list), the optional `onOpen` hook on `sse/connect.xhtml`, and both push
+5. The cockpit push item (refusing an empty user list), the `Notification` and `Reminder` bizlets' `postCommit` pushing
+   `activity` to the bean's user, the receiver queue collapsing identical waiting cockpit items in `SseClientHandler`, the optional `onOpen` hook on `sse/connect.xhtml`, and both push
    handlers (`desktop/util.js`, `prime/pf.js`) passing it to `SKYVE.cockpit.changed`.
 6. `CockpitServlet` and its `web.xml` declaration at `/cockpit/*`, following `SmartClientSnapServlet` as described in
    [Server endpoints](#server-endpoints), with the JSON shapes there; its matcher in `SpringSecurityConfig`; add it to
@@ -945,6 +959,8 @@ C1:
       anything outside the panel.
 - [ ] In a customer with cockpit roles, a user without one gets no panel and is refused by `/cockpit`.
 - [ ] `EXT.getCockpit().notify(...)` in a transaction that rolls back creates no notification and sends no push.
+- [ ] A bizlet's `postCommit` runs once for each bean whose `postSave` ran, after the commit, and never after a rollback.
+- [ ] Fifty notifications for one user in one transaction reach the browser as one push.
 - [ ] A notification sent to a signed-in user updates the badge in SmartClient and in PrimeFaces without a page load.
 - [ ] After the stream drops and reconnects, the badge shows the right count without any new event.
 - [ ] Marking a notification read in one tab updates the badge in the user's other tabs.
@@ -1002,7 +1018,7 @@ C2 (refined in its own plan):
 - Build and test in an rsync'd mirror of the checkout, not in the shared checkout.
 - H2 tests through the real endpoints for `/cockpit`, following [test-patterns.md](test-patterns.md): security
   (another user, a public user, an anonymous request; CSRF once decided), counts, read state, the post-commit push, reminder firing and the purge.
-- Unit tests for the post-commit callback and for the push item in both push handlers.
+- Unit tests for `Bizlet.postCommit` (each rule in C1 step 2) and for the push item in both push handlers.
 - SAIL in both renderers on the `kitchensink` suite: the badge updates on a push from the server, the panel opens, docks
   and stays open across navigation, a notification is marked read. Condition waits only, each justified; no fixed
   sleeps.
