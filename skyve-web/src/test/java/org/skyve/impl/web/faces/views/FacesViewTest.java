@@ -13,17 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +36,7 @@ import org.primefaces.model.Visibility;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -65,6 +63,7 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
@@ -767,22 +766,6 @@ class FacesViewTest {
 		assertFalse(url.contains("_h=64"));
 	}
 
-	private static ExternalContext setFacesContextWithRequestParameters(java.util.Map<String, String> requestParameters) {
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestParameterMap()).thenReturn(requestParameters);
-		FacesContextBridge.setCurrent(facesContext);
-		return externalContext;
-	}
-
-	@SuppressWarnings({ "java:S112", "java:S3011" }) // Reflection verifies private compatibility state without a JSF container.
-	private static Object getPrivateField(FacesView view, String fieldName) throws Exception {
-		Field field = FacesView.class.getDeclaredField(fieldName);
-		field.setAccessible(true);
-		return field.get(view);
-	}
-
 	@SuppressWarnings({ "java:S112", "java:S3011" }) // Reflection configures private compatibility state without a JSF container.
 	private static void setPrivateField(FacesView view, String fieldName, Object value) throws Exception {
 		Field field = FacesView.class.getDeclaredField(fieldName);
@@ -793,114 +776,44 @@ class FacesViewTest {
 	// ----- getCsrfToken -----
 
 	@Test
-	void getCsrfTokenReturnsNonNullToken() {
-		FacesView view = new FacesView();
-		assertNotNull(view.getCsrfToken());
-	}
-
-	@Test
-	void getCsrfTokenReturnsSameValueOnMultipleCalls() {
-		FacesView view = new FacesView();
-		String first = view.getCsrfToken();
-		String second = view.getCsrfToken();
-		assertEquals(first, second);
-	}
-
-	@Test
-	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
-	void getCsrfTokenReturnsExistingValueWhenFacesTraceEnabled() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", "existing-token");
-
-		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
-		UtilImpl.FACES_TRACE = true;
+	void getCsrfTokenIsTheSessionsTokenForEveryView() {
+		HttpSession session = new org.springframework.mock.web.MockHttpSession();
+		setFacesContextWithSession(session);
 		try {
-			assertEquals("existing-token", view.getCsrfToken());
+			String token = new FacesView().getCsrfToken();
+
+			assertEquals(StateUtil.getSessionToken(session), token);
+			assertEquals(token, new FacesView().getCsrfToken(), "every view of the session renders the same token");
 		}
 		finally {
-			UtilImpl.FACES_TRACE = originalFacesTrace;
+			FacesContextBridge.setCurrent(null);
 		}
 	}
 
 	@Test
-	void setCsrfTokenReturnsEarlyWhenIgnoreAutoUpdateFlagIsSet() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", "existing-token");
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
+	void setCsrfTokenKeepsNothingAsThePhaseListenerChecksTheToken() {
+		HttpSession session = new org.springframework.mock.web.MockHttpSession();
+		setFacesContextWithSession(session);
+		try {
+			FacesView view = new FacesView();
+			String token = view.getCsrfToken();
 
-		setFacesContextWithRequestParameters(Collections.singletonMap("primefaces.ignoreautoupdate", "true"));
-		view.setCsrfToken("existing-token");
-		FacesContextBridge.setCurrent(null);
+			view.setCsrfToken("posted-token");
 
-		assertEquals("existing-token", getPrivateField(view, "csrfToken"));
-		assertEquals(Boolean.FALSE, getPrivateField(view, "csrfTokenChecked"));
+			assertEquals(token, view.getCsrfToken());
+			assertTrue(StateUtil.checkSessionToken(session, token));
+		}
+		finally {
+			FacesContextBridge.setCurrent(null);
+		}
 	}
 
-	@Test
-	void setCsrfTokenMatchingCurrentTokenClearsStoredTokenAndMarksChecked() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", "existing-token");
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		setFacesContextWithRequestParameters(Collections.emptyMap());
-		view.setCsrfToken("existing-token");
-		FacesContextBridge.setCurrent(null);
-
-		assertNull(getPrivateField(view, "csrfToken"));
-		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
-	}
-
-	@Test
-	void setCsrfTokenWithNoExistingTokenOnlyMarksChecked() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", null);
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		setFacesContextWithRequestParameters(Collections.emptyMap());
-		view.setCsrfToken("incoming-token");
-		FacesContextBridge.setCurrent(null);
-
-		assertNull(getPrivateField(view, "csrfToken"));
-		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
-	}
-
-	@Test
-	void setCsrfTokenMismatchRedirectsAndClearsStoredToken() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", "existing-token");
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.emptyMap());
-		view.setCsrfToken("incoming-token");
-		FacesContextBridge.setCurrent(null);
-
-		verify(externalContext).redirect(org.skyve.util.Util.getLoggedOutUrl());
-		assertNull(getPrivateField(view, "csrfToken"));
-		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
-	}
-
-	@Test
-	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
-	void setCsrfTokenWithFacesTraceEnabledStillMarksChecked() throws Exception {
-		FacesView view = new FacesView();
+	private static void setFacesContextWithSession(HttpSession session) {
 		FacesContext facesContext = mock(FacesContext.class);
 		ExternalContext externalContext = mock(ExternalContext.class);
 		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestParameterMap()).thenReturn(new HashMap<>());
+		when(externalContext.getSession(true)).thenReturn(session);
 		FacesContextBridge.setCurrent(facesContext);
-
-		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
-		UtilImpl.FACES_TRACE = true;
-		try {
-			view.setCsrfToken("incoming-token");
-		}
-		finally {
-			UtilImpl.FACES_TRACE = originalFacesTrace;
-			FacesContextBridge.setCurrent(null);
-		}
-
-		assertNull(getPrivateField(view, "csrfToken"));
-		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
 	}
 
 	// ----- getCurrentBean -----
@@ -939,22 +852,6 @@ class FacesViewTest {
 	}
 
 	@Test
-	void setCsrfTokenThrowsFacesExceptionWhenRedirectFails() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfToken", "existing-token");
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestParameterMap()).thenReturn(Collections.emptyMap());
-		doThrow(new java.io.IOException("boom")).when(externalContext).redirect(org.skyve.util.Util.getLoggedOutUrl());
-		FacesContextBridge.setCurrent(facesContext);
-
-		assertThrows(FacesException.class, () -> view.setCsrfToken("wrong-token"));
-		FacesContextBridge.setCurrent(null);
-	}
-
-	@Test
 	void preRenderDispatchesToPostBackWhenFacesContextIsPostback() {
 		DispatchFacesView view = new DispatchFacesView();
 
@@ -990,80 +887,6 @@ class FacesViewTest {
 
 		invokeIgnoringThrowable(view::coldHit);
 		assertNotNull(view);
-	}
-
-	@Test
-	void postBackRedirectsWhenNoCsrfTokenParameterProvided() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestParameterMap()).thenReturn(Collections.emptyMap());
-		FacesContextBridge.setCurrent(facesContext);
-
-		view.postBack();
-		FacesContextBridge.setCurrent(null);
-
-		verify(externalContext).redirect(org.skyve.util.Util.getLoggedOutUrl());
-	}
-
-	@Test
-	void postBackThrowsFacesExceptionWhenRedirectFails() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		FacesContext facesContext = mock(FacesContext.class);
-		ExternalContext externalContext = mock(ExternalContext.class);
-		when(facesContext.getExternalContext()).thenReturn(externalContext);
-		when(externalContext.getRequestParameterMap()).thenReturn(Collections.emptyMap());
-		doThrow(new IOException("redirect failed")).when(externalContext).redirect(org.skyve.util.Util.getLoggedOutUrl());
-		FacesContextBridge.setCurrent(facesContext);
-
-		assertThrows(FacesException.class, view::postBack);
-		FacesContextBridge.setCurrent(null);
-	}
-
-	@Test
-	void postBackDoesNothingWhenCsrfTokenAlreadyChecked() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfTokenChecked", Boolean.TRUE);
-
-		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.emptyMap());
-
-		view.postBack();
-		FacesContextBridge.setCurrent(null);
-
-		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
-	}
-
-	@Test
-	void postBackSkipsRedirectWhenIgnoreAutoUpdateFlagIsSet() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.singletonMap("primefaces.ignoreautoupdate", "true"));
-
-		view.postBack();
-		FacesContextBridge.setCurrent(null);
-
-		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
-		assertEquals(Boolean.FALSE, getPrivateField(view, "csrfTokenChecked"));
-	}
-
-	@Test
-	void postBackConsumesCsrfTokenParameterWhenPresent() throws Exception {
-		FacesView view = new FacesView();
-		setPrivateField(view, "csrfTokenChecked", Boolean.FALSE);
-
-		ExternalContext externalContext = setFacesContextWithRequestParameters(Collections.singletonMap("csrfToken", "incoming-token"));
-
-		view.postBack();
-		FacesContextBridge.setCurrent(null);
-
-		verify(externalContext, never()).redirect(org.skyve.util.Util.getLoggedOutUrl());
-		assertEquals(Boolean.TRUE, getPrivateField(view, "csrfTokenChecked"));
 	}
 
 	@Test

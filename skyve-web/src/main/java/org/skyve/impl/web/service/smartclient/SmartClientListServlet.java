@@ -154,21 +154,10 @@ public class SmartClientListServlet extends HttpServlet {
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 
-		// Send CSRF Token as a response header (must be done before getting the writer)
-		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
-		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
-		Integer newCsrfToken = currentCsrfToken;
+		String csrfToken = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		// Send the session's CSRF token as a response header (must be done before getting the writer)
+		setCsrfTokenHeader(request, response);
 		String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
-		// If this is a mutating request, we'll definitely need a new CSRF Token
-		if (Operation.fetch.toString().equals(operationType)) {
-			if (newCsrfToken == null) {
-				newCsrfToken = StateUtil.createToken();
-			}
-		}
-		else {
-			newCsrfToken = StateUtil.createToken();
-		}
-		response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
 		try (PrintWriter pw = response.getWriter()) {
 			String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_dataSource")));
@@ -377,14 +366,14 @@ public class SmartClientListServlet extends HttpServlet {
 									model);
 							break;
 						case add:
-							checkCsrfToken(session, request, response, currentCsrfToken);
+							checkCsrfToken(session, csrfToken);
 	
 							if (! user.canCreateDocument(drivingDocument)) {
 								throw new SecurityException("create this data", user.getName());
 							}
 							break;
 						case update:
-							checkCsrfToken(session, request, response, currentCsrfToken);
+							checkCsrfToken(session, csrfToken);
 	
 							String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 							String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
@@ -439,7 +428,7 @@ public class SmartClientListServlet extends HttpServlet {
 							}
 							break;
 						case remove:
-							checkCsrfToken(session, request, response, currentCsrfToken);
+							checkCsrfToken(session, csrfToken);
 	
 							if (! user.canDeleteDocument(drivingDocument)) {
 								throw new SecurityException("delete this data", user.getName());
@@ -449,9 +438,6 @@ public class SmartClientListServlet extends HttpServlet {
 							break;
 						default:
 					}
-
-					// Replace CSRF token
-					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 
 					// serialise and cache conversation, if applicable
 					if (webContext != null) {
@@ -739,17 +725,36 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
 	}
 
-	@SuppressWarnings("unused")
-	static void checkCsrfToken(@Nonnull HttpSession session,
-								@Nonnull HttpServletRequest request,
-								@Nonnull HttpServletResponse response,
-								@Nullable Integer currentCsrfToken) {
-/* TODO Commented out until I can work out the async problems in SC
-		if (! StateUtil.checkToken(session, currentCsrfToken)) {
-			WebUtil.logout(request, response);
-			throw new java.lang.SecurityException("CSRF attack detected");
+	/**
+	 * Sets the {@code X-CSRF-TOKEN} response header to the session's CSRF token, issuing the token the first time
+	 * ({@link StateUtil#getSessionToken(HttpSession)}). The SmartClient and Flutter clients send it back with each
+	 * request. The token is the same for every request of the session, so requests in flight together all carry
+	 * a valid token. Nothing is set when the request has no session.
+	 *
+	 * <p>Side effects: sets the header; may store the session's token in the session.
+	 *
+	 * @param request	the request
+	 * @param response	the response, before its writer is got
+	 */
+	static void setCsrfTokenHeader(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			response.setHeader("X-CSRF-TOKEN", StateUtil.getSessionToken(session));
 		}
-*/
+	}
+
+	/**
+	 * Refuses a mutating request that did not send its session's CSRF token.
+	 *
+	 * @param session	the request's session
+	 * @param csrfToken	the token the request sent, or {@code null} if it sent none
+	 * @throws java.lang.SecurityException if {@code csrfToken} is not the session's token; the request is then
+	 * 			rolled back and answered as an unexpected error, with a logged reference
+	 */
+	static void checkCsrfToken(@Nonnull HttpSession session, @Nullable String csrfToken) {
+		if (! StateUtil.checkSessionToken(session, csrfToken)) {
+			throw new java.lang.SecurityException("CSRF token missing or invalid");
+		}
 	}
 
 	/**

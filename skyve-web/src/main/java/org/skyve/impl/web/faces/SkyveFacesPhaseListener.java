@@ -34,6 +34,7 @@ import jakarta.faces.event.PhaseEvent;
 import jakarta.faces.event.PhaseId;
 import jakarta.faces.event.PhaseListener;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Listens for lifecycle events and applies Skyve-specific web behaviour.
@@ -54,6 +55,11 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	}
 
 	private static final String VIEW_SELECTION_MARKER_KEY = FacesViewSelectionMarker.class.getName();
+
+	/** The request parameter of the hidden CSRF token input that {@code <s:csrfForm>} and the upload pages render. */
+	private static final String CSRF_TOKEN_PARAMETER_NAME = "csrfToken";
+	/** The request parameter of the hidden CSRF token input in the templates' UX/UI form. */
+	private static final String UXUI_CSRF_TOKEN_PARAMETER_NAME = "uxuicsrf";
 
 	/**
 	 * Logs and prepares pre-phase diagnostics for the JSF lifecycle.
@@ -118,6 +124,8 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	
 	/**
 	 * Restores any cached Skyve conversation before JSF processing continues and begins a persistence transaction.
+	 * A postback is first refused if its view's request selection changed or it does not send the session's CSRF
+	 * token (see {@link #checkCsrfToken(FacesContext, ExternalContext, UIViewRoot)}).
 	 *
 	 * @param event the current RESTORE_VIEW phase event
 	 * @throws Exception when cached conversation restoration fails
@@ -128,6 +136,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		ExternalContext ec = fc.getExternalContext();
 		UIViewRoot vr = fc.getViewRoot();
 		validateViewSelection(fc, ec, vr);
+		checkCsrfToken(fc, ec, vr);
 
 		Map<String, Object> s = ec.getSessionMap();
 		String webId = ec.getRequestParameterMap().get(AbstractWebContext.CONTEXT_NAME);
@@ -192,6 +201,37 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		}
 		else {
 			vr.getViewMap().put(VIEW_SELECTION_MARKER_KEY, current);
+		}
+	}
+
+	/**
+	 * Refuses a postback of a view that rendered the session's CSRF token ({@link FacesUtil#getCsrfToken()} marked
+	 * its view map) unless it sends the token back, before any value is applied or action run.
+	 *
+	 * <p>The token comes from the {@value #CSRF_TOKEN_PARAMETER_NAME} hidden input that {@code <s:csrfForm>} and the
+	 * upload and image markup pages render, or the {@value #UXUI_CSRF_TOKEN_PARAMETER_NAME} hidden input of the
+	 * templates' UX/UI form. A request that is not a postback, or of a view that never rendered the token, is not
+	 * checked.
+	 *
+	 * @throws ViewExpiredException if the token is missing or is not the session's, which sends the user to the
+	 * 			expired page; the refusal is logged as a warning
+	 */
+	private static void checkCsrfToken(@Nonnull FacesContext fc, @Nonnull ExternalContext ec, @Nullable UIViewRoot vr) {
+		if (vr == null) {
+			return;
+		}
+		Map<String, Object> viewMap = vr.getViewMap(false);
+		if ((viewMap == null) || (! Boolean.TRUE.equals(viewMap.get(FacesUtil.CSRF_TOKEN_RENDERED_KEY))) || (! fc.isPostback())) {
+			return;
+		}
+		Map<String, String> parameters = ec.getRequestParameterMap();
+		String token = parameters.get(CSRF_TOKEN_PARAMETER_NAME);
+		if (token == null) {
+			token = parameters.get(UXUI_CSRF_TOKEN_PARAMETER_NAME);
+		}
+		if (! StateUtil.checkSessionToken((HttpSession) ec.getSession(false), token)) {
+			FACES_LOGGER.warn("Postback of {} refused: CSRF token missing or invalid", vr.getViewId());
+			throw new ViewExpiredException("The postback's CSRF token is missing or invalid", vr.getViewId());
 		}
 	}
 

@@ -67,8 +67,8 @@ public final class SailRecording implements Serializable {
 	private final String uxui;
 	/** The user agent type the user got when recording started, or null if not known. */
 	private final UserAgentType userAgentType;
-	/** The CSRF token issued for this recording, or null before the recorder first asks. Guarded by this. */
-	private Integer token = null;
+	/** The CSRF token for this recording's batches ({@link StateUtil#createToken()}). */
+	private final String token = StateUtil.createToken();
 	/** The recorded steps in the order received: each an op-code and its attributes. Guarded by this. */
 	private final ArrayList<LinkedHashMap<String, String>> steps = new ArrayList<>();
 	/** The ids of the steps received, so that a step resent by the recorder is added once. Guarded by this. */
@@ -154,8 +154,8 @@ public final class SailRecording implements Serializable {
 	 * Starts a new recording in the session, replacing any earlier one (and the script it built), and keeps the user's
 	 * effective roles and UX/UI for the script's header.
 	 *
-	 * <p>Side effects: sets the session attribute {@link #SESSION_ATTRIBUTE_NAME}; removes the earlier recording's
-	 * CSRF token from the session's tokens.
+	 * <p>Side effects: sets the session attribute {@link #SESSION_ATTRIBUTE_NAME}; the earlier recording's CSRF token
+	 * no longer works, as each recording has its own.
 	 *
 	 * @param session	the session to record
 	 * @param user	the signed-in user
@@ -186,10 +186,6 @@ public final class SailRecording implements Serializable {
 												@Nullable UserAgentType userAgentType) {
 		if (! isAllowed(user)) {
 			throw new SecurityException("SAIL recording is not allowed for " + user.getName());
-		}
-		SailRecording earlier = get(session);
-		if (earlier != null) {
-			earlier.forgetToken(session);
 		}
 		String name = user.getName();
 		SailRecording result = new SailRecording(user.getCustomerName(),
@@ -228,33 +224,23 @@ public final class SailRecording implements Serializable {
 	}
 
 	/**
-	 * Returns the CSRF token for this recording's batches, issuing it the first time. The same token serves every page
-	 * of the recording, so the session's tokens do not grow with each page the recorder loads into.
+	 * Returns the CSRF token for this recording's batches. The same token serves every page of the recording; a new
+	 * recording has a new token, so that a page left from an earlier recording cannot add to it.
 	 *
-	 * <p>Side effects: the first call adds the token to the session's tokens ({@link StateUtil}).
-	 *
-	 * @param session	the recording's session
 	 * @return the token
 	 */
-	public synchronized @Nonnull Integer token(@Nonnull HttpSession session) {
-		Integer result = token;
-		if (result == null) {
-			result = StateUtil.createToken();
-			StateUtil.replaceToken(session, null, result);
-			token = result;
-		}
-		return result;
+	public @Nonnull String getToken() {
+		return token;
 	}
 
 	/**
-	 * Removes this recording's token from the session's tokens, as a new recording replaces it.
+	 * Determines whether a token sent with a batch is this recording's ({@link StateUtil#isSameToken(String, String)}).
+	 *
+	 * @param value	the token sent, or {@code null} if none was
+	 * @return	{@code true} if {@code value} is this recording's token
 	 */
-	private synchronized void forgetToken(@Nonnull HttpSession session) {
-		Integer old = token;
-		if (old != null) {
-			StateUtil.removeToken(session, old);
-			token = null;
-		}
+	public boolean isToken(@Nullable String value) {
+		return StateUtil.isSameToken(token, value);
 	}
 
 	/**
@@ -587,19 +573,16 @@ public final class SailRecording implements Serializable {
 	 * counts, and the last entries as the panel shows them, so that the panel needs no request to appear. A renderer
 	 * that does a full page load per view (PrimeFaces) renders it into each page while recording.
 	 *
-	 * <p>Side effects: issues the recording's token if it has none ({@link #token(HttpSession)}).
-	 *
 	 * <p>Complexity: O(n) in the entries, for the last {@code count} entries' rendering.
 	 *
-	 * @param session	the recording's session
 	 * @param count	how many of the last entries to include
 	 * @return {@code {"recording":true,"_csrf":t,"steps":n,"gestures":g,"from":i,"entries":[...]}}
 	 */
-	public synchronized @Nonnull String pageState(@Nonnull HttpSession session, int count) {
+	public synchronized @Nonnull String pageState(int count) {
 		int from = Math.max(0, steps.size() - count);
 		Map<String, Object> result = new LinkedHashMap<>(8);
 		result.put("recording", Boolean.TRUE);
-		result.put("_csrf", token(session));
+		result.put("_csrf", token);
 		result.put("steps", Integer.valueOf(steps.size()));
 		result.put("gestures", Integer.valueOf(getGestureCount()));
 		result.put("from", Integer.valueOf(from));

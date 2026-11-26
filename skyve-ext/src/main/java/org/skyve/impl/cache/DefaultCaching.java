@@ -145,12 +145,6 @@ public class DefaultCaching implements Caching {
 					createEHCache(UtilImpl.CONVERSATION_CACHE);
 				}
 
-				// Create the CSRF Token cache
-				if (UtilImpl.CSRF_TOKEN_CACHE != null) {
-					LOGGER.info("Create the CSRF token cache with config {}", UtilImpl.CSRF_TOKEN_CACHE);
-					createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
-				}
-
 				// Create the Geo IP cache
 				if (UtilImpl.GEO_IP_CACHE != null) {
 					LOGGER.info("Create the Geo IP cache with config {}", UtilImpl.GEO_IP_CACHE);

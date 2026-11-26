@@ -30,12 +30,6 @@
 			"diskSizeGB": 0,
 			"expiryTimeMinutes": 60
 		},
-		"csrfTokens": {
-			"heapSizeEntries": 100,
-			"offHeapSizeMB": 0,
-			"diskSizeGB": 0,
-			"expiryTimeMinutes": 60
-		},
 		"sessions": {
 			"heapSizeEntries": 100,
 			"offHeapSizeMB": 0,

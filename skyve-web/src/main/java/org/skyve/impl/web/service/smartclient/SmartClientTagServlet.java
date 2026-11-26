@@ -99,21 +99,10 @@ public class SmartClientTagServlet extends HttpServlet {
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
-    	// Send CSRF Token as a response header (must be done before getting the writer)
-		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
-		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
-		Integer newCsrfToken = currentCsrfToken;
+		String csrfToken = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		// Send the session's CSRF token as a response header (must be done before getting the writer)
+		SmartClientListServlet.setCsrfTokenHeader(request, response);
 		String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
-		// If this is a mutating request, we'll definitely need a new CSRF Token
-		if ("L".equals(action)) {
-			if (newCsrfToken == null) {
-				newCsrfToken = StateUtil.createToken();
-			}
-		}
-		else {
-			newCsrfToken = StateUtil.createToken();
-		}
-    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
@@ -145,7 +134,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
 							throw new ServletException("No tag, data source or criteria in the request.");
 						}
@@ -167,7 +156,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("U".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
 							throw new ServletException("No tag, data source or criteria in the request.");
 						}
@@ -189,7 +178,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("C".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if (tagId == null) {
 							throw new ServletException("No tag in the request.");
 						}
@@ -197,7 +186,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						tm.clear(tagId);
 					}
 					else if ("N".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if (tagName == null) {
 							throw new ServletException("No tag name in the request.");
 						}
@@ -208,7 +197,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						sb.append("'}");
 					}
 					else if ("D".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if (tagId == null) {
 							throw new ServletException("No tag in the request.");
 						}
@@ -218,9 +207,6 @@ public class SmartClientTagServlet extends HttpServlet {
 
 					Util.chunkCharsToWriter(sb, pw);
 					pw.flush();
-					
-					// Replace CSRF token
-					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();

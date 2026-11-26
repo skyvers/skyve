@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
 import org.skyve.cache.CacheConfig;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
@@ -41,7 +40,6 @@ class UserAgentDetectionCacheTest {
 	private static boolean originalForceNonPersistentCaching;
 	private static boolean originalCacheMultiple;
 	private static ConversationCacheConfig originalConversationCache;
-	private static CSRFTokenCacheConfig originalCsrfTokenCache;
 	private static SessionCacheConfig originalSessionCache;
 	private static GeoIPCacheConfig originalGeoIpCache;
 	private static List<HibernateCacheConfig> originalHibernateCaches;
@@ -52,7 +50,6 @@ class UserAgentDetectionCacheTest {
 		originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		originalCacheMultiple = UtilImpl.CACHE_MULTIPLE;
 		originalConversationCache = UtilImpl.CONVERSATION_CACHE;
-		originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
 		originalSessionCache = UtilImpl.SESSION_CACHE;
 		originalGeoIpCache = UtilImpl.GEO_IP_CACHE;
 		originalHibernateCaches = UtilImpl.HIBERNATE_CACHES;
@@ -62,7 +59,6 @@ class UserAgentDetectionCacheTest {
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 		UtilImpl.CACHE_MULTIPLE = false;
 		UtilImpl.CONVERSATION_CACHE = null;
-		UtilImpl.CSRF_TOKEN_CACHE = null;
 		UtilImpl.SESSION_CACHE = null;
 		UtilImpl.GEO_IP_CACHE = null;
 		UtilImpl.HIBERNATE_CACHES = new ArrayList<>();
@@ -76,7 +72,6 @@ class UserAgentDetectionCacheTest {
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
 		UtilImpl.CACHE_MULTIPLE = originalCacheMultiple;
 		UtilImpl.CONVERSATION_CACHE = originalConversationCache;
-		UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
 		UtilImpl.SESSION_CACHE = originalSessionCache;
 		UtilImpl.GEO_IP_CACHE = originalGeoIpCache;
 		UtilImpl.HIBERNATE_CACHES = originalHibernateCaches;

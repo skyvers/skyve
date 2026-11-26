@@ -39,7 +39,7 @@ Security in Skyve is declarative and impossible to accidentally bypass:
 - **Role-based CRUD with row-level scoping** — permissions are declared per document, enforced universally across persistence, queries, and UI. No endpoint-level checks to forget.
 - **Payload shaping** — REST and UI responses only include fields the user is permitted to see. Unpermitted input fields are silently ignored. No over-posting vulnerabilities.
 - **Forced-browsing prevention** — access vectors computed from roles, menus, and routes reject any request without a declared path. Users cannot reach documents by guessing URLs.
-- **Fail-closed defaults** — REST is blocked unless explicitly enabled. CSP, X-Frame, MIME-sniffing, and referrer headers are enforced on every response. CSRF tokens rotate per conversation.
+- **Fail-closed defaults** — REST is blocked unless explicitly enabled. CSP, X-Frame, MIME-sniffing, and referrer headers are enforced on every response. Each session has one CSRF token, checked on PrimeFaces postbacks and SmartClient changes.
 - **Multi-tenant isolation** — every row carries ownership fields (`bizCustomer`, `bizDataGroupId`, `bizUserId`); queries are automatically filtered to the user's scope.
 
 ### Purpose-built for AI

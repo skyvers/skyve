@@ -3,7 +3,6 @@ package org.skyve.impl.web.faces.components;
 import java.io.IOException;
 import java.util.List;
 
-import org.primefaces.component.autoupdate.AutoUpdateListener;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.skyve.util.Util;
 
@@ -45,10 +44,9 @@ public class CSRFForm extends HtmlForm {
 	    		throw new FacesException("managedBean attribute is required");
 	    	}
 	    	
-			// Add hidden csrfToken
+			// Add hidden csrfToken - the session's token, which never changes, so it needs no update after AJAX requests
 			// <p:outputPanel id="<formId>_csrfToken" style="display:none" layout="inline" deferred="false">
 	    	// 		<input type="hidden" name="csrfToken" value="#{<managedBeanName>.csrfToken}"/>
-			// 		<p:autoUpdate />
 			// </p:outputPanel>
 	    	OutputPanel panel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
 	    	panel.setId(getId() + "_csrfToken");
@@ -58,7 +56,6 @@ public class CSRFForm extends HtmlForm {
 	    	UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 	    	text.setValueExpression("value", ef.createValueExpression(elc, "<input type=\"hidden\" name=\"csrfToken\" value=\"#{" + managedBeanName + ".csrfToken}\"/>", String.class));
 	    	panel.getChildren().add(text);
-	        AutoUpdateListener.subscribe(panel);
 	
 			children.add(0, panel);
 		}

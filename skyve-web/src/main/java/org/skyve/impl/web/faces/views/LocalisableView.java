@@ -13,6 +13,7 @@ import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
@@ -249,6 +250,19 @@ public abstract class LocalisableView implements Serializable {
 		return WebUtil.getEnvironmentBannersHtml();
 	}
 	
+	/**
+	 * Returns the session's CSRF token for a hidden {@code csrfToken} input in this view's form, and marks the view
+	 * so that its postbacks must send the token back (see {@link FacesUtil#getCsrfToken()}).
+	 *
+	 * <p>Side effects: as {@link FacesUtil#getCsrfToken()}.
+	 *
+	 * @return the session's CSRF token
+	 */
+	@SuppressWarnings("static-method")
+	public @Nonnull String getCsrfToken() {
+		return FacesUtil.getCsrfToken();
+	}
+
 	/**
 	 * Returns the cache-busting version for web resource URLs.
 	 *

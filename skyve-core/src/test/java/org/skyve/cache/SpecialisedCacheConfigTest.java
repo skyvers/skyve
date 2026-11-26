@@ -40,36 +40,6 @@ class SpecialisedCacheConfigTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void csrfTokenCacheConfigHeapOnly() {
-		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(200L, 60L);
-		assertEquals(200L, cfg.getHeapSizeEntries());
-		assertEquals(60L, cfg.getExpiryInMinutes());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void csrfTokenCacheConfigWithDisk() {
-		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(200L, 32L, 60L);
-		assertEquals(32L, cfg.getDiskSizeInMB());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void csrfTokenCacheConfigWithOffHeap() {
-		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(200L, 128L, 32L, 60L);
-		assertEquals(128L, cfg.getOffHeapSizeInMB());
-		assertEquals(32L, cfg.getDiskSizeInMB());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void csrfTokenCacheConfigToString() {
-		CSRFTokenCacheConfig cfg = new CSRFTokenCacheConfig(10L, 5L);
-		assertThat(cfg.toString(), containsString("expiryInMinutes:5"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void conversationCacheConfigHeapOnly() {
 		ConversationCacheConfig cfg = new ConversationCacheConfig(500L, 120L);
 		assertEquals(500L, cfg.getHeapSizeEntries());

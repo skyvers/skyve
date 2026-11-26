@@ -7,15 +7,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.skyve.cache.SessionCacheConfig;
+import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.util.UtilImpl;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -128,7 +133,7 @@ class HealthServletTest {
 
     @Test
     @SuppressWarnings({"static-method", "resource"})
-    void doGetReportsJobSchedulerOffWhenSchedulerDisabled() throws Exception {
+    void doGetReportsJobSchedulerOffWhenSchedulerDisabled(@TempDir Path cacheDirectory) throws Exception {
         UtilImpl.HEALTH_CHECK = true;
         UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = 60;
         UtilImpl.JOB_SCHEDULER = false;
@@ -142,17 +147,59 @@ class HealthServletTest {
         PrintWriter writer = new PrintWriter(body);
         when(response.getWriter()).thenReturn(writer);
 
+        boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+        String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+        SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
         try {
+            // the caching check looks up the session cache
+            UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+            UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+            UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 1);
+            DefaultCaching.get().shutdown();
+            DefaultCaching.get().startup();
             servlet.doGet(request, response);
         }
         finally {
             writer.close();
+            DefaultCaching.get().shutdown();
+            UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+            UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+            UtilImpl.SESSION_CACHE = originalSessionCache;
         }
 
         String json = body.toString();
         assertTrue(json.contains("\"jobs\":\"off\""));
-        assertTrue(json.contains("\"caching\":\"ok\""));
+        assertTrue(json.contains("\"caching\":\"ok\""), json);
         verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @Test
+    @SuppressWarnings({"static-method", "resource"})
+    void doGetReportsACachingErrorWithoutTheSessionCache() throws Exception {
+        UtilImpl.HEALTH_CHECK = true;
+        UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = 60;
+        setCachedResponseField(new AtomicReference<>(new StringBuilder("{\"old\":true}")));
+        setResponseInstantField(new AtomicLong(Long.MIN_VALUE));
+
+        HealthServlet servlet = new HealthServlet();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        StringWriter body = new StringWriter();
+        PrintWriter writer = new PrintWriter(body);
+        when(response.getWriter()).thenReturn(writer);
+
+        SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+        try {
+            UtilImpl.SESSION_CACHE = null;
+            servlet.doGet(request, response);
+        }
+        finally {
+            writer.close();
+            UtilImpl.SESSION_CACHE = originalSessionCache;
+        }
+
+        String json = body.toString();
+        assertTrue(json.contains("\"caching\":\"error\""), json);
     }
 
     private static AtomicReference<StringBuilder> getCachedResponseField() {

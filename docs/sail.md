@@ -3746,7 +3746,7 @@ dropped silently.
   written with the column type's `shortDisplayFormatter`, as the grid's cells show it.
 - It sends its steps as JSON batches, one request at a time through SmartClient's RPC manager, to the `sailrecording`
   endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets the recording's CSRF token from the
-  endpoint (issued once per recording, so the session's tokens do not grow with the pages), and the endpoint checks
+  endpoint (one token per recording, so a page left from an earlier recording cannot add to a new one), and the endpoint checks
   the gate on every request. Steps the page has not seen acknowledged are sent again from a beacon as it
   unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
 - On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation`, with

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
@@ -39,7 +38,6 @@ class DefaultCachingTest {
 	private final String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 	private final boolean originalCacheMultiple = UtilImpl.CACHE_MULTIPLE;
 	private final ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
-	private final CSRFTokenCacheConfig originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
 	private final SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
 	private final GeoIPCacheConfig originalGeoIPCache = UtilImpl.GEO_IP_CACHE;
 	private final List<HibernateCacheConfig> originalHibernateCaches = UtilImpl.HIBERNATE_CACHES;
@@ -52,7 +50,6 @@ class DefaultCachingTest {
 		UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
 		UtilImpl.CACHE_MULTIPLE = originalCacheMultiple;
 		UtilImpl.CONVERSATION_CACHE = originalConversationCache;
-		UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
 		UtilImpl.SESSION_CACHE = originalSessionCache;
 		UtilImpl.GEO_IP_CACHE = originalGeoIPCache;
 		UtilImpl.HIBERNATE_CACHES = originalHibernateCaches;
@@ -106,7 +103,6 @@ class DefaultCachingTest {
 		UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
 		UtilImpl.CACHE_MULTIPLE = false;
 		UtilImpl.CONVERSATION_CACHE = null;
-		UtilImpl.CSRF_TOKEN_CACHE = null;
 		UtilImpl.SESSION_CACHE = null;
 		UtilImpl.GEO_IP_CACHE = null;
 		UtilImpl.APP_CACHES = new ArrayList<>();

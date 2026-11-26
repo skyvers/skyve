@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces;
 
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.util.OWASP;
 
@@ -13,8 +14,10 @@ import jakarta.el.MethodExpression;
 import jakarta.el.ValueExpression;
 import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Provides utility methods shared by Skyve web rendering and request handling paths.
@@ -65,7 +68,33 @@ public class FacesUtil {
 	// used to get the responsive form grid out of the view root when required
 	public static final String FORM_STYLES_KEY = "skyveFormStyles";
 
+	/**
+	 * View map key marking a view that has rendered the session's CSRF token, so that its postbacks must send it back
+	 * (see {@link SkyveFacesPhaseListener}).
+	 */
+	static final String CSRF_TOKEN_RENDERED_KEY = "skyveCsrfTokenRendered";
+
 	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
+
+	/**
+	 * Returns the session's CSRF token for a hidden {@code csrfToken} input ({@link StateUtil#getSessionToken(HttpSession)}),
+	 * and marks the current view so that every postback of it must send the token back. The mark is kept in the
+	 * view map, which the view state restores on each postback whatever the scope of the view's bean. The token is
+	 * the same for every view and request of the session.
+	 *
+	 * <p>Side effects: puts {@link #CSRF_TOKEN_RENDERED_KEY} in the current view's map; issues the session's token
+	 * the first time.
+	 *
+	 * @return the session's CSRF token
+	 */
+	public static @Nonnull String getCsrfToken() {
+		FacesContext fc = FacesContext.getCurrentInstance();
+		UIViewRoot vr = fc.getViewRoot();
+		if (vr != null) {
+			vr.getViewMap().put(CSRF_TOKEN_RENDERED_KEY, Boolean.TRUE);
+		}
+		return StateUtil.getSessionToken((HttpSession) fc.getExternalContext().getSession(true));
+	}
 
 	/**
 	 * Resolves a named JSF-managed bean from the active EL context.

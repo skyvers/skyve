@@ -19,6 +19,25 @@ const actions = {
     create: "N"
 };
 
+// The session's CSRF token, from the X-CSRF-TOKEN header of the last response (the snapshot list comes first);
+// the server refuses a create, update or delete without it
+let csrfToken = null;
+
+async function post(fd) {
+    if (csrfToken) {
+        fd.append(params.csrf, csrfToken);
+    }
+    const response = await fetch(new Request(SNAP_PATH, {
+        method: 'POST',
+        body: new URLSearchParams(fd),
+        headers: {
+            'Content-Type': FORM_URL_ENCODED
+        }
+    }));
+    csrfToken = response.headers.get('X-CSRF-TOKEN') ?? csrfToken;
+    return response;
+}
+
 export const SnapshotService = {
 
     async getSnapshots({ documentQuery, type = DEFAULT_TYPE }) {
@@ -28,15 +47,7 @@ export const SnapshotService = {
         fd.append(params.document, documentQuery);
         fd.append(params.type, type);
 
-        const req = new Request(SNAP_PATH, {
-            method: 'POST',
-            body: new URLSearchParams(fd),
-            headers: {
-                'Content-Type': FORM_URL_ENCODED
-            }
-        });
-
-        const response = await fetch(req);
+        const response = await post(fd);
         let payload;
         try {
             payload = await response.json();
@@ -57,15 +68,7 @@ export const SnapshotService = {
         fd.append(params.snapshot, snapString);
         fd.append(params.type, type);
 
-        const req = new Request(SNAP_PATH, {
-            method: 'POST',
-            body: new URLSearchParams(fd),
-            headers: {
-                'Content-Type': FORM_URL_ENCODED
-            }
-        });
-
-        const response = await fetch(req);
+        const response = await post(fd);
         // Result should looks like { "bizId": "xyz-abc" }
         return await response.json();
     },
@@ -75,15 +78,7 @@ export const SnapshotService = {
         fd.append(params.action, actions.delete);
         fd.append(params.id, id);
 
-        const req = new Request(SNAP_PATH, {
-            method: 'POST',
-            body: new URLSearchParams(fd),
-            headers: {
-                'Content-Type': FORM_URL_ENCODED
-            }
-        });
-
-        const response = await fetch(req);
+        const response = await post(fd);
         let status = response.status
         if (status == 200) {
             console.debug(`Deleted snapshot ${id}`);
@@ -104,15 +99,7 @@ export const SnapshotService = {
         fd.append(params.id, id);
         fd.append(params.type, type);
 
-        const req = new Request(SNAP_PATH, {
-            method: 'POST',
-            body: new URLSearchParams(fd),
-            headers: {
-                'Content-Type': FORM_URL_ENCODED
-            }
-        });
-
-        const response = await fetch(req);
+        const response = await post(fd);
         let status = response.status
         if (status == 200) {
             console.debug(`Updated snapshot ${id}`);

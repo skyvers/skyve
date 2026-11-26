@@ -41,6 +41,7 @@
 			</ui:define>
 			<ui:define name="templateBody">
 				<h:form enctype="multipart/form-data" prependId="false">
+					<input type="hidden" name="csrfToken" value="#{_skyveBizImport.csrfToken}" />
 					<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
 					<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
 					<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />

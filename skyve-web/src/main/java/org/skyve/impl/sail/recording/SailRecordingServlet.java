@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.content.MimeType;
-import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -30,10 +29,9 @@ import jakarta.servlet.http.HttpSession;
  * Receives the steps the browser recorder records, for the session's {@link SailRecording}.
  *
  * <ul>
- * <li>{@code GET} answers whether the session is recording: {@code {"recording":true,"_csrf":token,"steps":n}}, or
- * 		status 403 with {@code {"recording":false}}. The token is a Skyve CSRF token ({@link StateUtil#createToken()}),
- * 		issued once per recording ({@link SailRecording#token(HttpSession)}) and returned to every page that asks, so the
- * 		session's tokens do not grow with the pages.</li>
+ * <li>{@code GET} answers whether the session is recording: {@code {"recording":true,"_csrf":"token","steps":n}}, or
+ * 		status 403 with {@code {"recording":false}}. The token is the recording's own CSRF token
+ * 		({@link SailRecording#getToken()}), returned to every page of the recording that asks.</li>
  * <li>{@code GET} with {@code roles} returns the signed-in user's effective roles, {@code {"user":name,"roles":[...]}},
  * 		whenever {@code sail.recording} is on: the SAIL harness builds its views with them. It needs no recording and no
  * 		SAILRecorder role; status 403 when recording is off or nobody is signed in.</li>
@@ -43,12 +41,12 @@ import jakarta.servlet.http.HttpSession;
  * <li>{@code GET} with {@code format=xml} returns the script: the one built when the recording stopped (the same XML
  * 		the Control Panel downloads), or while recording, one built now without the metadata checks. With
  * 		{@code download}, as an attachment. Status 404 if there is no recording.</li>
- * <li>{@code POST} with a JSON body {@code {"_csrf":token,"steps":[...]}} adds the steps (see
+ * <li>{@code POST} with a JSON body {@code {"_csrf":"token","steps":[...]}} adds the steps (see
  * 		{@link SailRecording#add(List)}) and answers {@code {"received":added,"steps":total}}, with
  * 		{@code "limitReached":true,"maximumSteps":cap} once the recording is full. The batch can also carry
  * 		{@code "delete":id}, {@code "undo":true} (the last gesture) and {@code "stop":true} (stop, with the metadata
- * 		checks), applied in that order after its steps; the answer then also has {@code gestures} and {@code stopped}. A token the session did
- * 		not issue is refused with status 403. The token stays valid for the recording, so that the recorder can resend
+ * 		checks), applied in that order after its steps; the answer then also has {@code gestures} and {@code stopped}. A token that is not the
+ * 		recording's is refused with status 403. The token stays valid for the recording, so that the recorder can resend
  * 		steps from a beacon as the page unloads.</li>
  * </ul>
  * Every request but the roles is checked against the whole gate ({@link SailRecording#isRecording(HttpSession, User)}, or for the
@@ -141,9 +139,8 @@ public class SailRecordingServlet extends HttpServlet {
 			}
 			return;
 		}
-		Integer token = recording.token(session);
 		try (PrintWriter pw = response.getWriter()) {
-			pw.append("{\"recording\":true,\"").append(AbstractWebContext.CSRF_TOKEN_NAME).append("\":").append(token.toString());
+			pw.append("{\"recording\":true,\"").append(AbstractWebContext.CSRF_TOKEN_NAME).append("\":\"").append(recording.getToken()).append('"');
 			pw.append(",\"steps\":").append(String.valueOf(recording.getStepCount())).append('}');
 		}
 	}
@@ -180,8 +177,8 @@ public class SailRecordingServlet extends HttpServlet {
 			return;
 		}
 		Map<?, ?> batch = batch(new String(body, StandardCharsets.UTF_8));
-		if ((batch == null) || (! StateUtil.checkToken(session, token(batch.get(AbstractWebContext.CSRF_TOKEN_NAME))))) {
-			LOGGER.warn("SAIL recording batch refused for session {}: no valid CSRF token", session.getId());
+		if ((batch == null) || (! recording.isToken((batch.get(AbstractWebContext.CSRF_TOKEN_NAME) instanceof String token) ? token : null))) {
+			LOGGER.warn("SAIL recording batch refused: no valid CSRF token");
 			response.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
@@ -334,23 +331,5 @@ public class SailRecordingServlet extends HttpServlet {
 			LOGGER.warn("SAIL recording batch is not JSON: {}", e.toString());
 			return null;
 		}
-	}
-
-	/**
-	 * Returns a CSRF token sent as a JSON number or string.
-	 */
-	private static @Nullable Integer token(@Nullable Object value) {
-		if (value instanceof Number number) {
-			return Integer.valueOf(number.intValue());
-		}
-		if (value instanceof String string) {
-			try {
-				return Integer.valueOf(string.trim());
-			}
-			catch (@SuppressWarnings("unused") NumberFormatException e) {
-				return null;
-			}
-		}
-		return null;
 	}
 }

@@ -1,6 +1,9 @@
 package org.skyve.impl.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,6 +25,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
+import org.springframework.mock.web.MockHttpSession;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
@@ -89,6 +93,20 @@ class SkyveSessionListenerTest {
 		assertEquals(0, StateUtil.getSessionCount());
 		listener.sessionCreated(event);
 		assertEquals(1, StateUtil.getSessionCount());
+	}
+
+	@Test
+	void aSessionIdChangeAsAtSignInReplacesTheSessionsCsrfToken() {
+		SkyveSessionListener listener = new SkyveSessionListener();
+		MockHttpSession session = new MockHttpSession();
+		String beforeSignIn = StateUtil.getSessionToken(session);
+
+		listener.sessionIdChanged(new HttpSessionEvent(session), "old-session-id");
+
+		assertFalse(StateUtil.checkSessionToken(session, beforeSignIn), "a token seen before sign in is refused");
+		String afterSignIn = StateUtil.getSessionToken(session);
+		assertNotEquals(beforeSignIn, afterSignIn);
+		assertTrue(StateUtil.checkSessionToken(session, afterSignIn));
 	}
 
 	@Test

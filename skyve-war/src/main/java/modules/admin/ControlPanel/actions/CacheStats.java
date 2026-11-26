@@ -50,8 +50,6 @@ public class CacheStats implements ServerSideAction<ControlPanelExtension> {
 
 		String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 		addEHCacheStats(cacheName, caching.getEHCacheStatistics(cacheName), result);
-		cacheName = UtilImpl.CSRF_TOKEN_CACHE.getName();
-		addEHCacheStats(cacheName, caching.getEHCacheStatistics(cacheName), result);
 		cacheName = UtilImpl.SESSION_CACHE.getName();
 		addEHCacheStats(cacheName, caching.getEHCacheStatistics(cacheName), result);
 		cacheName = UtilImpl.GEO_IP_CACHE.getName();

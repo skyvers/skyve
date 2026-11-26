@@ -25,9 +25,6 @@ public class EvictStateJob implements Job {
 			LOGGER.info("Evict expired conversations");
 			StateUtil.evictExpiredConversations();
 			LOGGER.info("Successfully evicted expired conversations");
-			LOGGER.info("Evict expired session CSRF tokens");
-			StateUtil.evictExpiredSessionTokens();
-			LOGGER.info("Successfully evicted expired session CSRF tokens");
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst evicting expired web state", e);

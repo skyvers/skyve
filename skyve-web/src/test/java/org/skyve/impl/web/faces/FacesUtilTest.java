@@ -13,12 +13,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
@@ -29,6 +34,8 @@ import jakarta.faces.FacesException;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.UIViewRoot;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -161,6 +168,39 @@ class FacesUtilTest {
 
 		assertThrows(FacesException.class,
 				() -> FacesUtil.createMethodExpression("#{bean.run}", Void.class, new Class<?>[0]));
+	}
+
+	@Test
+	void getCsrfTokenIsTheSessionsTokenAndMarksTheViewSoItsPostbacksAreChecked() {
+		MockHttpSession session = new MockHttpSession();
+		Map<String, Object> viewMap = new HashMap<>();
+		UIViewRoot viewRoot = mock(UIViewRoot.class);
+		when(viewRoot.getViewMap()).thenReturn(viewMap);
+		FacesContext context = facesContextWithSession(session);
+		when(context.getViewRoot()).thenReturn(viewRoot);
+		FacesContextBridge.setCurrent(context);
+
+		String token = FacesUtil.getCsrfToken();
+
+		assertEquals(StateUtil.getSessionToken(session), token);
+		assertEquals(token, FacesUtil.getCsrfToken(), "every render of the session gets the same token");
+		assertEquals(Boolean.TRUE, viewMap.get(FacesUtil.CSRF_TOKEN_RENDERED_KEY));
+	}
+
+	@Test
+	void getCsrfTokenWithoutAViewRootStillReturnsTheSessionsToken() {
+		MockHttpSession session = new MockHttpSession();
+		FacesContextBridge.setCurrent(facesContextWithSession(session));
+
+		assertEquals(StateUtil.getSessionToken(session), FacesUtil.getCsrfToken());
+	}
+
+	private static FacesContext facesContextWithSession(MockHttpSession session) {
+		FacesContext result = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(result.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getSession(true)).thenReturn(session);
+		return result;
 	}
 
 	@Test

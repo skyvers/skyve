@@ -32,9 +32,7 @@
 	            			<c:if test="#{showSwitchMode}">
 								<li>
 									<h:form id="uxuiform" prependId="false"> 
-										<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}">
-											<p:autoUpdate />
-										</h:inputHidden>
+										<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}" />
 										<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
 											<i class="fa-solid fa-retweet"></i>
 											<span class="topbar-item-name">Switch Mode</span>

@@ -24,7 +24,6 @@ import org.ehcache.Cache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
@@ -50,7 +49,6 @@ class SessionTrackingTest {
 	private boolean originalForceNonPersistentCaching;
 	private String originalCacheDirectory;
 	private SessionCacheConfig originalSessionCache;
-	private CSRFTokenCacheConfig originalCsrfTokenCache;
 	private ConversationCacheConfig originalConversationCache;
 	private GeoIPCacheConfig originalGeoIPCache;
 	private Path cacheDirectory;
@@ -60,7 +58,6 @@ class SessionTrackingTest {
 		originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		originalSessionCache = UtilImpl.SESSION_CACHE;
-		originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
 		originalConversationCache = UtilImpl.CONVERSATION_CACHE;
 		originalGeoIPCache = UtilImpl.GEO_IP_CACHE;
 
@@ -68,7 +65,6 @@ class SessionTrackingTest {
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 		UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
-		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(100, 10);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
 		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(100, 10);
 
@@ -85,7 +81,6 @@ class SessionTrackingTest {
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
 		UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
 		UtilImpl.SESSION_CACHE = originalSessionCache;
-		UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
 		UtilImpl.CONVERSATION_CACHE = originalConversationCache;
 		UtilImpl.GEO_IP_CACHE = originalGeoIPCache;
 
@@ -319,91 +314,6 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void removeTokenRemovesOnlyThatToken() {
-		String sessionId = "remove-token-session";
-		Integer kept = StateUtil.createToken();
-		Integer removed = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, null, kept);
-		StateUtil.replaceToken(sessionId, null, removed);
-		StateUtil.removeToken(sessionId, removed);
-		StateUtil.removeToken(sessionId, null);
-		StateUtil.removeToken("no-such-session", kept);
-		assertThat(StateUtil.checkToken(sessionId, removed), is(false));
-		assertThat(StateUtil.checkToken(sessionId, kept), is(true));
-		StateUtil.clearTokens(sessionId);
-	}
-
-	@Test
-	void replaceTokenAddsTokenForSession() {
-		String sessionId = "token-session-" + System.nanoTime();
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, null, token);
-		assertThat(StateUtil.checkToken(sessionId, token), is(true));
-		StateUtil.clearTokens(sessionId);
-	}
-
-	@Test
-	void checkTokenReturnsFalseForNullToken() {
-		String sessionId = "token-session-null-" + System.nanoTime();
-		assertThat(StateUtil.checkToken(sessionId, null), is(false));
-	}
-
-	@Test
-	void checkTokenReturnsFalseForMissingSession() {
-		String sessionId = "missing-session-" + System.nanoTime();
-		assertThat(StateUtil.checkToken(sessionId, Integer.valueOf(42)), is(false));
-	}
-
-	@Test
-	void replaceTokenRemovesOldToken() {
-		String sessionId = "replace-session-" + System.nanoTime();
-		Integer oldToken = StateUtil.createToken();
-		Integer newToken = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, null, oldToken);
-		StateUtil.replaceToken(sessionId, oldToken, newToken);
-		assertThat(StateUtil.checkToken(sessionId, oldToken), is(false));
-		assertThat(StateUtil.checkToken(sessionId, newToken), is(true));
-		StateUtil.clearTokens(sessionId);
-	}
-
-	@Test
-	void clearTokensRemovesAllTokensForSession() {
-		String sessionId = "clear-session-" + System.nanoTime();
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, null, token);
-		StateUtil.clearTokens(sessionId);
-		assertThat(StateUtil.checkToken(sessionId, token), is(false));
-	}
-
-	@Test
-	void clearTokensHttpSessionOverloadRemovesAllTokensForSession() {
-		HttpSession session = session("clear-http-session-" + System.nanoTime());
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(session.getId(), null, token);
-		StateUtil.clearTokens(session);
-		assertThat(StateUtil.checkToken(session, token), is(false));
-	}
-
-	@Test
-	void replaceTokenHttpSessionOverloadAddsTokenForSession() {
-		HttpSession session = session("replace-http-session-" + System.nanoTime());
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(session, null, token);
-		assertThat(StateUtil.checkToken(session, token), is(true));
-		StateUtil.clearTokens(session);
-	}
-
-	@Test
-	void evictExpiredSessionTokensTouchesExistingEntries() {
-		String sessionId = "evict-token-session-" + System.nanoTime();
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, null, token);
-		StateUtil.evictExpiredSessionTokens();
-		assertThat(StateUtil.checkToken(sessionId, token), is(true));
-		StateUtil.clearTokens(sessionId);
-	}
-
-	@Test
 	void evictExpiredConversationsTouchesExistingEntries() {
 		String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 		Cache<String, byte[]> cache = DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class);
@@ -422,31 +332,6 @@ class SessionTrackingTest {
 	void logStateStatsRunsWithConfiguredCaches() {
 		StateUtil.logStateStats();
 		assertThat(StateUtil.getSessionCount(USER_ID), is(0));
-	}
-
-	@Test
-	void replaceTokenWithAnAlreadyValidNewTokenStillInvalidatesTheOldOne() {
-		String sessionId = "already-valid-" + System.nanoTime();
-		Integer oldToken = Integer.valueOf(1);
-		Integer newToken = Integer.valueOf(2);
-		StateUtil.replaceToken(sessionId, null, oldToken);
-		StateUtil.replaceToken(sessionId, null, newToken);
-
-		StateUtil.replaceToken(sessionId, oldToken, newToken);
-		StateUtil.replaceToken(sessionId, oldToken, newToken); // nothing left to change
-
-		assertThat(StateUtil.checkToken(sessionId, oldToken), is(false));
-		assertThat(StateUtil.checkToken(sessionId, newToken), is(true));
-		StateUtil.clearTokens(sessionId);
-	}
-
-	@Test
-	void replaceTokenWithSameOldAndNewDoesNothing() {
-		String sessionId = "same-token-" + System.nanoTime();
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(sessionId, token, token);
-		// token was not stored since old==new
-		assertThat(StateUtil.checkToken(sessionId, token), is(false));
 	}
 
 	@Test
@@ -477,29 +362,9 @@ class SessionTrackingTest {
 		assertFalse(sessionsCache().containsKey("last-user"));
 	}
 
-	@Test
-	void clearingTokensKeepsAnEmptyEntryOnlyForAKnownSession() {
-		StateUtil.replaceToken("known", null, Integer.valueOf(1));
-		StateUtil.removeToken("known", Integer.valueOf(1));
-		assertTrue(tokensCache().containsKey("known"));
-
-		StateUtil.replaceToken("cleared", null, Integer.valueOf(2));
-		StateUtil.clearTokens("cleared");
-		StateUtil.clearTokens("never-seen");
-
-		assertFalse(StateUtil.checkToken("cleared", Integer.valueOf(2)));
-		assertTrue(tokensCache().containsKey("cleared"));
-		assertFalse(tokensCache().containsKey("never-seen"));
-	}
-
 	@SuppressWarnings("rawtypes")
 	private static Cache<String, TreeSet> sessionsCache() {
 		return DefaultCaching.get().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
-	}
-
-	@SuppressWarnings("rawtypes")
-	private static Cache<String, TreeSet> tokensCache() {
-		return DefaultCaching.get().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
 	private static HttpSession session(String id) {

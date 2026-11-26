@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -45,6 +46,7 @@ import org.skyve.impl.web.faces.SkyveFacesPhaseListener.FacesViewSelectionMarker
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.web.UserAgentType;
+import org.springframework.mock.web.MockHttpSession;
 
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
@@ -63,6 +65,8 @@ import jakarta.servlet.http.HttpSession;
 @SuppressWarnings({ "static-method", "boxing", "java:S1192" }) // Repeated literals document lifecycle event contracts.
 class SkyveFacesPhaseListenerTest {
 	private static final String SELECTION_MARKER_KEY = FacesViewSelectionMarker.class.getName();
+	private static final String CSRF_TOKEN_PARAMETER = "csrfToken";
+	private static final String UXUI_CSRF_TOKEN_PARAMETER = "uxuicsrf";
 
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -406,6 +410,90 @@ class SkyveFacesPhaseListenerTest {
 						.forEach(File::delete);
 			}
 		}
+	}
+
+	/**
+	 * The view has no Skyve managed bean, as a list page or an upload page has, so the mark in its view map is all
+	 * that says its postbacks must send the token.
+	 */
+	@Test
+	@SuppressWarnings("java:S5778") // the side-effect mocks run after afterPhase in the lambda to prove the refusal throws before any of them
+	void aPostbackOfAViewThatRenderedTheCsrfTokenIsRefusedWithoutItBeforeAnythingIsRestored() throws Exception {
+		HttpSession session = new MockHttpSession();
+		StateUtil.getSessionToken(session);
+		List<Map<String, String>> refused = List.of(Map.of(),
+													Map.of(CSRF_TOKEN_PARAMETER, StateUtil.createToken()),
+													Map.of(UXUI_CSRF_TOKEN_PARAMETER, ""));
+		for (Map<String, String> parameters : refused) {
+			LifecycleRequest postback = csrfPostback(true, session, parameters);
+			AbstractPersistence persistence = bindPersistence();
+			Runnable modelMutation = mock(Runnable.class);
+			Runnable action = mock(Runnable.class);
+			SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
+			try {
+				FacesException exception = assertThrows(FacesException.class, () -> {
+					listener.afterPhase(postback.event);
+					modelMutation.run();
+					action.run();
+				}, parameters::toString);
+
+				assertInstanceOf(ViewExpiredException.class, exception.getCause());
+				verify(postback.request, never()).getUserPrincipal();
+				verifyNoInteractions(persistence, modelMutation, action);
+			}
+			finally {
+				clearBoundPersistence();
+			}
+		}
+	}
+
+	@Test
+	void aPostbackThatSendsTheSessionsCsrfTokenFromEitherFormProceeds() throws Exception {
+		for (String parameter : List.of(CSRF_TOKEN_PARAMETER, UXUI_CSRF_TOKEN_PARAMETER)) {
+			HttpSession session = new MockHttpSession();
+			LifecycleRequest postback = csrfPostback(true, session, Map.of(parameter, StateUtil.getSessionToken(session)));
+			AbstractPersistence persistence = bindPersistence();
+			try {
+				new SkyveFacesPhaseListener().afterPhase(postback.event);
+
+				verify(persistence).begin();
+			}
+			finally {
+				clearBoundPersistence();
+			}
+		}
+	}
+
+	@Test
+	void aPostbackOfAViewThatNeverRenderedTheCsrfTokenIsNotChecked() throws Exception {
+		LifecycleRequest postback = csrfPostback(false, new MockHttpSession(), Map.of());
+		AbstractPersistence persistence = bindPersistence();
+		try {
+			new SkyveFacesPhaseListener().afterPhase(postback.event);
+
+			verify(persistence).begin();
+		}
+		finally {
+			clearBoundPersistence();
+		}
+	}
+
+	/**
+	 * A normal postback of a view with a matching selection marker and no Skyve managed bean, in the given session,
+	 * with the given request parameters; the view rendered the CSRF token if {@code rendered}.
+	 */
+	private static LifecycleRequest csrfPostback(boolean rendered,
+													HttpSession session,
+													Map<String, String> parameters) throws Exception {
+		UxUi uxui = UxUi.newPrimeFaces("tablet", "external", "casablanca", "blue");
+		Map<String, Object> viewMap = markedViewMap(uxui, UserAgentType.tablet, false);
+		if (rendered) {
+			viewMap.put(FacesUtil.CSRF_TOKEN_RENDERED_KEY, Boolean.TRUE);
+		}
+		LifecycleRequest result = lifecycleRequest(uxui, UserAgentType.tablet, false, true, false, viewMap);
+		when(result.externalContext.getRequestParameterMap()).thenReturn(parameters);
+		when(result.externalContext.getSession(false)).thenReturn(session);
+		return result;
 	}
 
 	private static Map<String, Object> markedViewMap(UxUi uxui,

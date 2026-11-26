@@ -116,7 +116,7 @@ Question q = Question.okCancel("Payment.reference#checkDigit", "Confirmation", m
   - Set the askable attribute (R1.5) for every operation except `fetch`. `fetch` is form load (New, Edit, ZoomIn). `add`, `update` and `remove` cover OK, Save, ZoomOut, custom actions, rerenders and Delete.
   - Because `fetch` is not askable, a question there fails `ask` with `IllegalStateException` and reaches the generic handler as a `-1` error. The fetch callbacks in `editView.js` act only on `-1`, so a `-50` there would not be shown at all.
   - Before the generic handler, for a `QuestionException`, call `persistence.rollback()`.
-  - Do not call `StateUtil.replaceToken`, as on any failure. The token sent in this response's `X-CSRF-TOKEN` header is never registered, so the client must not use it (R4.7).
+  - The CSRF token is the session's and does not change, so the client resends the request with the token it holds.
   - Write HTTP 200 with status `-50` (Mike, 2026-10-19). `data` is a plain-text fallback for clients without question support, such as Flutter.
     - The status is negative, so every existing `status >= 0` check treats it as a failure.
     - It is outside SmartClient's own `RPCResponse.errorCodes`, which use `0`, `1`, `-1`, `-3` to `-13`, `-15`, `-16`, `-90` to `-92`, and `-100`. `-10` is SmartClient's `STATUS_TRANSACTION_FAILED`.
@@ -170,7 +170,7 @@ Question q = Question.okCancel("Payment.reference#checkDigit", "Confirmation", m
 
   One shared helper handles status -50 in all three callbacks, before the existing `status === -1` check. It shows the dialog. On a button that does not abort, it reissues the same DataSource call with the same callback and a copy of the `params` the first call built, with `_q` added. On a button that aborts, it calls the method's `completedCallback` with `success` false, as a failure does today.
   - Replaying means resending the captured `params`, not calling the method again. `saveInstance` clears `this._source` before it sends, so a second call would lose `_s`. A second call would also run `gather` again and show the static `confirm` again (R4.5).
-  - The resend keeps the `_csrf` the first request sent. The callbacks take a new token from `x-csrf-token` only when `status >= 0`, and R3.2 does not register the token sent with a question. This already happens, provided the -50 branch does not update `this._csrf`.
+  - The resend keeps the `_csrf` the first request sent. The token is the session's and does not change (Skyve 12), so it is still valid.
   - The question reaches the callback as `dsResponse.question` if `isc.RestDataSource` passes extra response properties through. The spike found that it does not, so the edit data source copies it in `transformResponse` (see [Open decisions](#open-decisions)).
   - Rebuild `skyve-min.js`.
 - **R4.8 PrimeFaces.** `pf.js` remembers the configuration of the most recent PrimeFaces AJAX request for the form. Command buttons and `p:ajax` change behaviours both go through PrimeFaces' AJAX request handling. `SKYVE.PF.ask` shows the dialog and re-issues that request with `_q` added as a request parameter.
@@ -224,7 +224,7 @@ These are documented on `Dialogs.ask` rather than enforced in code:
 
   The fixture also serves the manual browser checks.
 - **R7.5 Integration tests** against the fixture on H2, following `ConditionsFixtureH2Test` and `SmartClientEditServletH2Test`:
-  - **SmartClient**, through `SmartClientEditServlet.doPost`. Each path in R7.4 returns `-50` with the expected question. The rerun with `_q` carries on. After an abort nothing is written and the cached conversation is unchanged. A save, then a question, then OK writes the record once, with one optimistic-lock increment. A stale answer is asked again. The limit fails as an unexpected error. A question during `fetch` returns `-1`. The CSRF token is not replaced on a question.
+  - **SmartClient**, through `SmartClientEditServlet.doPost`. Each path in R7.4 returns `-50` with the expected question. The rerun with `_q` carries on. After an abort nothing is written and the cached conversation is unchanged. A save, then a question, then OK writes the record once, with one optimistic-lock increment. A stale answer is asked again. The limit fails as an unexpected error. A question during `fetch` returns `-1`. The question and its answer carry the session's one CSRF token.
   - **PrimeFaces**, following `FacesActionsTest`. The actions in R3.3 roll back, clear their messages, set the flag and queue `SKYVE.PF.ask`. The phase listener skips `postRender` and the save when the flag is set. An action outside R3.3 that asks reports an error.
   - **Background job.** `ask` throws `IllegalStateException` and `canAsk()` is false.
 

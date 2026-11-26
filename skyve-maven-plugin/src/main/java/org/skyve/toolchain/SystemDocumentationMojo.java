@@ -20,7 +20,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
@@ -148,7 +147,6 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 			UtilImpl.CONTENT_DIRECTORY = "./target/";
 
 			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 0, 0, 60);
-			UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 0, 0, 60);
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 			UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
 

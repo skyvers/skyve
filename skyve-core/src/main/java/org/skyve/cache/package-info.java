@@ -8,7 +8,7 @@
  *
  * <p>Pre-built configurations for well-known Skyve caches are provided as concrete
  * subclasses: {@link org.skyve.cache.ConversationCacheConfig},
- * {@link org.skyve.cache.SessionCacheConfig}, {@link org.skyve.cache.CSRFTokenCacheConfig},
+ * {@link org.skyve.cache.SessionCacheConfig},
  * {@link org.skyve.cache.GeoIPCacheConfig}, {@link org.skyve.cache.HibernateCacheConfig}, and
  * {@link org.skyve.cache.ArchivedDocumentCacheConfig}.
  *

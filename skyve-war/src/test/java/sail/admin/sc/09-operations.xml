@@ -134,7 +134,7 @@
 		</method>
 	</interaction>
 	<interaction name="Control Panel: caches, evicting and statistics">
-		<description>Opens the Control Panel and checks the cache statistics, evicts the CSRF token, conversation and Hibernate reference caches (declining once first) and checks the conversation cache empties, and checks a built-in cache refuses to be stopped.</description>
+		<description>Opens the Control Panel and checks the cache statistics, evicts the conversation and Hibernate reference caches (declining once first) and checks the conversation cache empties, and checks a built-in cache refuses to be stopped.</description>
 		<method>
 			<navigateMenu module="admin" item="DevOps/Control Panel" />
 			<tabSelect path="Design" />
@@ -152,16 +152,10 @@
 				return Number(sail.vars.conversationsBefore) > 1;
 			]]></testScript>
 			<tabSelect path="Design" />
-			<comment>The CSRF token cache holds only the current request's token on a fresh server, so its count cannot show an eviction reliably: the growl is checked, and the conversation cache's count below proves eviction</comment>
-			<dataEnter binding="selectedCache" value="CSRF Tokens" match="label" />
+			<dataEnter binding="selectedCache" value="Conversations" match="label" />
 			<action name="EvictSelectedCache" confirm="false" />
 			<action name="CacheStats" />
 			<tabSelect path="Design" />
-			<action name="EvictSelectedCache" />
-			<testMessage contains="Cache tokens has been cleared" type="info" />
-			<action name="CacheStats" />
-			<tabSelect path="Design" />
-			<dataEnter binding="selectedCache" value="Conversations" match="label" />
 			<action name="EvictSelectedCache" />
 			<testMessage contains="Cache conversations has been cleared" type="info" />
 			<action name="CacheStats" />

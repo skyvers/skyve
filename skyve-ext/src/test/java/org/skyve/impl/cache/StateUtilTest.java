@@ -5,10 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+
+import jakarta.servlet.http.HttpSession;
 
 @SuppressWarnings("static-method")
 class StateUtilTest {
@@ -61,29 +72,68 @@ class StateUtilTest {
 	// ----------------------------------------------------------------
 
 	@Test
-	void createTokenReturnsNonNullValue() {
-		Integer token = StateUtil.createToken();
-		assertNotNull(token);
-	}
-
-	@Test
-	void createTokenReturnsDifferentValuesOnSuccessiveCalls() {
-		// Probabilistically true — the chance of collision is ~1/2^32
-		Integer t1 = StateUtil.createToken();
-		Integer t2 = StateUtil.createToken();
-		Integer t3 = StateUtil.createToken();
-		// At least two of three should differ
-		boolean anyDiffers = !t1.equals(t2) || !t2.equals(t3) || !t1.equals(t3);
-		assertTrue(anyDiffers);
+	void createTokenIs128RandomBitsAsHex() {
+		String t1 = StateUtil.createToken();
+		String t2 = StateUtil.createToken();
+		assertTrue(t1.matches("[0-9a-f]{32}"), t1);
+		assertTrue(t2.matches("[0-9a-f]{32}"), t2);
+		assertNotEquals(t1, t2);
 	}
 
 	// ----------------------------------------------------------------
-	// checkToken (String, Integer) with null token
+	// Session CSRF token
 	// ----------------------------------------------------------------
 
 	@Test
-	void checkTokenReturnsFalseForNullToken() {
-		assertFalse(StateUtil.checkToken("some-session", null));
+	void getSessionTokenIssuesATokenOnceAndKeepsItForTheSession() {
+		HttpSession session = session();
+		String token = StateUtil.getSessionToken(session);
+		assertTrue(token.matches("[0-9a-f]{32}"), token);
+		assertEquals(token, StateUtil.getSessionToken(session));
+		assertNotEquals(token, StateUtil.getSessionToken(session()), "another session has its own token");
+	}
+
+	@Test
+	void checkSessionTokenAcceptsOnlyTheSessionsToken() {
+		HttpSession session = session();
+		String token = StateUtil.getSessionToken(session);
+		assertTrue(StateUtil.checkSessionToken(session, token));
+		assertFalse(StateUtil.checkSessionToken(session, StateUtil.createToken()), "another token");
+		assertFalse(StateUtil.checkSessionToken(session, token.substring(1)), "a shorter token");
+		assertFalse(StateUtil.checkSessionToken(session, null), "no token");
+		assertFalse(StateUtil.checkSessionToken(null, token), "no session");
+		assertFalse(StateUtil.checkSessionToken(session(), token), "another session's token");
+	}
+
+	@Test
+	void checkSessionTokenDoesNotIssueAToken() {
+		HttpSession session = session();
+		assertFalse(StateUtil.checkSessionToken(session, ""));
+		assertFalse(StateUtil.checkSessionToken(session, "null"));
+		verify(session, never()).setAttribute(anyString(), any());
+	}
+
+	@Test
+	void removeSessionTokenMakesTheNextCallIssueANewToken() {
+		HttpSession session = session();
+		String old = StateUtil.getSessionToken(session);
+		StateUtil.removeSessionToken(session);
+		assertFalse(StateUtil.checkSessionToken(session, old), "the old token is refused");
+		String renewed = StateUtil.getSessionToken(session);
+		assertNotEquals(old, renewed);
+		assertTrue(StateUtil.checkSessionToken(session, renewed));
+	}
+
+	/**
+	 * A session that keeps its attributes, as a container's does.
+	 */
+	private static HttpSession session() {
+		Map<String, Object> attributes = new HashMap<>();
+		HttpSession result = mock(HttpSession.class);
+		when(result.getAttribute(anyString())).thenAnswer(i -> attributes.get(i.getArgument(0)));
+		doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(result).setAttribute(anyString(), any());
+		doAnswer(i -> attributes.remove(i.getArgument(0))).when(result).removeAttribute(anyString());
+		return result;
 	}
 
 	// ----------------------------------------------------------------

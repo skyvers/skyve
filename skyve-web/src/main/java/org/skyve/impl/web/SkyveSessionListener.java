@@ -14,17 +14,19 @@ import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionIdListener;
 import jakarta.servlet.http.HttpSessionListener;
 
 /**
  * Used to count the active sessions on a server.
  * The session count is on StateUtil as this is in skyve-ext, not skyve-web 
  * and so is available to all application tiers.
- * Also notifies customers through Observers that a user session has ended.
+ * Also notifies customers through Observers that a user session has ended,
+ * and drops a session's CSRF token when its id changes.
  * 
  * @author mike
  */
-public class SkyveSessionListener implements HttpSessionListener {
+public class SkyveSessionListener implements HttpSessionListener, HttpSessionIdListener {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SkyveSessionListener.class);
 
 	/**
@@ -35,6 +37,20 @@ public class SkyveSessionListener implements HttpSessionListener {
 	@Override
 	public void sessionCreated(@SuppressWarnings("null") @Nonnull HttpSessionEvent se) {
 		StateUtil.incrementSessionCount();
+	}
+
+	/**
+	 * Drops the session's CSRF token, so that a new one is issued.
+	 * The id changes at sign in (Spring Security's session fixation protection), and a token seen before
+	 * sign in must not work after it.
+	 *
+	 * @param se the session event for the session whose id changed
+	 * @param oldSessionId the session's id before the change
+	 */
+	@Override
+	public void sessionIdChanged(@SuppressWarnings("null") @Nonnull HttpSessionEvent se,
+									@SuppressWarnings("null") @Nonnull String oldSessionId) {
+		StateUtil.removeSessionToken(se.getSession());
 	}
 
 	/**

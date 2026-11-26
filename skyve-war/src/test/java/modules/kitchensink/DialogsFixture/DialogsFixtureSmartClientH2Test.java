@@ -316,24 +316,20 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	void aQuestionDoesNotReplaceTheCSRFToken() throws Exception {
+	void aQuestionAndItsAnswerCarryTheSessionsOneCSRFToken() throws Exception {
 		SmartClient client = new SmartClient(u);
 		client.fetchNew();
-		Integer token = client.csrf;
-		String sessionId = client.session.getId();
-		assertTrue(StateUtil.checkToken(sessionId, token));
+		String token = client.csrf;
+		assertTrue(StateUtil.checkSessionToken(client.session, token));
 
 		JsonNode asked = client.update("AskOnce", null, null);
 		assertEquals(QUESTION, status(asked), asked::toString);
-		Integer notRegistered = Integer.valueOf(client.lastResponse.getHeader("X-CSRF-TOKEN"));
-		assertNotEquals(token, notRegistered);
-		assertTrue(StateUtil.checkToken(sessionId, token));
-		assertFalse(StateUtil.checkToken(sessionId, notRegistered));
+		assertEquals(token, client.lastResponse.getHeader("X-CSRF-TOKEN"));
 
 		JsonNode answered = client.update("AskOnce", null, answers(asked.get("question"), "OK"));
 		assertEquals(0, status(answered), answered::toString);
-		assertFalse(StateUtil.checkToken(sessionId, token));
-		assertTrue(StateUtil.checkToken(sessionId, client.csrf));
+		assertEquals(token, client.csrf);
+		assertTrue(StateUtil.checkSessionToken(client.session, token));
 	}
 
 	/**
@@ -445,7 +441,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		private final MockHttpSession session = new MockHttpSession();
 		private ObjectNode values;
 		private String webId;
-		private Integer csrf;
+		private String csrf;
 		private MockHttpServletResponse lastResponse;
 		private String document = DialogsFixture.DOCUMENT_NAME;
 
@@ -545,7 +541,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 				request.addParameter(AbstractWebContext.CONTEXT_NAME, webId);
 			}
 			if (csrf != null) {
-				request.addParameter(AbstractWebContext.CSRF_TOKEN_NAME, csrf.toString());
+				request.addParameter(AbstractWebContext.CSRF_TOKEN_NAME, csrf);
 			}
 			if (action != null) {
 				request.addParameter(AbstractWebContext.ACTION_NAME, action);
@@ -579,7 +575,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 			lastResponse = response;
 			JsonNode result = JSON_MAPPER.readTree(response.getContentAsString()).get("response");
 			if (status(result) >= 0) {
-				csrf = Integer.valueOf(response.getHeader("X-CSRF-TOKEN"));
+				csrf = response.getHeader("X-CSRF-TOKEN");
 			}
 			return result;
 		}

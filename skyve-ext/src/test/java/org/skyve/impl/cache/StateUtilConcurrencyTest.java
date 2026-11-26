@@ -3,6 +3,9 @@ package org.skyve.impl.cache;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,8 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +35,6 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
@@ -39,14 +43,15 @@ import org.skyve.impl.util.UtilImpl;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * Proves that {@link StateUtil}'s per-user session sets and per-session CSRF token sets stay exact
- * when many threads change one entry at the same moment, against the real Ehcache caches.
+ * Proves that {@link StateUtil}'s per-user session sets stay exact when many threads change one entry at the
+ * same moment, against the real Ehcache caches, and that simultaneous first requests of a session share one
+ * CSRF token.
  *
  * <p>Each round parks every worker on a {@link CountDownLatch} and releases them together, so
  * the read-modify-write window of each call overlaps the others'. Every round uses a fresh key,
  * and each test runs {@link #ROUNDS} rounds, so a lost update in any round fails the test.
  * Both cache topologies Skyve configures are covered: heap only, and heap with off-heap and
- * disk tiers (skyve.json's default for the session and token caches).
+ * disk tiers (skyve.json's default for the session cache).
  * <p>
  * A set changed by racing threads can be corrupted so that a worker loops forever while it holds a cache lock,
  * and then every later cache call blocks. So each test and the clean-up have a timeout on a separate thread, and
@@ -77,7 +82,6 @@ class StateUtilConcurrencyTest {
 	private boolean originalForceNonPersistentCaching;
 	private String originalCacheDirectory;
 	private SessionCacheConfig originalSessionCache;
-	private CSRFTokenCacheConfig originalCsrfTokenCache;
 	private ConversationCacheConfig originalConversationCache;
 	private GeoIPCacheConfig originalGeoIPCache;
 	private Path cacheDirectory;
@@ -88,7 +92,6 @@ class StateUtilConcurrencyTest {
 		originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		originalSessionCache = UtilImpl.SESSION_CACHE;
-		originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
 		originalConversationCache = UtilImpl.CONVERSATION_CACHE;
 		originalGeoIPCache = UtilImpl.GEO_IP_CACHE;
 		cacheDirectory = Files.createTempDirectory("skyve-stateutil-concurrency");
@@ -112,7 +115,6 @@ class StateUtilConcurrencyTest {
 		UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
 		UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
 		UtilImpl.SESSION_CACHE = originalSessionCache;
-		UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
 		UtilImpl.CONVERSATION_CACHE = originalConversationCache;
 		UtilImpl.GEO_IP_CACHE = originalGeoIPCache;
 
@@ -287,32 +289,23 @@ class StateUtilConcurrencyTest {
 		}
 	}
 
-	@ParameterizedTest
-	@EnumSource(Topology.class)
-	void concurrentTokenChangesInOneSessionKeepEveryToken(Topology topology) throws Exception {
-		start(topology);
+	@Test
+	void simultaneousFirstRequestsOfOneSessionShareOneCsrfToken() throws Exception {
 		List<String> failures = new ArrayList<>();
 		for (int round = 0; round < ROUNDS; round++) {
-			String sessionId = "session-" + round;
-			int base = round * THREADS * 4;
-			// tokens base .. base + 4T - 1: replaced (old -> new), removed, and added from nothing
+			HttpSession session = sessionWithAttributes("session-" + round);
+			Set<String> issued = ConcurrentHashMap.newKeySet();
 			List<Runnable> tasks = new ArrayList<>();
-			TreeSet<Integer> expected = new TreeSet<>();
 			for (int i = 0; i < THREADS; i++) {
-				Integer replaced = Integer.valueOf(base + i);
-				Integer replacement = Integer.valueOf(base + THREADS + i);
-				Integer removed = Integer.valueOf(base + (2 * THREADS) + i);
-				Integer added = Integer.valueOf(base + (3 * THREADS) + i);
-				StateUtil.replaceToken(sessionId, null, replaced);
-				StateUtil.replaceToken(sessionId, null, removed);
-				tasks.add(() -> StateUtil.replaceToken(sessionId, replaced, replacement));
-				tasks.add(() -> StateUtil.removeToken(sessionId, removed));
-				tasks.add(() -> StateUtil.replaceToken(sessionId, null, added));
-				expected.add(replacement);
-				expected.add(added);
+				tasks.add(() -> issued.add(StateUtil.getSessionToken(session)));
 			}
 			runTogether(failures, round, tasks);
-			checkTokens(failures, round, sessionId, expected);
+			if (issued.size() != 1) {
+				failures.add("round " + round + ": the session was issued " + issued.size() + " tokens");
+			}
+			else if (! StateUtil.checkSessionToken(session, issued.iterator().next())) {
+				failures.add("round " + round + ": the token issued is not the session's");
+			}
 		}
 		assertTrue(failures.isEmpty(), () -> describe(failures));
 	}
@@ -326,13 +319,11 @@ class StateUtilConcurrencyTest {
 		if (topology == Topology.HEAP) {
 			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(1000, 10);
-			UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(1000, 10);
 		}
 		else {
 			UtilImpl.FORCE_NON_PERSISTENT_CACHING = false;
 			// a heap smaller than the rounds' keys, so entries move to the lower tiers during the test
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(50, 1, 10, 10);
-			UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(50, 1, 10, 10);
 		}
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 10);
 		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 10);
@@ -409,18 +400,6 @@ class StateUtilConcurrencyTest {
 		}
 	}
 
-	private static void checkTokens(List<String> failures, int round, String sessionId, Set<Integer> expected) {
-		try {
-			Set<Integer> actual = tokensCache().get(sessionId);
-			if (! expected.equals(actual)) {
-				failures.add("round " + round + ": expected " + expected + " but was " + actual);
-			}
-		}
-		catch (RuntimeException e) { // a set corrupted by racing updates cannot be read
-			failures.add("round " + round + ": reading the tokens threw " + e);
-		}
-	}
-
 	private static String describe(List<String> failures) {
 		long rounds = failures.stream().map(f -> f.substring(0, f.indexOf(':'))).distinct().count();
 		return rounds + " of " + ROUNDS + " rounds failed; first: "
@@ -432,9 +411,16 @@ class StateUtilConcurrencyTest {
 		return DefaultCaching.get().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static org.ehcache.Cache<String, TreeSet> tokensCache() {
-		return DefaultCaching.get().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
+	/**
+	 * A session that keeps its attributes, as a container's does; safe to use from many threads.
+	 */
+	private static HttpSession sessionWithAttributes(String id) {
+		Map<String, Object> attributes = new ConcurrentHashMap<>();
+		HttpSession result = mock(HttpSession.class);
+		when(result.getId()).thenReturn(id);
+		when(result.getAttribute(anyString())).thenAnswer(i -> attributes.get(i.getArgument(0)));
+		doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(result).setAttribute(anyString(), any());
+		return result;
 	}
 
 	private static List<HttpSession> sessions(String prefix, int count) {

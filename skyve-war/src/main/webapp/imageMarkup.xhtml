@@ -36,6 +36,7 @@
 					 (stroke, sloppiness, etc.) cannot trigger a full-page JSF postback. The p:commandButton for Apply
 					 is triggered programmatically and continues to use PrimeFaces AJAX. -->
 				<h:form id="form" prependId="false" rendered="#{_skyveMarkup.canAccess}">
+					<input type="hidden" name="csrfToken" value="#{_skyveMarkup.csrfToken}" />
 					<h:inputHidden id="svg" value="#{_skyveMarkup.svg}" />
 					<h:inputHidden id="_c" value="#{_skyveMarkup.contextParameter}" />
 					<h:inputHidden id="_b" value="#{_skyveMarkup.bindingParameter}" />

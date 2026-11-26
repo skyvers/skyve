@@ -713,7 +713,7 @@ isc.BizListGrid.addMethods({
 					a: "L",
 					d: me._dataSource.ID,
 					t: "sc",
-					_csrf: me._csrf,
+					// no CSRF token: listing is not checked, and is a GET, so the token would be in the URL
 				};
 				isc.RPCManager.sendRequest({
 					showPrompt: false,

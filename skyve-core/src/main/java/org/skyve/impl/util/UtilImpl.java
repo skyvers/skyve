@@ -24,7 +24,6 @@ import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
 import org.skyve.cache.ArchivedDocumentCacheConfig;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
@@ -335,7 +334,6 @@ public class UtilImpl {
 	// Set in test classes to ensure EHCaches are never set to be persistent when testing
 	public static boolean FORCE_NON_PERSISTENT_CACHING = false; 
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
-	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
 	public static GeoIPCacheConfig GEO_IP_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
@@ -929,7 +927,6 @@ public class UtilImpl {
     	CACHE_MULTIPLE = false;
     	FORCE_NON_PERSISTENT_CACHING = false; 
     	CONVERSATION_CACHE = null;
-    	CSRF_TOKEN_CACHE = null;
     	SESSION_CACHE = null;
     	GEO_IP_CACHE = null;
     	HIBERNATE_CACHES = new ArrayList<>();

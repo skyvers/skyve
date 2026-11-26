@@ -1,6 +1,10 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +15,7 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +43,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -286,6 +292,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		String tagId = EXT.getTagManager().create("list-tag-" + System.nanoTime(), true);
 
 		CapturedResponse tagged = service(newRequest(u)
+				.withCsrfToken()
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param("_tagId", tagId)
@@ -296,6 +303,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		assertTrue(tagged.body().contains("\"" + PersistentBean.TAGGED_NAME + "\":true"), tagged.body());
 
 		CapturedResponse untagged = service(newRequest(u)
+				.withCsrfToken()
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param("_tagId", tagId)
@@ -307,8 +315,29 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void aTagWithoutTheSessionsCsrfTokenIsRefusedAndTagsNothing() throws Exception {
+		Contact contact = saveContact("list-tag-refused");
+		String tagId = EXT.getTagManager().create("list-tag-refused-" + System.nanoTime(), true);
+
+		CapturedResponse refused = service(newRequest(u)
+				.param(AbstractWebContext.CSRF_TOKEN_NAME, StateUtil.createToken())
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_tagId", tagId)
+				.param(Bean.DOCUMENT_ID, contact.getBizId())
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
+
+		assertUnexpectedError(refused.body());
+		AbstractPersistence.get().setUser(u);
+		try (AutoClosingIterable<Bean> tagged = EXT.getTagManager().iterate(tagId)) {
+			assertFalse(tagged.iterator().hasNext(), "nothing was tagged");
+		}
+	}
+
+	@Test
 	void tagWithoutATagIdIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
+				.withCsrfToken()
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param(Bean.DOCUMENT_ID, "row-1")
@@ -320,6 +349,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 	@Test
 	void untagWithoutATagIdIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
+				.withCsrfToken()
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param(Bean.DOCUMENT_ID, "row-1")
@@ -458,17 +488,28 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 
 	private static final class RequestBuilder {
 		private final Map<String, String[]> parameters = new LinkedHashMap<>();
+		// the session keeps its attributes, as a container's does, so its CSRF token stays the same
+		private final Map<String, Object> attributes = new HashMap<>();
 		private final HttpSession session = mock(HttpSession.class);
 
 		private RequestBuilder(User user) {
 			when(session.getId()).thenReturn("smart-client-list-session-" + System.nanoTime());
-			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+			attributes.put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+			when(session.getAttribute(anyString())).thenAnswer(i -> attributes.get(i.getArgument(0)));
+			doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(session).setAttribute(anyString(), any());
 			StateUtil.addSession(user.getId(), session);
 		}
 
 		private RequestBuilder param(String name, String value) {
 			parameters.put(name, new String[] { value });
 			return this;
+		}
+
+		/**
+		 * Sends the session's CSRF token, as the client does with a mutating request.
+		 */
+		private RequestBuilder withCsrfToken() {
+			return param(AbstractWebContext.CSRF_TOKEN_NAME, StateUtil.getSessionToken(session));
 		}
 
 		/**

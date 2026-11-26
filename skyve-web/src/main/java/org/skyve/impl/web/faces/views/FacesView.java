@@ -3,7 +3,6 @@ package org.skyve.impl.web.faces.views;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -29,7 +28,6 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.MetadataIconResolver;
 import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -179,54 +177,14 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
-	 * Used to track requests being executed out of order possibly from a Cross Site Request Forgery
-	 */
-	private String csrfToken;
-	private boolean csrfTokenChecked = true;
-
-	/**
-	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
-	 *
-	 * @return the current CSRF token
-	 */
-	public @Nonnull String getCsrfToken() {
-		if (csrfToken == null) {
-			csrfToken = StateUtil.createToken().toString();
-			csrfTokenChecked = false;
-		}
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("getCsrfToken() = {}", csrfToken);
-		return csrfToken;
-	}
-
-	/**
-	 * Compares the token set with the existing value to detect CSRF attacks.
-	 * If there is a token set and it matches, this method clears the existing csrfToken value ready for a getter call.
-	 * If the tokens do not match, then the current user is logged out.
+	 * Accepts the token from a hidden input bound to {@code csrfToken}, as the templates' UX/UI form has: the binding
+	 * needs a setter. The token is checked when the view is restored, before any value is applied or action run
+	 * ({@link org.skyve.impl.web.faces.SkyveFacesPhaseListener}), so it is not kept here.
 	 *
 	 * @param csrfToken value from the web request
 	 */
 	public void setCsrfToken(@Nullable String csrfToken) {
-		// We can't do CSRF processing as
-		if (FacesUtil.isIgnoreAutoUpdate()) {
-			return;
-		}
-
-		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("setCsrfToken() = {}", csrfToken);
-		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
-		csrfTokenChecked = true; // indicate we have checked the token
-		if (this.csrfToken != null) { // there needs to be a token to check first
-
-			if (! this.csrfToken.equals(currentCsrfToken)) {
-				LOGGER.error("CSRF attack detected");
-				try {
-					FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getLoggedOutUrl());
-				}
-				catch (IOException e) {
-					throw new FacesException("Could not redirect home after CSRF attack", e);
-				}
-			}
-			this.csrfToken = null;
-		}
+		// checked in the phase listener
 	}
 
 	/**
@@ -250,7 +208,7 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
-	 * Handles postback lifecycle processing including CSRF token checks.
+	 * Handles postback lifecycle processing.
 	 */
 	protected void postBack() {
 		if (LOGGER.isInfoEnabled()) {
@@ -262,22 +220,6 @@ public class FacesView extends HarnessView {
 							getBizIdParameter());
 		}
 
-		if ((! csrfTokenChecked) && (! FacesUtil.isIgnoreAutoUpdate())) {
-			ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-			String csrfTokenParameterValue = ec.getRequestParameterMap().get("csrfToken");
-			if (csrfTokenParameterValue != null) {
-				setCsrfToken(csrfTokenParameterValue);
-			}
-			else {
-				try {
-					LOGGER.error("No CSRF token detected");
-					ec.redirect(Util.getLoggedOutUrl());
-				}
-				catch (IOException e) {
-					throw new FacesException("Could not redirect home after CSRF attack", e);
-				}
-			}
-		}
 	}
 
 	/**
@@ -1713,7 +1655,7 @@ public class FacesView extends HarnessView {
 
 	/**
 	 * Returns what the PrimeFaces SAIL recorder needs to start on this page at once, as JSON: the recording's CSRF
-	 * token, its counts and the last entries the panel shows (see {@link SailRecording#pageState(HttpSession, int)}).
+	 * token, its counts and the last entries the panel shows (see {@link SailRecording#pageState(int)}).
 	 * Only while the session records ({@link #isSailRecording()}).
 	 *
 	 * <p>Complexity: renders the last {@value #SAIL_RECORDING_INLINE_ENTRIES} entries; call it once per render.
@@ -1727,7 +1669,7 @@ public class FacesView extends HarnessView {
 		try {
 			HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession(false);
 			SailRecording recording = SailRecording.get(session);
-			return ((session == null) || (recording == null)) ? null : recording.pageState(session, SAIL_RECORDING_INLINE_ENTRIES);
+			return ((session == null) || (recording == null)) ? null : recording.pageState(SAIL_RECORDING_INLINE_ENTRIES);
 		}
 		catch (Exception e) {
 			FACES_LOGGER.warn("SAIL recording could not give the page its state", e);

@@ -22,8 +22,8 @@ import util.AbstractH2Test;
  * 
  * This action evicts a selected cache by name.
  * It sets tabIndex to null, then clears the cache based on the cache name.
- * The action handles different cache types: CONVERSATION_CACHE, CSRF_TOKEN_CACHE,
- * GEO_IP_CACHE, SESSION_CACHE, Hibernate caches, and APP_CACHES.
+ * The action handles different cache types: CONVERSATION_CACHE, GEO_IP_CACHE,
+ * SESSION_CACHE, Hibernate caches, and APP_CACHES.
  * 
  * Note: Some cache types may not be available in the test environment.
  * We verify the testable behavior (tabIndex being set, result being returned)
@@ -83,31 +83,6 @@ class EvictSelectedCacheH2Test extends AbstractH2Test {
 			assertThat(result, is(notNullValue()));
 			assertThat(result.getBean(), is(controlPanel));
 			// tabIndex should be set to null
-			assertThat(controlPanel.getTabIndex(), is(nullValue()));
-		} catch (Exception ignored) {
-			assertThat(ignored, notNullValue());
-			// If cache operations fail in test environment, still verify state changes
-			assertThat(controlPanel.getTabIndex(), is(nullValue()));
-		}
-	}
-
-	@Test
-	void testExecuteWithCSRFTokenCache() throws Exception {
-		// setup the test data
-		controlPanel.setTabIndex(Integer.valueOf(2));
-		if (UtilImpl.CSRF_TOKEN_CACHE != null) {
-			controlPanel.setSelectedCache(UtilImpl.CSRF_TOKEN_CACHE.getName());
-		} else {
-			controlPanel.setSelectedCache("testCSRFTokenCache");
-		}
-
-		// call the method under test
-		try {
-			ServerSideActionResult<ControlPanelExtension> result = action.execute(controlPanel, webContext);
-
-			// verify the result
-			assertThat(result, is(notNullValue()));
-			assertThat(result.getBean(), is(controlPanel));
 			assertThat(controlPanel.getTabIndex(), is(nullValue()));
 		} catch (Exception ignored) {
 			assertThat(ignored, notNullValue());

@@ -146,9 +146,8 @@ A refused `/smartedit` request gets this response:
 ```
 
 `data` is the user's localised message, HTML-escaped and then JSON-escaped. The transaction
-is rolled back, the conversation is not updated and the CSRF token is not replaced: ignore
-the response's `X-CSRF-TOKEN` header and send the next request with the token you already
-hold.
+is rolled back and the conversation is not updated. The session's CSRF token does not change,
+so send the next request with the token you already hold.
 
 BizPort export, BizPort import and upload requests are checked against the bean that their
 `_b` binding zooms in on, or the conversation bean when there is none. The other entry

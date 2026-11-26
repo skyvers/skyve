@@ -3,6 +3,7 @@ package org.skyve.impl.sail.recording;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -76,14 +77,16 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	void stepsNeedTheTokenAndAreAddedOnce() throws Exception {
 		SailRecording recording = SailRecording.start(session, u);
 		String token = token();
-		String batch = "{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}";
+		String batch = "{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}";
 		assertEquals("{\"received\":2,\"steps\":2,\"gestures\":2,\"stopped\":false}", post(batch).body());
 		assertEquals("{\"received\":0,\"steps\":2,\"gestures\":2,\"stopped\":false}", post(batch).body());
 
-		Response forged = post("{\"_csrf\":12345,\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
+		Response forged = post("{\"_csrf\":\"" + StateUtil.createToken() + "\",\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
+		Response number = post("{\"_csrf\":12345,\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
 		Response none = post("{\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
 		Response garbage = post("not json");
 		assertAll(() -> verify(forged.response).sendError(HttpServletResponse.SC_FORBIDDEN),
+					() -> verify(number.response).sendError(HttpServletResponse.SC_FORBIDDEN),
 					() -> verify(none.response).sendError(HttpServletResponse.SC_FORBIDDEN),
 					() -> verify(garbage.response).sendError(HttpServletResponse.SC_FORBIDDEN),
 					() -> assertEquals(2, recording.getStepCount()));
@@ -93,7 +96,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	void theCapIsReported() throws Exception {
 		UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS = 1;
 		SailRecording.start(session, u);
-		String body = post("{\"_csrf\":" + token() + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}").body();
+		String body = post("{\"_csrf\":\"" + token() + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}").body();
 		assertEquals("{\"received\":1,\"steps\":1,\"gestures\":1,\"stopped\":false,\"limitReached\":true,\"maximumSteps\":1}", body);
 	}
 
@@ -101,13 +104,13 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	void aStoppedRecordingTakesNoStepsAndServesItsScript() throws Exception {
 		SailRecording recording = SailRecording.start(session, u);
 		String token = token();
-		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"}]}");
+		post("{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"}]}");
 		// while recording, the script as it stands, for the panel's Copy and Download
 		Response early = get(Map.of("format", "xml"));
 		assertTrue(early.body().contains("<save/>"), early.body());
 
 		String xml = recording.stop();
-		Response late = post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-2\",\"op\":\"ok\"}]}");
+		Response late = post("{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-2\",\"op\":\"ok\"}]}");
 		Response script = get(Map.of("format", "xml"));
 		assertAll(() -> verify(late.response).setStatus(HttpServletResponse.SC_FORBIDDEN),
 					() -> assertEquals(xml, script.body()),
@@ -117,7 +120,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	@Test
 	void aRangeOfStepsIsServed() throws Exception {
 		SailRecording.start(session, u);
-		post("{\"_csrf\":" + token() + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
+		post("{\"_csrf\":\"" + token() + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
 		String body = get(Map.of("from", "1", "count", "1")).body();
 		assertTrue(body.startsWith("{\"total\":3,\"gestures\":3,\"stopped\":false,\"from\":1,\"entries\":[{\"id\":\"p-2\""), body);
 		assertTrue(body.contains("\"lines\":[\"<ok") && (! body.contains("<save")), body);
@@ -133,8 +136,8 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	void thePageStateHasTheTokenAndTheLastEntries() throws Exception {
 		SailRecording recording = SailRecording.start(session, u, "tablet", UserAgentType.tablet);
 		String token = token();
-		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
-		String state = recording.pageState(session, 2);
+		post("{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
+		String state = recording.pageState(2);
 		Map<?, ?> parsed = (Map<?, ?>) java.util.Objects.requireNonNull(JSON.unmarshall(state), state);
 		assertAll(() -> assertTrue(state.startsWith("{\"recording\":true,\"_csrf\":"), state),
 					() -> assertEquals(token, String.valueOf(parsed.get("_csrf")), "the endpoint's token: " + state),
@@ -152,13 +155,13 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	void thePanelDeletesUndoesAndStops() throws Exception {
 		SailRecording recording = SailRecording.start(session, u);
 		String token = token();
-		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}," +
+		post("{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}," +
 				"{\"id\":\"p-3\",\"op\":\"ok\"},{\"id\":\"p-4\",\"op\":\"context\",\"text\":\"shown: info growl\"}]}");
-		String deleted = post("{\"_csrf\":" + token + ",\"delete\":\"p-2\"}").body();
-		String undone = post("{\"_csrf\":" + token + ",\"undo\":true}").body();
+		String deleted = post("{\"_csrf\":\"" + token + "\",\"delete\":\"p-2\"}").body();
+		String undone = post("{\"_csrf\":\"" + token + "\",\"undo\":true}").body();
 		// a resent copy of a deleted step is not added again
-		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}]}");
-		String stopped = post("{\"_csrf\":" + token + ",\"stop\":true}").body();
+		post("{\"_csrf\":\"" + token + "\",\"steps\":[{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}]}");
+		String stopped = post("{\"_csrf\":\"" + token + "\",\"stop\":true}").body();
 		Response file = get(Map.of("format", "xml", "download", "true"));
 		assertAll(() -> assertTrue(deleted.contains("\"steps\":3,\"gestures\":2"), deleted),
 					() -> assertTrue(undone.contains("\"steps\":1,\"gestures\":1"), undone),
@@ -170,19 +173,18 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	}
 
 	/**
-	 * Every page of a recording gets the same token, so the session's tokens do not grow with the pages; a new
-	 * recording replaces it.
+	 * Every page of a recording gets the same token; a new recording has a new one, and the old one no longer works.
 	 */
 	@Test
 	void theTokenIsIssuedOncePerRecording() throws Exception {
 		SailRecording.start(session, u);
 		String first = token();
 		assertEquals(first, token());
-		SailRecording.start(session, u);
+		SailRecording current = SailRecording.start(session, u);
 		String second = token();
 		assertAll(() -> assertNotEquals(first, second, first),
-					() -> assertTrue(! StateUtil.checkToken(session, Integer.valueOf(first)), "the old token is gone"),
-					() -> assertTrue(StateUtil.checkToken(session, Integer.valueOf(second))));
+					() -> assertFalse(current.isToken(first), "the old token is refused"),
+					() -> assertTrue(current.isToken(second)));
 	}
 
 	/**

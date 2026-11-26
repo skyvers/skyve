@@ -46,10 +46,6 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.CONVERSATION_CACHE.getKeyClass(), UtilImpl.CONVERSATION_CACHE.getValueClass());
 				clearEHCache(cache, webContext, cacheName);
 			}
-			else if (UtilImpl.CSRF_TOKEN_CACHE.getName().equals(cacheName)) {
-				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.CSRF_TOKEN_CACHE.getKeyClass(), UtilImpl.CSRF_TOKEN_CACHE.getValueClass());
-				clearEHCache(cache, webContext, cacheName);
-			}
 			else if (UtilImpl.GEO_IP_CACHE.getName().equals(cacheName)) {
 				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.GEO_IP_CACHE.getKeyClass(), UtilImpl.GEO_IP_CACHE.getValueClass());
 				clearEHCache(cache, webContext, cacheName);

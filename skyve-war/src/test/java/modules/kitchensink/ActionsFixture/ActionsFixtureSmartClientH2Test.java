@@ -186,6 +186,28 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void aSaveOrADeleteWithoutTheSessionsCSRFTokenIsRefusedAndWritesNothing() throws Exception {
+		SmartClient client = SmartClient.fixture(u);
+		client.fetchNew();
+		String token = client.csrf;
+
+		client.csrf = null;
+		JsonNode save = client.update("Save");
+		assertEquals(-1, status(save), save::toString);
+		assertEquals(0, count(KitchensinkDocument.ACTIONS_FIXTURE));
+
+		client.csrf = token;
+		JsonNode saved = client.update("Save");
+		assertEquals(0, status(saved), saved::toString);
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
+
+		client.csrf = StateUtil.createToken();
+		JsonNode delete = client.remove(ActionsFixture.DOCUMENT_NAME);
+		assertEquals(-1, status(delete), delete::toString);
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
+	}
+
+	@Test
 	void deleteIsRefusedWhenItsConditionIsTrue() throws Exception {
 		ActionsFixture undeletable = persistedFixture(true, false);
 		ActionsFixture deletable = persistedFixture(false, false);
@@ -206,6 +228,8 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	void aDeleteWithNoConversationDeletesNothingAndIsNotRefused() throws Exception {
 		ActionsFixture fixture = persistedFixture(true, false);
 		SmartClient client = SmartClient.fixture(u);
+		// the session's token, which the client has from any earlier response
+		client.csrf = StateUtil.getSessionToken(client.session);
 
 		// No conversation, so there is no bean to delete: the request deletes nothing, as before the check
 		JsonNode response = client.request("remove", null, null, null, null, ActionsFixture.DOCUMENT_NAME, fixture.getBizId());
@@ -395,8 +419,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	void aRefusalLeavesTheConversationAndTheCSRFTokenAsTheyWere() throws Exception {
 		SmartClient client = SmartClient.fixture(u);
 		client.fetchNew();
-		Integer token = client.csrf;
-		String sessionId = client.session.getId();
+		String token = client.csrf;
 		client.set(ActionsFixture.eventTextPropertyName, "posted with a refused action");
 
 		JsonNode refused = client.update("RunWithoutTrigger");
@@ -407,8 +430,31 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		ActionsFixture cached = (ActionsFixture) client.cachedBean();
 		assertNull(cached.getEventText());
 		assertNull(cached.getOutcome());
-		// The token was not replaced, so the client carries on with it
-		assertTrue(StateUtil.checkToken(sessionId, token));
+		// The session's token is still the one the client has, so it carries on with it
+		assertTrue(StateUtil.checkSessionToken(client.session, token));
+		assertRan(client.update("RunFromToolbar"), "Run From Toolbar ran");
+	}
+
+	@Test
+	void anUpdateWithoutTheSessionsCSRFTokenIsRefusedAndChangesNothing() throws Exception {
+		SmartClient client = SmartClient.fixture(u);
+		client.fetchNew();
+		String token = client.csrf;
+		client.set(ActionsFixture.eventTextPropertyName, "posted without the token");
+
+		client.csrf = null;
+		JsonNode missing = client.update("RunFromToolbar");
+		client.csrf = StateUtil.createToken();
+		JsonNode forged = client.update("RunFromToolbar");
+
+		assertEquals(-1, status(missing), missing::toString);
+		assertEquals(-1, status(forged), forged::toString);
+		// Neither request reached the conversation or ran the action
+		ActionsFixture cached = (ActionsFixture) client.cachedBean();
+		assertNull(cached.getEventText());
+		assertNull(cached.getOutcome());
+		// With the session's token the same request runs
+		client.csrf = token;
 		assertRan(client.update("RunFromToolbar"), "Run From Toolbar ran");
 	}
 
@@ -682,7 +728,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		private final String document;
 		private ObjectNode values;
 		private String webId;
-		private Integer csrf;
+		private String csrf;
 
 		private SmartClient(User user, ModuleDocument edited) {
 			this.module = edited.moduleName();
@@ -801,7 +847,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 				request.addParameter(AbstractWebContext.CONTEXT_NAME, webId);
 			}
 			if (csrf != null) {
-				request.addParameter(AbstractWebContext.CSRF_TOKEN_NAME, csrf.toString());
+				request.addParameter(AbstractWebContext.CSRF_TOKEN_NAME, csrf);
 			}
 			if (action != null) {
 				request.addParameter(AbstractWebContext.ACTION_NAME, action);
@@ -834,7 +880,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 			}
 			JsonNode result = JSON_MAPPER.readTree(response.getContentAsString()).get("response");
 			if (status(result) >= 0) {
-				csrf = Integer.valueOf(response.getHeader("X-CSRF-TOKEN"));
+				csrf = response.getHeader("X-CSRF-TOKEN");
 			}
 			return result;
 		}

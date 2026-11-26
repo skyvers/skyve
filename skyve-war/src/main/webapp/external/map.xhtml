@@ -27,6 +27,7 @@
 			<ui:param name="vue" value="false" />
 			<ui:define name="body">
 				<h:form prependId="false">
+					<input type="hidden" name="csrfToken" value="#{skyve.csrfToken}" />
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>

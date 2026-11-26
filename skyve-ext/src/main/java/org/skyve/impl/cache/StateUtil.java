@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -45,13 +47,13 @@ import jakarta.servlet.http.HttpSession;
 /**
  * Manages serialised conversation (page-scope) state in the HTTP session,
  * providing store and retrieve operations for Faces view state and navigation data,
- * and keeps the per-user session id sets and per-session CSRF token sets.
+ * keeps the per-user session id sets, and issues and checks each session's CSRF token.
  *
  * <p>Thread-safe: all public methods may be called concurrently without external synchronisation.
- * The session id and CSRF token sets are changed with Ehcache's atomic conditional operations
+ * The session id sets are changed with Ehcache's atomic conditional operations
  * ({@code putIfAbsent}, {@code replace(key, old, new)}, {@code remove(key, old)}) on a new copy of the
- * set, so simultaneous changes to one user's sessions or one session's tokens are never lost, and a
- * set read from the cache is never changed afterwards.
+ * set, so simultaneous changes to one user's sessions are never lost, and a set read from the cache is
+ * never changed afterwards.
  */
 public class StateUtil {
 
@@ -344,113 +346,88 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.GEO_IP_CACHE.getName(), String.class, IPGeolocation.class);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	private static @Nonnull Cache<String, TreeSet> getTokens() {
-		return EXT.getCaching().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
-	}
+	/**
+	 * The session attribute that holds the session's CSRF token.
+	 */
+	private static final String CSRF_TOKEN_ATTRIBUTE_NAME = "skyve.csrfToken";
 
 	/**
-	 * Performs clearTokens.
+	 * Guards issuing a session's token, so that simultaneous first requests of a session share one token.
 	 */
-	public static void clearTokens(@Nonnull HttpSession session) {
-		clearTokens(session.getId());
-	}
-	
-	/**
-	 * Invalidates every CSRF token of a session.
-	 *
-	 * <p>Side effects: replaces a known session's token set with an empty one in the CSRF token cache;
-	 * does nothing for an unknown session.
-	 *
-	 * <p>Threading: atomic.
-	 *
-	 * @param sessionId	the session's id
-	 */
-	public static void clearTokens(@Nonnull String sessionId) {
-		getTokens().replace(sessionId, new TreeSet<>());
-	}
-	
-	/**
-	 * Performs checkToken.
-	 */
-	public static boolean checkToken(@Nonnull HttpSession session, @Nullable Integer token) {
-		return checkToken(session.getId(), token);
-	}
-	
-	/**
-	 * Performs checkToken.
-	 */
-	@SuppressWarnings("rawtypes")
-	public static boolean checkToken(@Nonnull String sessionId, @Nullable Integer token) {
-		if (token == null) {
-			return false;
-		}
-		Cache<String, TreeSet> tokens = getTokens();
-		TreeSet values = tokens.get(sessionId);
-		return (values != null) && values.contains(token);
-	}
+	private static final Object CSRF_TOKEN_LOCK = new Object();
 
 	/**
-	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 * Returns the session's CSRF token, issuing it the first time.
 	 *
-	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 * <p>The token stays the same for the life of the session, so requests in flight at the same time all carry
+	 * a valid token. It is dropped when the session id changes, as at sign in (see {@link #removeSessionToken(HttpSession)}),
+	 * and goes with the session.
+	 *
+	 * <p>Side effects: the first call stores a new token in the session.
+	 *
+	 * <p>Threading: simultaneous first calls for one session return the same token.
 	 *
 	 * @param session	the session
-	 * @param token	the token to remove, or {@code null} to do nothing
+	 * @return the token
 	 */
-	public static void removeToken(@Nonnull HttpSession session, @Nullable Integer token) {
-		removeToken(session.getId(), token);
+	public static @Nonnull String getSessionToken(@Nonnull HttpSession session) {
+		String result = (String) session.getAttribute(CSRF_TOKEN_ATTRIBUTE_NAME);
+		if (result == null) {
+			synchronized (CSRF_TOKEN_LOCK) {
+				result = (String) session.getAttribute(CSRF_TOKEN_ATTRIBUTE_NAME);
+				if (result == null) {
+					result = createToken();
+					session.setAttribute(CSRF_TOKEN_ATTRIBUTE_NAME, result);
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
-	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 * Determines whether a token sent with a request is its session's CSRF token.
 	 *
-	 * <p>Side effects: writes the session's token set in the CSRF token cache when it held the token;
-	 * a set left empty stays in the cache.
+	 * <p>The comparison takes the same time wherever the values differ. No token is issued: a session that has
+	 * none rejects every token.
 	 *
-	 * <p>Threading: atomic; simultaneous token changes in one session are all kept.
-	 *
-	 * @param sessionId	the session's id
-	 * @param token	the token to remove, or {@code null} to do nothing
+	 * @param session	the request's session, or {@code null} if it has none
+	 * @param token	the token the request sent, or {@code null} if it sent none
+	 * @return	{@code true} if the session has a token and {@code token} is it
 	 */
-	public static void removeToken(@Nonnull String sessionId, @Nullable Integer token) {
-		if (token == null) {
-			return;
+	public static boolean checkSessionToken(@Nullable HttpSession session, @Nullable String token) {
+		if ((session == null) || (token == null)) {
+			return false;
 		}
-		updateSet(getTokens(), sessionId, false, (TreeSet<Integer> values) -> values.remove(token));
-	}
-
-	public static void replaceToken(@Nonnull HttpSession session,
-										@Nullable Integer oldToken,
-										@Nonnull Integer newToken) {
-		replaceToken(session.getId(), oldToken, newToken);
+		String sessionToken = (String) session.getAttribute(CSRF_TOKEN_ATTRIBUTE_NAME);
+		return (sessionToken != null) && isSameToken(sessionToken, token);
 	}
 
 	/**
-	 * Replaces one of a session's CSRF tokens with a new one, leaving its other tokens valid.
+	 * Determines whether a token sent with a request is the expected one, comparing in the same time wherever the
+	 * values differ, so that the time taken does not tell an attacker how much of a guess was right.
 	 *
-	 * <p>Side effects: writes the session's token set in the CSRF token cache, creating it for a new
-	 * session; does nothing when both tokens are the same.
-	 *
-	 * <p>Threading: atomic; simultaneous token changes in one session are all kept.
-	 *
-	 * @param sessionId	the session's id
-	 * @param oldToken	the token to invalidate, or {@code null} to only add {@code newToken}
-	 * @param newToken	the token to make valid
+	 * @param expected	the token issued
+	 * @param token	the token sent, or {@code null} if none was
+	 * @return	{@code true} if {@code token} is {@code expected}
 	 */
-	public static void replaceToken(@Nonnull String sessionId,
-										@Nullable Integer oldToken,
-										@Nonnull Integer newToken) {
-		if (newToken.equals(oldToken)) {
-			return;
-		}
-		
-		updateSet(getTokens(), sessionId, false, (TreeSet<Integer> values) -> {
-			boolean removed = (oldToken != null) && values.remove(oldToken);
-			return values.add(newToken) || removed;
-		});
+	public static boolean isSameToken(@Nonnull String expected, @Nullable String token) {
+		return (token != null) &&
+				MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8));
 	}
-	
+
+	/**
+	 * Drops the session's CSRF token, so that the next {@link #getSessionToken(HttpSession)} issues a new one.
+	 * This is called when the session id changes, as at sign in, so that a token seen before sign in does not
+	 * work after it.
+	 *
+	 * <p>Side effects: removes the token from the session.
+	 *
+	 * @param session	the session
+	 */
+	public static void removeSessionToken(@Nonnull HttpSession session) {
+		session.removeAttribute(CSRF_TOKEN_ATTRIBUTE_NAME);
+	}
+
 	// This is thread-safe
 	private static final SecureRandom RANDOM = new SecureRandom();
     // Get 128 random bytes - move past first seed sequence
@@ -458,9 +435,17 @@ public class StateUtil {
 	    byte[] randomBytes = new byte[128];
 	    RANDOM.nextBytes(randomBytes);
 	}
-	
-	public static @Nonnull Integer createToken() {
-		return Integer.valueOf(RANDOM.nextInt());
+
+	/**
+	 * Creates an unguessable token: 128 random bits from {@link SecureRandom} as 32 lower-case hex digits,
+	 * which need no escaping in a URL, header, HTML attribute or JSON string.
+	 *
+	 * @return	a new token
+	 */
+	public static @Nonnull String createToken() {
+		byte[] bytes = new byte[16];
+		RANDOM.nextBytes(bytes);
+		return HexFormat.of().formatHex(bytes);
 	}
 	
 	/**
@@ -468,7 +453,6 @@ public class StateUtil {
 	 */
 	public static void logStateStats() {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
-		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
 		logCacheStats(UtilImpl.GEO_IP_CACHE.getName(), "Geo IP");
 		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
 		FACES_LOGGER.info("Session count = {}", SESSION_COUNT);
@@ -513,23 +497,6 @@ public class StateUtil {
 			Entry<String, byte[]> entry = i.next();
 			if (entry != null) {
 				conversations.containsKey(entry.getKey());
-			}
-		}
-	}
-	
-	/**
-	 * Performs evictExpiredSessionTokens.
-	 */
-	@SuppressWarnings("rawtypes")
-	public static void evictExpiredSessionTokens() {
-		Cache<String, TreeSet> tokens = getTokens();
-		Iterator<Entry<String, TreeSet>> i = tokens.iterator();
-		while (i.hasNext()) {
-			// accessing an entry is meant to evict the entry if it has expired.
-			// iterating isn't enough but containsKey() does the trick
-			Entry<String, TreeSet> entry = i.next();
-			if (entry != null) {
-				tokens.containsKey(entry.getKey());
 			}
 		}
 	}

@@ -225,8 +225,8 @@ public class HealthServlet extends HttpServlet {
 		// Caching
 		result.append("\",\"caching\":\"");
 		try {
-			// Check for a bogus token that will get the CSRF token cache
-			StateUtil.checkToken("", null);
+			// Look up a bogus user, which gets the session cache
+			StateUtil.getSessions("");
 			result.append(STATUS_OK);
 		}
 		catch (Throwable t) {

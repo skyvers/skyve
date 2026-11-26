@@ -190,16 +190,19 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * Processes SmartClient edit requests and writes a JSON response.
 	 *
 	 * <p>Every operation but {@code fetch} marks the request as able to ask questions. A question asked in the
-	 * request rolls it back and is written as a status {@code -50} response; the conversation is not cached and
-	 * the CSRF token is not replaced, so the client can resend the request with the answer.
+	 * request rolls it back and is written as a status {@code -50} response; the conversation is not cached, so the
+	 * client can resend the request with the answer.
 	 *
 	 * <p>A custom action, a download, OK, Save or a delete is refused with {@link ActionUnavailableException}
 	 * unless the view, as last rendered, offers a reachable trigger for it (see {@link ActionAvailability}).
 	 * A push request, an inline data grid's New (see {@link ServletConstants#INLINE_ADD_ACTION_NAME}) and a delete
 	 * with no bean (no conversation) are not checked.
 	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
-	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached and
-	 * the CSRF token is not replaced.
+	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached.
+	 *
+	 * <p>Every operation but {@code fetch} is refused unless it sends the session's CSRF token
+	 * (see {@link SmartClientListServlet#checkCsrfToken(HttpSession, String)}); every response carries the token in
+	 * its {@code X-CSRF-TOKEN} header.
 	 *
 	 * @param request inbound HTTP request
 	 * @param response outbound HTTP response
@@ -213,21 +216,10 @@ public class SmartClientEditServlet extends HttpServlet {
         response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 
-    	// Send CSRF Token as a response header (must be done before getting the writer)
-		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
-		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
-		Integer newCsrfToken = currentCsrfToken;
+		String csrfToken = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		// Send the session's CSRF token as a response header (must be done before getting the writer)
+		SmartClientListServlet.setCsrfTokenHeader(request, response);
 		String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
-		// If this is a mutating request, we'll definitely need a new CSRF Token
-		if (Operation.fetch.toString().equals(operationType)) {
-			if (newCsrfToken == null) {
-				newCsrfToken = StateUtil.createToken();
-			}
-		}
-		else {
-			newCsrfToken = StateUtil.createToken();
-		}
-    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
 		try (PrintWriter pw = response.getWriter()) {
 	        if (operationType == null) {
@@ -377,7 +369,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							throw new ServletException(REQUEST_MALFORMED);
 						}
 
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 
 						add(webContext,
 								user,
@@ -405,7 +397,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							throw new ServletException(REQUEST_MALFORMED);
 						}
 
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						
 						apply(webContext,
 			                    user,
@@ -460,7 +452,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									throw new ServletException(REQUEST_MALFORMED);
 								}
 	
-								SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+								SmartClientListServlet.checkCsrfToken(session, csrfToken);
 								
 								apply(webContext,
 					                    user, 
@@ -485,7 +477,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							case remove:
 								LOGGER.info("REMOVE with binding {}", formBinding);
 	
-								SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+								SmartClientListServlet.checkCsrfToken(session, csrfToken);
 	
 								// With no bean (no conversation) there is nothing to delete, and remove() deletes nothing.
 								if (processBean != null) {
@@ -516,9 +508,6 @@ public class SmartClientEditServlet extends HttpServlet {
 							default:
 						}
 					}
-
-					// Replace CSRF token
-					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -529,9 +518,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		    		persistence.rollback();
 		    	}
 
-		    	// A question is not an error - the conversation is not cached and the CSRF token is not replaced
+		    	// A question is not an error - the conversation is not cached
 		    	QuestionException question = ExceptionUtils.throwableOfType(t, QuestionException.class);
-		    	// A refused action is expected - it was logged when refused, and as with a question the token is not replaced
+		    	// A refused action is expected - it was logged when refused, and as with a question the conversation is not cached
 		    	ActionUnavailableException unavailable = ExceptionUtils.throwableOfType(t, ActionUnavailableException.class);
 		    	if (question != null) {
 		    		produceQuestionResponse(question, pw);

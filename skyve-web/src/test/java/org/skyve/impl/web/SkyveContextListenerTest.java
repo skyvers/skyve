@@ -1906,7 +1906,6 @@ class SkyveContextListenerTest {
 			state.put("directory", cacheDirectory.toString());
 			state.put("multiple", Boolean.TRUE);
 			state.put("conversations", cacheSettings());
-			state.put("csrfTokens", cacheSettings());
 			state.put("sessions", cacheSettings());
 			state.put("geoIPs", cacheSettings());
 			invokePrivateStatic("configureStateSettings", new Class<?>[] {Map.class}, Map.of("state", state));

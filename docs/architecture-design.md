@@ -85,7 +85,7 @@ Skyve inverts this model. Security is **declarative, universal, and impossible t
 - **Payload shaping** — REST and UI payloads are shaped by the framework according to the user's permissions. Fields the user cannot see are never serialised. Fields the user cannot modify are ignored on input. There is no over-posting vulnerability through the UI. The one exception is `RestService`'s insert, update and delete routes, which check no document permissions: they are blocked by default (below) and must not be enabled for untrusted callers.
 - **Access vectors and forced-browsing prevention** — `UserAccess` keys are computed from menus, roles, routes, and view metadata by `AccessProcessor`. `EXT.checkAccess()` rejects any request that doesn't match a declared access vector — meaning users cannot reach documents or actions by guessing URLs.
 - **Row-level isolation** — `bizCustomer`, `bizDataGroupId`, and `bizUserId` fields on every bean enforce tenant and ownership boundaries at the persistence layer. Queries are automatically filtered; no developer intervention required.
-- **Fail-closed by default** — REST endpoints are blocked (`ForbiddenFilter`) unless explicitly enabled. Security headers (CSP, X-Frame-Options, MIME-sniffing, Referrer-Policy) are applied to every response. CSRF tokens are rotated per request.
+- **Fail-closed by default** — REST endpoints are blocked (`ForbiddenFilter`) unless explicitly enabled. Security headers (CSP, X-Frame-Options, MIME-sniffing, Referrer-Policy) are applied to every response. Each session has one CSRF token, checked on PrimeFaces postbacks and SmartClient changes (see [OWASP Protections](#owasp-protections)).
 
 The net effect: a developer cannot accidentally ship an unsecured application. The only way to weaken security is to deliberately override the framework's protections — and even then, metadata validation will flag many unsafe configurations.
 
@@ -822,11 +822,47 @@ Row-level isolation is enforced via `Bean` ownership fields: `bizCustomer`, `biz
 
 ### OWASP Protections
 
-- CSRF token rotation (managed in conversation cache)
+- A CSRF token per HTTP session (see [CSRF token](#csrf-token) below)
 - CSP, X-Frame-Options, Referrer-Policy, X-Content-Type-Options headers (SecurityHeadersFilter)
 - Input encoding via `org.owasp.encoder`
 - Fail-closed REST (ForbiddenFilter blocks `/rest/*` by default)
 - Session fixation prevention (conversation-session binding in `StateUtil`)
+
+#### CSRF token
+
+Each HTTP session has one CSRF token: 128 random bits held in the session (`StateUtil.getSessionToken`), compared in
+constant time, and never rotated, so requests in flight together (SmartClient sends several at once) all carry a valid
+token. `SkyveSessionListener` drops it when the session id changes at sign in, so a token seen before sign in does not
+work after it. A bad or missing token is refused, logged without the session id, and does not sign the user out.
+
+- **PrimeFaces.** A view that renders the token (`<s:csrfForm>`, the templates' UX/UI form, and the content upload,
+  BizPort import and image markup pages) is marked in its view map (`FacesUtil.getCsrfToken`). Every postback of a
+  marked view must send the token back: `SkyveFacesPhaseListener` checks it when the view is restored, before any value
+  is applied or action run, and refuses with the expired page. The server-side view state is a second protection
+  for every postback.
+- **SmartClient.** Every response carries the token in the `X-CSRF-TOKEN` header, which the widgets, the Vue grid
+  and the Flutter client send back as `_csrf`. Without it these are refused (`SmartClientListServlet.checkCsrfToken`),
+  with a status -1 error and a support reference: add, update, remove, custom actions and the inline grid's New in the
+  edit and list servlets, snapshot create, update and delete (`N`, `U`, `D`), and tag, untag, clear, create and
+  delete (`T`, `U`, `C`, `N`, `D`). Fetches and listings are not checked; the GET ones (the edit view's fetches and
+  the snapshot menu's list) send no token, so it stays out of URLs.
+- **Not covered:** GET requests (they must not change state), the other servlets (downloads, reports, the map, REST,
+  which has its own authentication), and the sign-in form. The session cookie is also `SameSite=Strict`
+  (`undertow-handlers.conf`), which stops modern browsers sending it with a cross-site request.
+
+**Why not Spring Security's CSRF filter.** Spring's `CsrfFilter` (off in `SpringSecurityConfig`) is not tied to JSP:
+it also keeps a token in the session and reads `_csrf` or `X-CSRF-TOKEN`. It was not used because:
+
+- it checks every POST, fetches included (the Vue grid and the snapshot and tag menus post theirs), but the SmartClient,
+  Vue grid and Flutter clients get the token from their first response, so every client would need the token before
+  its first request;
+- its refusal is an HTTP 403, where SmartClient needs a status -1 JSON response and PrimeFaces AJAX a partial-response
+  redirect, so each client would need its own access-denied handler;
+- some POSTs cannot easily send it: multipart uploads (the filter runs before the parts are parsed, so the token must
+  go in a header or the URL), the SAIL recorder's `sendBeacon` (no headers), and REST with Basic authentication.
+
+Protecting the sign-in form from login CSRF could still use Spring's filter for the login URL alone
+(`requireCsrfProtectionMatcher`), with the token added to `login.jsp`.
 
 ---
 
@@ -1136,7 +1172,6 @@ flowchart TD
 | Cache Region | Implementation | Purpose |
 |--------------|---------------|---------|
 | Conversations | `ConversationCacheConfig` → EHCache | Serialized `WebContext` per browser tab (idle-expiring) |
-| CSRF Tokens | `DefaultCaching` | Per-session CSRF token rotation |
 | GeoIP | `DefaultCaching` | Cached geolocation lookups |
 | Session | `DefaultCaching` | Session-scoped application data |
 | App | `DefaultCaching` | Application-scoped shared data |

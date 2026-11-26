@@ -2,7 +2,9 @@ package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +15,7 @@ import java.io.StringWriter;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.RequestUxUiSelection;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.metadata.router.UxUi;
@@ -63,7 +67,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("t", "sc")).doGet();
 
 		assertEquals("[]", response.body());
-		verify(response.response).setIntHeader(org.mockito.ArgumentMatchers.eq("X-CSRF-TOKEN"), anyInt());
+		verify(response.response).setHeader(org.mockito.ArgumentMatchers.eq("X-CSRF-TOKEN"), anyString());
 	}
 
 	@Test
@@ -72,7 +76,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("a", "L")).doPost();
 
 		assertEquals("[]", response.body());
-		verify(response.response).setIntHeader(org.mockito.ArgumentMatchers.eq("X-CSRF-TOKEN"), anyInt());
+		verify(response.response).setHeader(org.mockito.ArgumentMatchers.eq("X-CSRF-TOKEN"), anyString());
 	}
 
 	@Test
@@ -88,6 +92,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	@Test
 	void aNewSnapshotIsListedForItsDatasource() throws Exception {
 		CapturedResponse created = service(newRequest(u)
+				.withCsrfToken()
 				.param("a", "N")
 				.param("t", "sc")
 				.param("d", "admin_qContacts")
@@ -109,8 +114,55 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void aNewSnapshotWithoutTheSessionsCsrfTokenIsRefusedAndNotCreated() throws Exception {
+		CapturedResponse refused = service(newRequest(u)
+				.param(AbstractWebContext.CSRF_TOKEN_NAME, StateUtil.createToken())
+				.param("a", "N")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")
+				.param("n", "Refused")
+				.param("s", SNAPSHOT)).doGet();
+
+		assertUnexpectedWarning(refused.body());
+		AbstractPersistence.get().setUser(u);
+		CapturedResponse listed = service(newRequest(u)
+				.param("a", "L")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")).doGet();
+		assertEquals("[]", listed.body());
+	}
+
+	@Test
+	void aSnapshotDeleteWithoutTheSessionsCsrfTokenIsRefusedAndTheSnapshotStays() throws Exception {
+		CapturedResponse created = service(newRequest(u)
+				.withCsrfToken()
+				.param("a", "N")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")
+				.param("n", "Kept")
+				.param("s", SNAPSHOT)).doGet();
+		String body = created.body();
+		assertTrue(body.startsWith("{\"bizId\":\""), body);
+		String snapId = body.substring(10, body.length() - 2);
+		AbstractPersistence.get().setUser(u);
+
+		CapturedResponse refused = service(newRequest(u)
+				.param("a", "D")
+				.param("i", snapId)).doGet();
+
+		assertUnexpectedWarning(refused.body());
+		AbstractPersistence.get().setUser(u);
+		CapturedResponse listed = service(newRequest(u)
+				.param("a", "L")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")).doGet();
+		assertTrue(listed.body().contains("\"bizId\":\"" + snapId + "\""), listed.body());
+	}
+
+	@Test
 	void updateWithoutASnapshotIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
+				.withCsrfToken()
 				.param("a", "U")
 				.param("i", "snap-1")).doGet();
 
@@ -120,6 +172,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	@Test
 	void newWithoutASnapshotNameIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
+				.withCsrfToken()
 				.param("a", "N")
 				.param("d", "admin_qContacts")
 				.param("s", SNAPSHOT)).doGet();
@@ -130,6 +183,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	@Test
 	void deleteWithoutASnapshotIdIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
+				.withCsrfToken()
 				.param("a", "D")).doGet();
 
 		assertUnexpectedWarning(response.body());
@@ -189,17 +243,28 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 
 	private static final class RequestBuilder {
 		private final Map<String, String[]> parameters = new LinkedHashMap<>();
+		// the session keeps its attributes, as a container's does, so its CSRF token stays the same
+		private final Map<String, Object> attributes = new HashMap<>();
 		private final HttpSession session = mock(HttpSession.class);
 
 		private RequestBuilder(User user) {
 			when(session.getId()).thenReturn("smart-client-snap-session-" + System.nanoTime());
-			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+			attributes.put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+			when(session.getAttribute(anyString())).thenAnswer(i -> attributes.get(i.getArgument(0)));
+			doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(session).setAttribute(anyString(), any());
 			StateUtil.addSession(user.getId(), session);
 		}
 
 		private RequestBuilder param(String name, String value) {
 			parameters.put(name, new String[] { value });
 			return this;
+		}
+
+		/**
+		 * Sends the session's CSRF token, as the client does with a mutating request.
+		 */
+		private RequestBuilder withCsrfToken() {
+			return param(AbstractWebContext.CSRF_TOKEN_NAME, StateUtil.getSessionToken(session));
 		}
 
 		private HttpServletRequest build() {

@@ -23,7 +23,6 @@ import java.util.regex.PatternSyntaxException;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.cache.ArchivedDocumentCacheConfig;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.Caching;
 import org.skyve.cache.ConversationCacheConfig;
@@ -118,7 +117,6 @@ public class SkyveContextListener implements ServletContextListener {
 	private static final String DISK_SIZE_GB_KEY = "diskSizeGB";
 	private static final String EXPIRY_TIME_MINUTES_KEY = "expiryTimeMinutes";
 	private static final String STATE_CONVERSATIONS_KEY = "state.conversations";
-	private static final String STATE_CSRF_TOKENS_KEY = "state.csrfTokens";
 	private static final String STATE_SESSIONS_KEY = "state.sessions";
 	private static final String STATE_GEO_IPS_KEY = "state.geoIPs";
 	private static final String CACHES_KEY = "caches";
@@ -659,11 +657,6 @@ public class SkyveContextListener implements ServletContextListener {
 													getInt(STATE_CONVERSATIONS_KEY, OFF_HEAP_SIZE_MB_KEY, conversations),
 													toDiskSizeMb(STATE_CONVERSATIONS_KEY, conversations),
 													getInt(STATE_CONVERSATIONS_KEY, EXPIRY_TIME_MINUTES_KEY, conversations));
-		Map<String, Object> tokens = getRequiredObject(STATE_KEY, "csrfTokens", state);
-		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(getInt(STATE_CSRF_TOKENS_KEY, HEAP_SIZE_ENTRIES_KEY, tokens),
-											getInt(STATE_CSRF_TOKENS_KEY, OFF_HEAP_SIZE_MB_KEY, tokens),
-											toDiskSizeMb(STATE_CSRF_TOKENS_KEY, tokens),
-											getInt(STATE_CSRF_TOKENS_KEY, EXPIRY_TIME_MINUTES_KEY, tokens));
 		Map<String, Object> sessions = getRequiredObject(STATE_KEY, "sessions", state);
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(getInt(STATE_SESSIONS_KEY, HEAP_SIZE_ENTRIES_KEY, sessions),
 										getInt(STATE_SESSIONS_KEY, OFF_HEAP_SIZE_MB_KEY, sessions),

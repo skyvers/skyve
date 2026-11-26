@@ -16,7 +16,6 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.SnapshotAdapter;
 import org.skyve.impl.util.UtilImpl;
@@ -91,21 +90,10 @@ public class SmartClientSnapServlet extends HttpServlet {
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
-		// Send CSRF Token as a response header (must be done before getting the writer)
-		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
-		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
-		Integer newCsrfToken = currentCsrfToken;
+		String csrfToken = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		// Send the session's CSRF token as a response header (must be done before getting the writer)
+		SmartClientListServlet.setCsrfTokenHeader(request, response);
 		String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
-		// If this is a mutating request, we'll definitely need a new CSRF Token
-		if ("L".equals(action)) {
-			if (newCsrfToken == null) {
-				newCsrfToken = StateUtil.createToken();
-			}
-		}
-		else {
-			newCsrfToken = StateUtil.createToken();
-		}
-		response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
@@ -171,14 +159,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 						}
 					}
 					else if ("U".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if ((snapId == null) || (snapshot == null)) {
 							throw new ServletException("No snapshot ID or snapshot in the request.");
 						}
 						update(snapId, snapshot, smartClientRequest);
 					}
 					else if ("N".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if ((moduleName == null) || (documentOrQueryOrModelName == null) || (snapName == null) || (snapshot == null)) {
 							throw new ServletException("No data source, snapshot name or snapshot in the request.");
 						}
@@ -188,7 +176,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 						sb.append("\"}");
 					}
 					else if ("D".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						SmartClientListServlet.checkCsrfToken(session, csrfToken);
 						if (snapId == null) {
 							throw new ServletException("No snapshot ID in the request.");
 						}
@@ -197,9 +185,6 @@ public class SmartClientSnapServlet extends HttpServlet {
 
 					Util.chunkCharsToWriter(sb, pw);
 					pw.flush();
-
-					// Replace CSRF token
-					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();

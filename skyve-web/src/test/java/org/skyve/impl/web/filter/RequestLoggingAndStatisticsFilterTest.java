@@ -15,7 +15,6 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
@@ -92,7 +91,6 @@ class RequestLoggingAndStatisticsFilterTest {
 		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
-		CSRFTokenCacheConfig originalCsrfTokenCache = UtilImpl.CSRF_TOKEN_CACHE;
 		GeoIPCacheConfig originalGeoIpCache = UtilImpl.GEO_IP_CACHE;
 		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
 		try {
@@ -101,7 +99,6 @@ class RequestLoggingAndStatisticsFilterTest {
 			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
 			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
 			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 1);
-			UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 1);
 			UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 1);
 			UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 1);
 			DefaultCaching.get().shutdown();
@@ -155,7 +152,6 @@ class RequestLoggingAndStatisticsFilterTest {
 			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
 			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
 			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
-			UtilImpl.CSRF_TOKEN_CACHE = originalCsrfTokenCache;
 			UtilImpl.GEO_IP_CACHE = originalGeoIpCache;
 			UtilImpl.SESSION_CACHE = originalSessionCache;
 			WebContainer.clear();

@@ -446,7 +446,7 @@ resources, whose URLs end in `.xhtml` (`primefaces.js.xhtml?ln=primefaces`).
 
 - **Static script, style and SVG only, by path.** These are the bulk of every first load and the same for every user.
   Pages, Faces partial responses and the JSON from the list and snap servlets are left uncompressed for now: they carry
-  session data next to the rotating CSRF token, which is the case the BREACH attack on compressed HTTPS needs. They can
+  session data next to the session's CSRF token, which is the case the BREACH attack on compressed HTTPS needs. They can
   be added later, with that weighed.
 - **Never the SSE stream.** Compression buffers output, which would hold back pushes; `/sse` matches no rule, and C0
   step 8 checks it is sent uncompressed.
