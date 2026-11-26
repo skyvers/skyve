@@ -776,14 +776,16 @@ class FacesViewTest {
 	// ----- getCsrfToken -----
 
 	@Test
-	void getCsrfTokenIsTheSessionsTokenForEveryView() {
+	void getCsrfTokenIsAMaskOfTheSessionsTokenForEveryView() {
 		HttpSession session = new org.springframework.mock.web.MockHttpSession();
 		setFacesContextWithSession(session);
 		try {
-			String token = new FacesView().getCsrfToken();
+			String first = new FacesView().getCsrfToken();
+			String second = new FacesView().getCsrfToken();
 
-			assertEquals(StateUtil.getSessionToken(session), token);
-			assertEquals(token, new FacesView().getCsrfToken(), "every view of the session renders the same token");
+			assertTrue(StateUtil.checkSessionToken(session, first));
+			assertTrue(StateUtil.checkSessionToken(session, second), "every view's mask is accepted");
+			assertNotEquals(first, second, "each render is masked afresh");
 		}
 		finally {
 			FacesContextBridge.setCurrent(null);
@@ -800,8 +802,8 @@ class FacesViewTest {
 
 			view.setCsrfToken("posted-token");
 
-			assertEquals(token, view.getCsrfToken());
 			assertTrue(StateUtil.checkSessionToken(session, token));
+			assertTrue(StateUtil.checkSessionToken(session, view.getCsrfToken()));
 		}
 		finally {
 			FacesContextBridge.setCurrent(null);

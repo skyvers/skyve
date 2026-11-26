@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -180,10 +181,13 @@ class FacesUtilTest {
 		when(context.getViewRoot()).thenReturn(viewRoot);
 		FacesContextBridge.setCurrent(context);
 
-		String token = FacesUtil.getCsrfToken();
+		String first = FacesUtil.getCsrfToken();
+		String second = FacesUtil.getCsrfToken();
 
-		assertEquals(StateUtil.getSessionToken(session), token);
-		assertEquals(token, FacesUtil.getCsrfToken(), "every render of the session gets the same token");
+		assertTrue(StateUtil.checkSessionToken(session, first));
+		assertTrue(StateUtil.checkSessionToken(session, second));
+		assertNotEquals(first, second, "each render is masked afresh");
+		assertFalse(first.contains(StateUtil.getSessionToken(session)), "the raw token is not rendered");
 		assertEquals(Boolean.TRUE, viewMap.get(FacesUtil.CSRF_TOKEN_RENDERED_KEY));
 	}
 
@@ -192,7 +196,7 @@ class FacesUtilTest {
 		MockHttpSession session = new MockHttpSession();
 		FacesContextBridge.setCurrent(facesContextWithSession(session));
 
-		assertEquals(StateUtil.getSessionToken(session), FacesUtil.getCsrfToken());
+		assertTrue(StateUtil.checkSessionToken(session, FacesUtil.getCsrfToken()));
 	}
 
 	private static FacesContext facesContextWithSession(MockHttpSession session) {

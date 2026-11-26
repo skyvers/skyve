@@ -31,7 +31,9 @@ import jakarta.servlet.http.HttpSession;
  * <ul>
  * <li>{@code GET} answers whether the session is recording: {@code {"recording":true,"_csrf":"token","steps":n}}, or
  * 		status 403 with {@code {"recording":false}}. The token is the recording's own CSRF token
- * 		({@link SailRecording#getToken()}), returned to every page of the recording that asks.</li>
+ * 		({@link SailRecording#getToken()}), returned to every page of the recording that asks. It is not masked: this
+ * 		JSON holds nothing taken from the request, so it gives BREACH nothing to compare; the page state rendered
+ * 		into pages is masked ({@link SailRecording#pageState(int)}).</li>
  * <li>{@code GET} with {@code roles} returns the signed-in user's effective roles, {@code {"user":name,"roles":[...]}},
  * 		whenever {@code sail.recording} is on: the SAIL harness builds its views with them. It needs no recording and no
  * 		SAILRecorder role; status 403 when recording is off or nobody is signed in.</li>

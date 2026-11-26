@@ -451,7 +451,8 @@ class SkyveFacesPhaseListenerTest {
 	void aPostbackThatSendsTheSessionsCsrfTokenFromEitherFormProceeds() throws Exception {
 		for (String parameter : List.of(CSRF_TOKEN_PARAMETER, UXUI_CSRF_TOKEN_PARAMETER)) {
 			HttpSession session = new MockHttpSession();
-			LifecycleRequest postback = csrfPostback(true, session, Map.of(parameter, StateUtil.getSessionToken(session)));
+			// a page renders a mask of the token (StateUtil.maskToken)
+			LifecycleRequest postback = csrfPostback(true, session, Map.of(parameter, StateUtil.maskToken(StateUtil.getSessionToken(session))));
 			AbstractPersistence persistence = bindPersistence();
 			try {
 				new SkyveFacesPhaseListener().afterPhase(postback.event);

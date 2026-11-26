@@ -97,7 +97,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("t", "sc")
 				.param("d", "admin_qContacts")
 				.param("n", "Starts with AA")
-				.param("s", SNAPSHOT)).doGet();
+				.param("s", SNAPSHOT)).doPost();
 
 		String body = created.body();
 		assertTrue(body.startsWith("{\"bizId\":\""), body);
@@ -121,9 +121,28 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("t", "sc")
 				.param("d", "admin_qContacts")
 				.param("n", "Refused")
+				.param("s", SNAPSHOT)).doPost();
+
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
+		AbstractPersistence.get().setUser(u);
+		CapturedResponse listed = service(newRequest(u)
+				.param("a", "L")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")).doGet();
+		assertEquals("[]", listed.body());
+	}
+
+	@Test
+	void aNewSnapshotSentAsAGetIsRefusedEvenWithTheSessionsCsrfToken() throws Exception {
+		CapturedResponse refused = service(newRequest(u)
+				.withCsrfToken()
+				.param("a", "N")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")
+				.param("n", "Sent as a GET")
 				.param("s", SNAPSHOT)).doGet();
 
-		assertUnexpectedWarning(refused.body());
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
 		AbstractPersistence.get().setUser(u);
 		CapturedResponse listed = service(newRequest(u)
 				.param("a", "L")
@@ -140,7 +159,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.param("t", "sc")
 				.param("d", "admin_qContacts")
 				.param("n", "Kept")
-				.param("s", SNAPSHOT)).doGet();
+				.param("s", SNAPSHOT)).doPost();
 		String body = created.body();
 		assertTrue(body.startsWith("{\"bizId\":\""), body);
 		String snapId = body.substring(10, body.length() - 2);
@@ -148,9 +167,9 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 
 		CapturedResponse refused = service(newRequest(u)
 				.param("a", "D")
-				.param("i", snapId)).doGet();
+				.param("i", snapId)).doPost();
 
-		assertUnexpectedWarning(refused.body());
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
 		AbstractPersistence.get().setUser(u);
 		CapturedResponse listed = service(newRequest(u)
 				.param("a", "L")
@@ -164,7 +183,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 		CapturedResponse response = service(newRequest(u)
 				.withCsrfToken()
 				.param("a", "U")
-				.param("i", "snap-1")).doGet();
+				.param("i", "snap-1")).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -175,7 +194,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 				.withCsrfToken()
 				.param("a", "N")
 				.param("d", "admin_qContacts")
-				.param("s", SNAPSHOT)).doGet();
+				.param("s", SNAPSHOT)).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -184,7 +203,7 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 	void deleteWithoutASnapshotIdIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.withCsrfToken()
-				.param("a", "D")).doGet();
+				.param("a", "D")).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -217,11 +236,13 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 		}
 
 		private CapturedResponse doGet() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("GET");
 			servlet.doGet(request, response.response);
 			return response;
 		}
 
 		private CapturedResponse doPost() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("POST");
 			servlet.doPost(request, response.response);
 			return response;
 		}

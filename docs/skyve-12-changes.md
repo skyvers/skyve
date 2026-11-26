@@ -19,9 +19,10 @@ Work through this list. Each item links to the detail.
    and posts back from a plain `<h:form>` must use `<s:csrfForm managedBean="...">` instead,
    or add the hidden input to the form. Otherwise its postbacks go to the expired page. See
    [CSRF token](#csrf-token).
-2. **Your own SmartClient or HTTP clients must send `_csrf`** with every change they post to
-   `smartedit`, `smartlist`, `smartsnap` or `smarttag`. Skyve's own clients (the SmartClient
-   widgets, the Vue list grid and the Flutter client) already do.
+2. **Your own SmartClient or HTTP clients must POST their changes with `_csrf`** to
+   `smartedit`, `smartlist`, `smartsnap` or `smarttag`; a change sent any other way is refused.
+   Skyve's own clients (the SmartClient widgets, the Vue list grid and the Flutter client)
+   already do.
 3. **Java that used the old token API no longer compiles.** `CSRFTokenCacheConfig`,
    `UtilImpl.CSRF_TOKEN_CACHE` and the `StateUtil` token-set methods are gone, and
    `StateUtil.createToken()` returns a `String`. See [Java API](#java-api).
@@ -41,7 +42,8 @@ its scope and why Spring Security's own CSRF filter is not used are in
 [Architecture: CSRF token](architecture-design.md#csrf-token).
 
 **PrimeFaces.** `<s:csrfForm>` renders the token in a hidden `csrfToken` input, and the
-templates' UX/UI form in `uxuicsrf`. A view that has rendered the token must send it with
+templates' UX/UI form in `uxuicsrf`. Each render is masked afresh, so the value differs on
+every page while the token stays the same. A view that has rendered the token must send it with
 every postback; one that does not is sent to the expired page. For a plain `<h:form>` on a
 page of your own, add:
 
@@ -53,19 +55,25 @@ where `bean` is the page's Skyve view bean (any `FacesView`, or any other bean t
 `LocalisableView`).
 
 **Templates.** The templates' `uxuicsrf` input and `<s:csrfForm>` no longer auto-update
-after each AJAX request, as the token never changes. Copies of the old templates keep
-working; re-copying them only saves that update.
+after each AJAX request: any mask of the session's token stays valid. The templates' `uxuicsrf`
+is now a plain `<input type="hidden">`. Copies of the old templates keep working and are masked
+too; re-copying them only drops the old `h:inputHidden` binding and its auto-update.
 
 **SmartClient.** Every response carries the token in its `X-CSRF-TOKEN` header. Send it
-back as the `_csrf` parameter with every change. Fetches and listings are not checked.
+back as the `_csrf` parameter with every change, as a POST. Fetches and listings are not
+checked. A refused change is answered with SmartClient's login-required marker, on which a
+SmartClient page goes to the home page with the session's current token, as after a session
+timeout. A page left open while the user signed in again in another tab recovers this way;
+unsaved changes on it are lost. Other clients see a failed request.
 
 ### Java API
 
 - Removed: `org.skyve.cache.CSRFTokenCacheConfig`, `UtilImpl.CSRF_TOKEN_CACHE`, and
   `StateUtil.checkToken`, `replaceToken`, `removeToken`, `clearTokens` and
   `evictExpiredSessionTokens`. The Control Panel no longer lists a "CSRF Tokens" cache.
-- Added: `StateUtil.getSessionToken(HttpSession)`, `checkSessionToken(HttpSession, String)`,
-  `removeSessionToken(HttpSession)` and `isSameToken(String, String)`;
+- Added: `StateUtil.getSessionToken(HttpSession)`, `checkSessionToken(HttpSession, String)`
+  (it accepts the token or a mask of it), `maskToken(String)`, `removeSessionToken(HttpSession)`
+  and `isSameToken(String, String)`;
   `FacesUtil.getCsrfToken()`; `LocalisableView.getCsrfToken()`.
 - Changed: `StateUtil.createToken()` returns a 32-digit hex `String`, not an `Integer`.
   `FacesView.setCsrfToken(String)` keeps nothing: the token is checked when the view is

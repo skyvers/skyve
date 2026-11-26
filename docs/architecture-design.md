@@ -836,17 +836,24 @@ token. `SkyveSessionListener` drops it when the session id changes at sign in, s
 work after it. A bad or missing token is refused, logged without the session id, and does not sign the user out.
 
 - **PrimeFaces.** A view that renders the token (`<s:csrfForm>`, the templates' UX/UI form, and the content upload,
-  BizPort import and image markup pages) is marked in its view map (`FacesUtil.getCsrfToken`). Every postback of a
+  BizPort import, image markup and map pages) is marked in its view map (`FacesUtil.getCsrfToken`). Each render is
+  a fresh mask of the token (a random pad and the token XORed with it, `StateUtil.maskToken`), so a compressed page
+  never repeats the secret, which is what the BREACH attack needs. Every postback of a
   marked view must send the token back: `SkyveFacesPhaseListener` checks it when the view is restored, before any value
   is applied or action run, and refuses with the expired page. The server-side view state is a second protection
   for every postback.
 - **SmartClient.** Every response carries the token in the `X-CSRF-TOKEN` header, which the widgets, the Vue grid
-  and the Flutter client send back as `_csrf`. Without it these are refused (`SmartClientListServlet.checkCsrfToken`),
-  with a status -1 error and a support reference: add, update, remove, custom actions and the inline grid's New in the
+  and the Flutter client send back as `_csrf` (headers are not compressed, so the header is not masked). Unless they
+  are a POST and carry the token, these are refused (`SmartClientListServlet.checkCsrfToken`) with SmartClient's
+  login-required marker, on which a SmartClient page goes to the home page with the session's current token and
+  user, as after a session timeout (a page left open while the user signed in again in another tab recovers this
+  way; the Vue grid and the Flutter client just see a failed request): add, update, remove, custom actions and the
+  inline grid's New in the
   edit and list servlets, snapshot create, update and delete (`N`, `U`, `D`), and tag, untag, clear, create and
-  delete (`T`, `U`, `C`, `N`, `D`). Fetches and listings are not checked; the GET ones (the edit view's fetches and
-  the snapshot menu's list) send no token, so it stays out of URLs.
-- **Not covered:** GET requests (they must not change state), the other servlets (downloads, reports, the map, REST,
+  delete (`T`, `U`, `C`, `N`, `D`). Fetches and listings are not checked, and the SmartClient edit view's fetches
+  and the snapshot menu's list (a GET) send no token.
+- **Not covered:** GET requests other than the checked changes, which are refused as a GET (a GET must not change
+  state), the other servlets (downloads, reports, the map, REST,
   which has its own authentication), and the sign-in form. The session cookie is also `SameSite=Strict`
   (`undertow-handlers.conf`), which stops modern browsers sending it with a cross-site request.
 

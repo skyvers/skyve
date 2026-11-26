@@ -300,8 +300,6 @@ public class SmartClientListServlet extends HttpServlet {
 						tagId = null;
 					}
 
-					HttpSession session = request.getSession();
-
 					switch (operation) {
 						case fetch:
 							if (! user.canReadDocument(drivingDocument)) {
@@ -366,14 +364,14 @@ public class SmartClientListServlet extends HttpServlet {
 									model);
 							break;
 						case add:
-							checkCsrfToken(session, csrfToken);
+							checkCsrfToken(request, csrfToken);
 	
 							if (! user.canCreateDocument(drivingDocument)) {
 								throw new SecurityException("create this data", user.getName());
 							}
 							break;
 						case update:
-							checkCsrfToken(session, csrfToken);
+							checkCsrfToken(request, csrfToken);
 	
 							String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 							String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
@@ -428,7 +426,7 @@ public class SmartClientListServlet extends HttpServlet {
 							}
 							break;
 						case remove:
-							checkCsrfToken(session, csrfToken);
+							checkCsrfToken(request, csrfToken);
 	
 							if (! user.canDeleteDocument(drivingDocument)) {
 								throw new SecurityException("delete this data", user.getName());
@@ -455,6 +453,9 @@ public class SmartClientListServlet extends HttpServlet {
 					persistence.rollback();
 				}
 
+				if (produceCsrfRefusedResponse(t, pw)) {
+					return;
+				}
 				String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
 				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw, reference);
 			}
@@ -744,17 +745,60 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * Refuses a mutating request that did not send its session's CSRF token.
-	 *
-	 * @param session	the request's session
-	 * @param csrfToken	the token the request sent, or {@code null} if it sent none
-	 * @throws java.lang.SecurityException if {@code csrfToken} is not the session's token; the request is then
-	 * 			rolled back and answered as an unexpected error, with a logged reference
+	 * SmartClient's login-required marker (the default {@code isc.RPCManager.loginRequiredMarker}, which
+	 * {@code login.jsp} also writes). A response that holds it makes the client call {@code loginRequired},
+	 * which goes to the home page (Skyve's override in {@code util.js}).
 	 */
-	static void checkCsrfToken(@Nonnull HttpSession session, @Nullable String csrfToken) {
-		if (! StateUtil.checkSessionToken(session, csrfToken)) {
-			throw new java.lang.SecurityException("CSRF token missing or invalid");
+	static final String LOGIN_REQUIRED_MARKER = "<SCRIPT>//'\"]]>>isc_loginRequired";
+
+	/**
+	 * The refusal of a change that is not a POST or does not send its session's CSRF token.
+	 */
+	static final class CsrfRefusedException extends java.lang.SecurityException {
+		private static final long serialVersionUID = 6411236812271263187L;
+
+		CsrfRefusedException(@Nonnull String message) {
+			super(message);
 		}
+	}
+
+	/**
+	 * Refuses a mutating request that is not a POST, or did not send its session's CSRF token. Every Skyve client
+	 * posts its changes; a GET could carry the token in its URL, and a change should never be a GET.
+	 *
+	 * @param request	the request
+	 * @param csrfToken	the token the request sent, or {@code null} if it sent none
+	 * @throws CsrfRefusedException if the request is not a POST or {@code csrfToken} is not the session's token; the
+	 * 			request is then rolled back and answered by {@link #produceCsrfRefusedResponse(Throwable, PrintWriter)}
+	 */
+	static void checkCsrfToken(@Nonnull HttpServletRequest request, @Nullable String csrfToken) {
+		if (! "POST".equals(request.getMethod())) {
+			throw new CsrfRefusedException("A change must be a POST");
+		}
+		if (! StateUtil.checkSessionToken(request.getSession(false), csrfToken)) {
+			throw new CsrfRefusedException("CSRF token missing or invalid");
+		}
+	}
+
+	/**
+	 * Answers a refusal from {@link #checkCsrfToken(HttpServletRequest, String)} with SmartClient's login-required
+	 * marker, so that a SmartClient page goes to the home page with the session's current token and user. A page left open while the user
+	 * signed in again in another tab (a new session id, so a new token) recovers this way, as after a session timeout;
+	 * a forged request's response is never seen. Unsaved changes on that page are lost, as after a timeout.
+	 *
+	 * <p>Side effects: when {@code t} is a refusal, logs a warning and writes the marker.
+	 *
+	 * @param t	what the request failed with
+	 * @param pw	the response writer
+	 * @return	{@code true} if {@code t} was a refusal and the response is written
+	 */
+	static boolean produceCsrfRefusedResponse(@Nonnull Throwable t, @Nonnull PrintWriter pw) {
+		if (t instanceof CsrfRefusedException) {
+			LOGGER.warn("SmartClient change refused: {}", t.getMessage());
+			pw.append(LOGIN_REQUIRED_MARKER);
+			return true;
+		}
+		return false;
 	}
 
 	/**

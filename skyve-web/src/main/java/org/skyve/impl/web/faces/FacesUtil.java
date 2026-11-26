@@ -77,15 +77,16 @@ public class FacesUtil {
 	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
 
 	/**
-	 * Returns the session's CSRF token for a hidden {@code csrfToken} input ({@link StateUtil#getSessionToken(HttpSession)}),
-	 * and marks the current view so that every postback of it must send the token back. The mark is kept in the
-	 * view map, which the view state restores on each postback whatever the scope of the view's bean. The token is
-	 * the same for every view and request of the session.
+	 * Returns the session's CSRF token ({@link StateUtil#getSessionToken(HttpSession)}), masked afresh for a hidden
+	 * {@code csrfToken} input ({@link StateUtil#maskToken(String)}), and marks the current view so that every postback
+	 * of it must send the token back. The mark is kept in the view map, which the view state restores on each
+	 * postback whatever the scope of the view's bean. The token is the same for every view and request of the
+	 * session; only its mask differs.
 	 *
 	 * <p>Side effects: puts {@link #CSRF_TOKEN_RENDERED_KEY} in the current view's map; issues the session's token
 	 * the first time.
 	 *
-	 * @return the session's CSRF token
+	 * @return a mask of the session's CSRF token
 	 */
 	public static @Nonnull String getCsrfToken() {
 		FacesContext fc = FacesContext.getCurrentInstance();
@@ -93,7 +94,7 @@ public class FacesUtil {
 		if (vr != null) {
 			vr.getViewMap().put(CSRF_TOKEN_RENDERED_KEY, Boolean.TRUE);
 		}
-		return StateUtil.getSessionToken((HttpSession) fc.getExternalContext().getSession(true));
+		return StateUtil.maskToken(StateUtil.getSessionToken((HttpSession) fc.getExternalContext().getSession(true)));
 	}
 
 	/**

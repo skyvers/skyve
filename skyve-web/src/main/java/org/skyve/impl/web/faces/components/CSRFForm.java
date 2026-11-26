@@ -44,7 +44,7 @@ public class CSRFForm extends HtmlForm {
 	    		throw new FacesException("managedBean attribute is required");
 	    	}
 	    	
-			// Add hidden csrfToken - the session's token, which never changes, so it needs no update after AJAX requests
+			// Add hidden csrfToken - a mask of the session's token; any mask of it stays valid, so it needs no update after AJAX requests
 			// <p:outputPanel id="<formId>_csrfToken" style="display:none" layout="inline" deferred="false">
 	    	// 		<input type="hidden" name="csrfToken" value="#{<managedBeanName>.csrfToken}"/>
 			// </p:outputPanel>

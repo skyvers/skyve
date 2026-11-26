@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -297,7 +298,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param("_tagId", tagId)
 				.param(Bean.DOCUMENT_ID, contact.getBizId())
-				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doPost();
 
 		assertTrue(tagged.body().contains("\"status\":0"), tagged.body());
 		assertTrue(tagged.body().contains("\"" + PersistentBean.TAGGED_NAME + "\":true"), tagged.body());
@@ -308,7 +309,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param("_tagId", tagId)
 				.param(Bean.DOCUMENT_ID, contact.getBizId())
-				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doGet();
+				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doPost();
 
 		assertTrue(untagged.body().contains("\"status\":0"), untagged.body());
 		assertTrue(untagged.body().contains("\"" + PersistentBean.TAGGED_NAME + "\":false"), untagged.body());
@@ -325,9 +326,29 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param("_tagId", tagId)
 				.param(Bean.DOCUMENT_ID, contact.getBizId())
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doPost();
+
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
+		AbstractPersistence.get().setUser(u);
+		try (AutoClosingIterable<Bean> tagged = EXT.getTagManager().iterate(tagId)) {
+			assertFalse(tagged.iterator().hasNext(), "nothing was tagged");
+		}
+	}
+
+	@Test
+	void aTagSentAsAGetIsRefusedEvenWithTheSessionsCsrfToken() throws Exception {
+		Contact contact = saveContact("list-tag-get");
+		String tagId = EXT.getTagManager().create("list-tag-get-" + System.nanoTime(), true);
+
+		CapturedResponse refused = service(newRequest(u)
+				.withCsrfToken()
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_tagId", tagId)
+				.param(Bean.DOCUMENT_ID, contact.getBizId())
 				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
 
-		assertUnexpectedError(refused.body());
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
 		AbstractPersistence.get().setUser(u);
 		try (AutoClosingIterable<Bean> tagged = EXT.getTagManager().iterate(tagId)) {
 			assertFalse(tagged.iterator().hasNext(), "nothing was tagged");
@@ -341,7 +362,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param(Bean.DOCUMENT_ID, "row-1")
-				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doPost();
 
 		assertUnexpectedError(response.body());
 	}
@@ -353,7 +374,7 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 				.param("_operationType", Operation.update.toString())
 				.param("_dataSource", CONTACTS_DATASOURCE)
 				.param(Bean.DOCUMENT_ID, "row-1")
-				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doGet();
+				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doPost();
 
 		assertUnexpectedError(response.body());
 	}
@@ -462,11 +483,13 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 		}
 
 		private CapturedResponse doGet() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("GET");
 			servlet.doGet(request, response.response);
 			return response;
 		}
 
 		private CapturedResponse doPost() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("POST");
 			servlet.doPost(request, response.response);
 			return response;
 		}

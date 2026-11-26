@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,14 +66,26 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
-	void doGetReturnsWarningForMutatingActionWithoutValidCsrfToken() throws Exception {
+	void aTagWithoutTheSessionsCsrfTokenTellsThePageToReload() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.param("a", "T")
 				.param("t", "missing-tag")
-				.param("d", "malformed")).doGet();
+				.param("d", "malformed")).doPost();
 
-		assertTrue(response.body().contains("isc.warn('"), response.body());
-		assertTrue(response.body().contains("tag operation was unsuccessful"), response.body());
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, response.body());
+	}
+
+	@Test
+	void aNewTagSentAsAGetIsRefusedEvenWithTheSessionsCsrfToken() throws Exception {
+		String name = "get-tag-" + System.nanoTime();
+		CapturedResponse refused = service(newRequest(u)
+				.withCsrfToken()
+				.param("a", "N")
+				.param("n", name)).doGet();
+
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
+		AbstractPersistence.get().setUser(u);
+		assertNull(EXT.getTagManager().getTagId(name));
 	}
 
 	@Test
@@ -90,7 +103,7 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 				.withCsrfToken()
 				.param("a", "U")
 				.param("t", "tag-1")
-				.param("d", "admin_qContacts")).doGet();
+				.param("d", "admin_qContacts")).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -99,7 +112,7 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 	void clearWithoutATagIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.withCsrfToken()
-				.param("a", "C")).doGet();
+				.param("a", "C")).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -110,9 +123,9 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 		CapturedResponse refused = service(newRequest(u)
 				.param(AbstractWebContext.CSRF_TOKEN_NAME, StateUtil.createToken())
 				.param("a", "N")
-				.param("n", name)).doGet();
+				.param("n", name)).doPost();
 
-		assertUnexpectedWarning(refused.body());
+		assertEquals(SmartClientListServlet.LOGIN_REQUIRED_MARKER, refused.body());
 		AbstractPersistence.get().setUser(u);
 		assertNull(EXT.getTagManager().getTagId(name));
 	}
@@ -121,7 +134,7 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 	void newTagWithoutANameIsAnErrorAndCreatesNoTag() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.withCsrfToken()
-				.param("a", "N")).doGet();
+				.param("a", "N")).doPost();
 
 		assertUnexpectedWarning(response.body());
 		assertFalse(response.body().contains("{bizId:'"), response.body());
@@ -131,7 +144,7 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 	void deleteWithoutATagIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.withCsrfToken()
-				.param("a", "D")).doGet();
+				.param("a", "D")).doPost();
 
 		assertUnexpectedWarning(response.body());
 	}
@@ -171,11 +184,13 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 		}
 
 		private CapturedResponse doGet() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("GET");
 			servlet.doGet(request, response.response);
 			return response;
 		}
 
 		private CapturedResponse doPost() throws ServletException, IOException {
+			when(request.getMethod()).thenReturn("POST");
 			servlet.doPost(request, response.response);
 			return response;
 		}

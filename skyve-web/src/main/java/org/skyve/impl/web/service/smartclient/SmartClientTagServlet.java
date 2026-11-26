@@ -44,7 +44,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet handling SmartClient tag operations for lookup fields, including listing available tags, tagging, untagging, and tag management.
@@ -124,7 +123,6 @@ public class SmartClientTagServlet extends HttpServlet {
 					String criteria = Util.processStringValue(request.getParameter("c"));
 					String dataSourceName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 		
-					HttpSession session = request.getSession();
 					TagManager tm = EXT.getTagManager();
 
 					if ("L".equals(action)) {
@@ -134,7 +132,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
 							throw new ServletException("No tag, data source or criteria in the request.");
 						}
@@ -156,7 +154,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("U".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
 							throw new ServletException("No tag, data source or criteria in the request.");
 						}
@@ -178,7 +176,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("C".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if (tagId == null) {
 							throw new ServletException("No tag in the request.");
 						}
@@ -186,7 +184,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						tm.clear(tagId);
 					}
 					else if ("N".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if (tagName == null) {
 							throw new ServletException("No tag name in the request.");
 						}
@@ -197,7 +195,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						sb.append("'}");
 					}
 					else if ("D".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if (tagId == null) {
 							throw new ServletException("No tag in the request.");
 						}
@@ -214,6 +212,9 @@ public class SmartClientTagServlet extends HttpServlet {
 			}
 			catch (Throwable t) {
 	    		persistence.rollback();
+				if (SmartClientListServlet.produceCsrfRefusedResponse(t, pw)) {
+					return;
+				}
 	
 		    	pw.append("isc.warn('");
 		    	if (t instanceof MessageException messageException) {

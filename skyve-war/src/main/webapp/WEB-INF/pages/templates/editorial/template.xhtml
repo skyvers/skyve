@@ -90,7 +90,7 @@
 									</f:facet>
 								</p:card>
 								<h:form id="uxuiform" prependId="false"> 
-									<h:inputHidden id="uxuicsrf" value="#{bean.csrfToken}" />
+									<input type="hidden" name="uxuicsrf" value="#{bean.csrfToken}" />
 				  					<p:menu style="width:100%; border:0">
 										<p:submenu label="User Management" rendered="#{showLogout}">
 											<p:menuitem value="Profile" url="?a=e&amp;m=admin&amp;d=UserDashboard" ajax="false" icon="fa-solid fa-user"/>

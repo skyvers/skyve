@@ -209,7 +209,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * its view map) unless it sends the token back, before any value is applied or action run.
 	 *
 	 * <p>The token comes from the {@value #CSRF_TOKEN_PARAMETER_NAME} hidden input that {@code <s:csrfForm>} and the
-	 * upload and image markup pages render, or the {@value #UXUI_CSRF_TOKEN_PARAMETER_NAME} hidden input of the
+	 * upload, BizPort import, image markup and map pages render, or the {@value #UXUI_CSRF_TOKEN_PARAMETER_NAME} hidden input of the
 	 * templates' UX/UI form. A request that is not a postback, or of a view that never rendered the token, is not
 	 * checked.
 	 *

@@ -84,7 +84,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Handles HTTP requests for this Skyve web endpoint.
@@ -200,9 +199,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
 	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached.
 	 *
-	 * <p>Every operation but {@code fetch} is refused unless it sends the session's CSRF token
-	 * (see {@link SmartClientListServlet#checkCsrfToken(HttpSession, String)}); every response carries the token in
-	 * its {@code X-CSRF-TOKEN} header.
+	 * <p>Every change (add, update, remove, a custom action or the inline grid's New, whatever the operation) is
+	 * refused unless it is a POST and sends the session's CSRF token (see
+	 * {@link SmartClientListServlet#checkCsrfToken(HttpServletRequest, String)}); a refusal answers with the
+	 * login-required marker, on which the page goes to the home page. Every response carries the token in its
+	 * {@code X-CSRF-TOKEN} header.
 	 *
 	 * @param request inbound HTTP request
 	 * @param response outbound HTTP response
@@ -359,8 +360,6 @@ public class SmartClientEditServlet extends HttpServlet {
 						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());
 					}
 	
-					HttpSession session = request.getSession();
-					
 					String actionName = webContext.getAction();
 					// an inline data grid's New button - add a new element to the grid's collection or inverse
 					if (ServletConstants.INLINE_ADD_ACTION_NAME.equals(actionName)) {
@@ -369,7 +368,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							throw new ServletException(REQUEST_MALFORMED);
 						}
 
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 
 						add(webContext,
 								user,
@@ -397,7 +396,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							throw new ServletException(REQUEST_MALFORMED);
 						}
 
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						
 						apply(webContext,
 			                    user,
@@ -452,7 +451,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									throw new ServletException(REQUEST_MALFORMED);
 								}
 	
-								SmartClientListServlet.checkCsrfToken(session, csrfToken);
+								SmartClientListServlet.checkCsrfToken(request, csrfToken);
 								
 								apply(webContext,
 					                    user, 
@@ -477,7 +476,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							case remove:
 								LOGGER.info("REMOVE with binding {}", formBinding);
 	
-								SmartClientListServlet.checkCsrfToken(session, csrfToken);
+								SmartClientListServlet.checkCsrfToken(request, csrfToken);
 	
 								// With no bean (no conversation) there is nothing to delete, and remove() deletes nothing.
 								if (processBean != null) {
@@ -528,7 +527,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    	else if (unavailable != null) {
 		    		produceUnavailableResponse(unavailable, pw);
 		    	}
-		    	else {
+		    	else if (! SmartClientListServlet.produceCsrfRefusedResponse(t, pw)) {
 		    		String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
 		    		produceErrorResponse(t, operation, true, pw, reference, webContext);
 		    	}

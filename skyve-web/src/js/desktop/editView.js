@@ -295,7 +295,7 @@ isc.EditView.addMethods({
 			_ecnt: this._ecnt,
 			_ccnt: this._ccnt,
 		};
-		// No CSRF token: a fetch is not checked, and is a GET, so the token would be in the URL
+		// No CSRF token: a fetch is not checked
 		if (formBinding) {
 			params._b = formBinding;
 		}
@@ -414,7 +414,7 @@ isc.EditView.addMethods({
 		};
 
 		// Add optional parameters if they exist
-		// (no CSRF token: a fetch is not checked, and is a GET, so the token would be in the URL)
+		// (no CSRF token: a fetch is not checked)
 		if (action) params._a = action;
 		if (formBinding) params._b = formBinding;
 		if (parentContext) params._c = parentContext;

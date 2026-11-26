@@ -251,12 +251,12 @@ public abstract class LocalisableView implements Serializable {
 	}
 	
 	/**
-	 * Returns the session's CSRF token for a hidden {@code csrfToken} input in this view's form, and marks the view
-	 * so that its postbacks must send the token back (see {@link FacesUtil#getCsrfToken()}).
+	 * Returns a fresh mask of the session's CSRF token for a hidden {@code csrfToken} input in this view's form, and
+	 * marks the view so that its postbacks must send it back (see {@link FacesUtil#getCsrfToken()}).
 	 *
 	 * <p>Side effects: as {@link FacesUtil#getCsrfToken()}.
 	 *
-	 * @return the session's CSRF token
+	 * @return a mask of the session's CSRF token
 	 */
 	@SuppressWarnings("static-method")
 	public @Nonnull String getCsrfToken() {

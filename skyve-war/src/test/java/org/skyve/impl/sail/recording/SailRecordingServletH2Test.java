@@ -140,7 +140,8 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		String state = recording.pageState(2);
 		Map<?, ?> parsed = (Map<?, ?>) java.util.Objects.requireNonNull(JSON.unmarshall(state), state);
 		assertAll(() -> assertTrue(state.startsWith("{\"recording\":true,\"_csrf\":"), state),
-					() -> assertEquals(token, String.valueOf(parsed.get("_csrf")), "the endpoint's token: " + state),
+					() -> assertNotEquals(token, String.valueOf(parsed.get("_csrf")), "the page gets a mask, not the token: " + state),
+					() -> assertTrue(recording.isToken(String.valueOf(parsed.get("_csrf"))), "the mask is accepted: " + state),
 					() -> assertEquals("3", String.valueOf(parsed.get("steps")), state),
 					() -> assertEquals("1", String.valueOf(parsed.get("from")), state),
 					() -> assertTrue(state.contains("\"p-2\"") && state.contains("\"p-3\"") && (! state.contains("\"p-1\"")), state),

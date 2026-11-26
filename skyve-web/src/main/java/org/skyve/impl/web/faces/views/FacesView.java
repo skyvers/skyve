@@ -177,8 +177,8 @@ public class FacesView extends HarnessView {
 	}
 
 	/**
-	 * Accepts the token from a hidden input bound to {@code csrfToken}, as the templates' UX/UI form has: the binding
-	 * needs a setter. The token is checked when the view is restored, before any value is applied or action run
+	 * Accepts the token from a hidden input bound to {@code csrfToken}, as copies of the templates' UX/UI form from
+	 * before Skyve 12 have: the binding needs a setter. The token is checked when the view is restored, before any value is applied or action run
 	 * ({@link org.skyve.impl.web.faces.SkyveFacesPhaseListener}), so it is not kept here.
 	 *
 	 * @param csrfToken value from the web request

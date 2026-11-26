@@ -234,7 +234,8 @@ public final class SailRecording implements Serializable {
 	}
 
 	/**
-	 * Determines whether a token sent with a batch is this recording's ({@link StateUtil#isSameToken(String, String)}).
+	 * Determines whether a token sent with a batch is this recording's, or a mask of it
+	 * ({@link StateUtil#isSameToken(String, String)}).
 	 *
 	 * @param value	the token sent, or {@code null} if none was
 	 * @return	{@code true} if {@code value} is this recording's token
@@ -569,7 +570,8 @@ public final class SailRecording implements Serializable {
 	}
 
 	/**
-	 * Returns what a page that loads the recorder needs to start at once, as JSON: the recording's CSRF token, its
+	 * Returns what a page that loads the recorder needs to start at once, as JSON: the recording's CSRF token (masked
+	 * afresh, see {@link StateUtil#maskToken(String)}), its
 	 * counts, and the last entries as the panel shows them, so that the panel needs no request to appear. A renderer
 	 * that does a full page load per view (PrimeFaces) renders it into each page while recording.
 	 *
@@ -582,7 +584,8 @@ public final class SailRecording implements Serializable {
 		int from = Math.max(0, steps.size() - count);
 		Map<String, Object> result = new LinkedHashMap<>(8);
 		result.put("recording", Boolean.TRUE);
-		result.put("_csrf", token);
+		// masked, as the state is rendered into each page (see StateUtil.maskToken)
+		result.put("_csrf", StateUtil.maskToken(token));
 		result.put("steps", Integer.valueOf(steps.size()));
 		result.put("gestures", Integer.valueOf(getGestureCount()));
 		result.put("from", Integer.valueOf(from));

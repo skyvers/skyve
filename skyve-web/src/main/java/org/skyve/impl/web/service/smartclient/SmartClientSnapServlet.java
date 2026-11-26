@@ -43,7 +43,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet handling SmartClient snapshot operations, including listing, creating, updating, and deleting snapshots.
@@ -147,8 +146,6 @@ public class SmartClientSnapServlet extends HttpServlet {
 						}
 					}
 
-					HttpSession session = request.getSession();
-
 					if ("L".equals(action)) {
 						if ((moduleName == null) || (documentOrQueryOrModelName == null)) { // no data source means no snapshots
 							sb.append("[]");
@@ -159,14 +156,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 						}
 					}
 					else if ("U".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if ((snapId == null) || (snapshot == null)) {
 							throw new ServletException("No snapshot ID or snapshot in the request.");
 						}
 						update(snapId, snapshot, smartClientRequest);
 					}
 					else if ("N".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if ((moduleName == null) || (documentOrQueryOrModelName == null) || (snapName == null) || (snapshot == null)) {
 							throw new ServletException("No data source, snapshot name or snapshot in the request.");
 						}
@@ -176,7 +173,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 						sb.append("\"}");
 					}
 					else if ("D".equals(action)) {
-						SmartClientListServlet.checkCsrfToken(session, csrfToken);
+						SmartClientListServlet.checkCsrfToken(request, csrfToken);
 						if (snapId == null) {
 							throw new ServletException("No snapshot ID in the request.");
 						}
@@ -192,6 +189,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 			}
 			catch (Throwable t) {
 				persistence.rollback();
+				if (SmartClientListServlet.produceCsrfRefusedResponse(t, pw)) {
+					return;
+				}
 
 				pw.append("isc.warn('");
 				if (t instanceof MessageException me) {

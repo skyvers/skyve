@@ -385,14 +385,15 @@ public class StateUtil {
 	}
 
 	/**
-	 * Determines whether a token sent with a request is its session's CSRF token.
+	 * Determines whether a token sent with a request is its session's CSRF token, as issued or as masked for a page
+	 * ({@link #maskToken(String)}).
 	 *
 	 * <p>The comparison takes the same time wherever the values differ. No token is issued: a session that has
 	 * none rejects every token.
 	 *
 	 * @param session	the request's session, or {@code null} if it has none
 	 * @param token	the token the request sent, or {@code null} if it sent none
-	 * @return	{@code true} if the session has a token and {@code token} is it
+	 * @return	{@code true} if the session has a token and {@code token} is it, or a mask of it
 	 */
 	public static boolean checkSessionToken(@Nullable HttpSession session, @Nullable String token) {
 		if ((session == null) || (token == null)) {
@@ -403,16 +404,61 @@ public class StateUtil {
 	}
 
 	/**
-	 * Determines whether a token sent with a request is the expected one, comparing in the same time wherever the
-	 * values differ, so that the time taken does not tell an attacker how much of a guess was right.
+	 * Masks a token for a page: a new random pad, then the token XORed with the pad, both as hex. Each render of the
+	 * token then differs, so a compressed page does not repeat the secret, which is what the BREACH attack on
+	 * compressed HTTPS needs to recover it. {@link #checkSessionToken(HttpSession, String)} accepts the mask.
+	 *
+	 * @param token	a token from {@link #createToken()}
+	 * @return	the mask, twice as long as the token
+	 * @throws IllegalArgumentException if {@code token} is not hex
+	 */
+	public static @Nonnull String maskToken(@Nonnull String token) {
+		byte[] bytes = HEX.parseHex(token);
+		byte[] pad = new byte[bytes.length];
+		RANDOM.nextBytes(pad);
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] ^= pad[i];
+		}
+		return HEX.formatHex(pad) + HEX.formatHex(bytes);
+	}
+
+	/**
+	 * Returns the token a mask from {@link #maskToken(String)} was made from.
+	 *
+	 * @param mask	the mask sent
+	 * @return	the token, or {@code null} if {@code mask} is not hex
+	 */
+	private static @Nullable String unmaskToken(@Nonnull String mask) {
+		int half = mask.length() / 2;
+		try {
+			byte[] pad = HEX.parseHex(mask, 0, half);
+			byte[] bytes = HEX.parseHex(mask, half, mask.length());
+			for (int i = 0; i < bytes.length; i++) {
+				bytes[i] ^= pad[i];
+			}
+			return HEX.formatHex(bytes);
+		}
+		catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Determines whether a token sent with a request is the expected one, as issued or as masked for a page
+	 * ({@link #maskToken(String)}), comparing in the same time wherever the values differ, so that the time taken
+	 * does not tell an attacker how much of a guess was right.
 	 *
 	 * @param expected	the token issued
 	 * @param token	the token sent, or {@code null} if none was
-	 * @return	{@code true} if {@code token} is {@code expected}
+	 * @return	{@code true} if {@code token} is {@code expected}, or a mask of it
 	 */
 	public static boolean isSameToken(@Nonnull String expected, @Nullable String token) {
-		return (token != null) &&
-				MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8));
+		if (token == null) {
+			return false;
+		}
+		String sent = (token.length() == (2 * expected.length())) ? unmaskToken(token) : token;
+		return (sent != null) &&
+				MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), sent.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -430,6 +476,7 @@ public class StateUtil {
 
 	// This is thread-safe
 	private static final SecureRandom RANDOM = new SecureRandom();
+	private static final HexFormat HEX = HexFormat.of();
     // Get 128 random bytes - move past first seed sequence
 	static {
 	    byte[] randomBytes = new byte[128];
@@ -445,7 +492,7 @@ public class StateUtil {
 	public static @Nonnull String createToken() {
 		byte[] bytes = new byte[16];
 		RANDOM.nextBytes(bytes);
-		return HexFormat.of().formatHex(bytes);
+		return HEX.formatHex(bytes);
 	}
 	
 	/**

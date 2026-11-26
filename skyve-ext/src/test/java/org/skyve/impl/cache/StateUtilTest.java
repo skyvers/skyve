@@ -106,6 +106,31 @@ class StateUtilTest {
 	}
 
 	@Test
+	void aMaskIsNewEachTimeAndIsAcceptedAsTheSessionsToken() {
+		HttpSession session = session();
+		String token = StateUtil.getSessionToken(session);
+		String first = StateUtil.maskToken(token);
+		String second = StateUtil.maskToken(token);
+
+		assertTrue(first.matches("[0-9a-f]{64}"), first);
+		assertNotEquals(first, second, "each render differs");
+		assertFalse(first.contains(token), "the token does not appear in its mask");
+		assertTrue(StateUtil.checkSessionToken(session, first));
+		assertTrue(StateUtil.checkSessionToken(session, second));
+	}
+
+	@Test
+	void aMaskOfAnotherTokenOrAMalformedMaskIsRefused() {
+		HttpSession session = session();
+		String token = StateUtil.getSessionToken(session);
+		String mask = StateUtil.maskToken(token);
+
+		assertFalse(StateUtil.checkSessionToken(session, StateUtil.maskToken(StateUtil.createToken())), "another token's mask");
+		assertFalse(StateUtil.checkSessionToken(session, "z" + mask.substring(1)), "not hex");
+		assertFalse(StateUtil.checkSessionToken(session, mask.substring(0, 32) + mask.substring(0, 32)), "a pad as its own mask");
+	}
+
+	@Test
 	void checkSessionTokenDoesNotIssueAToken() {
 		HttpSession session = session();
 		assertFalse(StateUtil.checkSessionToken(session, ""));

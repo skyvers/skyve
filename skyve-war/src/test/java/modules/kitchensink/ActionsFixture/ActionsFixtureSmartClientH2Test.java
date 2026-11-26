@@ -62,6 +62,8 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 	/** SmartClientEditServlet.UNAVAILABLE_RESPONSE_STATUS, which is private. */
 	private static final int UNAVAILABLE = -51;
 	private static final String UNAVAILABLE_MESSAGE = "This action is no longer available.";
+	/** SmartClient's login-required marker, with which a refused change is answered (SmartClientListServlet). */
+	private static final String LOGIN_REQUIRED_MARKER = "<SCRIPT>//'\"]]>>isc_loginRequired";
 	static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 	static final String DOWNLOAD_ONCE = "DownloadOnce";
 	/** What {@code DownloadOnce} downloads. */
@@ -192,8 +194,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		String token = client.csrf;
 
 		client.csrf = null;
-		JsonNode save = client.update("Save");
-		assertEquals(-1, status(save), save::toString);
+		assertReloaded(client.update("Save"));
 		assertEquals(0, count(KitchensinkDocument.ACTIONS_FIXTURE));
 
 		client.csrf = token;
@@ -202,9 +203,22 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
 
 		client.csrf = StateUtil.createToken();
-		JsonNode delete = client.remove(ActionsFixture.DOCUMENT_NAME);
-		assertEquals(-1, status(delete), delete::toString);
+		assertReloaded(client.remove(ActionsFixture.DOCUMENT_NAME));
 		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
+
+		// A change sent as a GET is refused even with the session's token
+		client.csrf = token;
+		client.method = "GET";
+		assertReloaded(client.remove(ActionsFixture.DOCUMENT_NAME));
+		assertEquals(1, count(KitchensinkDocument.ACTIONS_FIXTURE));
+	}
+
+	/**
+	 * Asserts that the server refused a change by telling the page to reload (SmartClient's login-required marker),
+	 * so that the page picks up the session's current token.
+	 */
+	private static void assertReloaded(JsonNode response) {
+		assertNull(response, () -> "expected the page to be told to reload, but got " + response);
 	}
 
 	@Test
@@ -447,8 +461,8 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		client.csrf = StateUtil.createToken();
 		JsonNode forged = client.update("RunFromToolbar");
 
-		assertEquals(-1, status(missing), missing::toString);
-		assertEquals(-1, status(forged), forged::toString);
+		assertReloaded(missing);
+		assertReloaded(forged);
 		// Neither request reached the conversation or ran the action
 		ActionsFixture cached = (ActionsFixture) client.cachedBean();
 		assertNull(cached.getEventText());
@@ -729,6 +743,8 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		private ObjectNode values;
 		private String webId;
 		private String csrf;
+		/** The HTTP method of the requests: SmartClient posts them. */
+		private String method = "POST";
 
 		private SmartClient(User user, ModuleDocument edited) {
 			this.module = edited.moduleName();
@@ -781,7 +797,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		private JsonNode update(String action, String source, String gridBinding, String documentName, String bizId)
 		throws Exception {
 			JsonNode result = request("update", action, source, null, gridBinding, documentName, bizId);
-			if (status(result) >= 0) {
+			if ((result != null) && (status(result) >= 0)) {
 				values = (ObjectNode) result.get("data");
 			}
 			return result;
@@ -822,7 +838,7 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		}
 
 		private MockHttpServletRequest newRequest() {
-			MockHttpServletRequest result = new MockHttpServletRequest("POST", "/smartedit");
+			MockHttpServletRequest result = new MockHttpServletRequest(method, "/smartedit");
 			result.setSession(session);
 			result.addHeader("User-Agent", USER_AGENT);
 			return result;
@@ -878,7 +894,13 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 			finally {
 				WebContainer.clear();
 			}
-			JsonNode result = JSON_MAPPER.readTree(response.getContentAsString()).get("response");
+			String body = response.getContentAsString();
+			// a refused change is answered with SmartClient's login-required marker alone, as after a session timeout
+			if (body.contains("isc_loginRequired")) {
+				assertEquals(LOGIN_REQUIRED_MARKER, body, "the marker is the whole response");
+				return null;
+			}
+			JsonNode result = JSON_MAPPER.readTree(body).get("response");
 			if (status(result) >= 0) {
 				csrf = response.getHeader("X-CSRF-TOKEN");
 			}
