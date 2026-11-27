@@ -864,11 +864,20 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	/**
 	 * Begin a transaction for both static and dynamic persistence contexts.
+	 *
+	 * <p>An active transaction is joined, unless it is marked rollback-only. That one is rolled back first,
+	 * because joining it would lose all the new work at the next commit. A transaction is marked rollback-only
+	 * by {@link #setRollbackOnly()}, or by Hibernate when a statement fails in the database other than with
+	 * a timeout, and {@link #rollback()} leaves it open so that a Faces page can still render, and lazy load,
+	 * after a failed action. Rolling it back here clears the session, so beans loaded before this call are detached.
 	 */
 	@Override
 	public final void begin() {
 		try {
 			EntityTransaction et = em.getTransaction();
+			if (et.isActive() && et.getRollbackOnly()) {
+				rollbackRollbackOnly(et);
+			}
 			if (! et.isActive()) {
 				// FROM THE HIBERNATE_REFERENCE DOCS Page 190
 	            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
@@ -880,6 +889,31 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		finally {
 			if (dynamicPersistence != null) {
 				dynamicPersistence.begin();
+			}
+		}
+	}
+
+	/**
+	 * Roll back a transaction marked rollback-only, as {@link #commit(boolean, boolean)} does,
+	 * and forget the unique constraint checks made in it, since their hashes were rolled back too.
+	 */
+	private void rollbackRollbackOnly(@Nonnull EntityTransaction et) {
+		try {
+			et.rollback();
+		}
+		finally {
+			try {
+				if (dynamicPersistence != null) {
+					dynamicPersistence.rollback();
+				}
+			}
+			finally {
+				try {
+					uniqueBeansChecked.clear();
+				}
+				finally {
+					uniqueHashes.clear();
+				}
 			}
 		}
 	}

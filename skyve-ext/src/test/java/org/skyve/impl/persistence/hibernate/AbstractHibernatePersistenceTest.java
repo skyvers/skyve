@@ -10,12 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.skyve.persistence.DynamicPersistence;
+
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,27 +29,39 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.skyve.content.BeanContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.IteratingJob;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
@@ -383,6 +400,486 @@ class AbstractHibernatePersistenceTest {
 		finally {
 			persistence.close();
 		}
+	}
+
+	// Rollback-only transactions.
+	// A failed statement makes Hibernate mark the transaction rollback-only and leave it active.
+	// rollback() leaves such a transaction open, so that a Faces page can still read as it renders
+	// after a failed action, and begin() rolls it back, so that the work after it is not lost with it.
+	// Saves, lazy loading and unique constraints with real metadata are tested in skyve-war's RollbackOnlyTransactionH2Test.
+	// H2 lets a transaction carry on reading after a failed statement; PostgreSQL aborts it, so the reads would fail there.
+
+	private static final String H2_URL = "jdbc:h2:mem:ahp_coverage;DB_CLOSE_DELAY=-1";
+	/** Too long for the 128 character bizKey column, so the insert fails in the database. */
+	private static final String TOO_LONG_BIZ_KEY = "x".repeat(200);
+	private static final String LOST = "1-lost";
+	private static final String KEPT = "2-kept";
+
+	@Test
+	void testFailedStatementLeavesTheTransactionActiveAndRollbackOnly() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			failAStatement(persistence);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testRollbackLeavesAFailedTransactionOpenForReading() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + "lost");
+			failAStatement(persistence);
+
+			persistence.rollback();
+
+			EntityTransaction et = persistence.getEntityManager().getTransaction();
+			assertTrue(et.isActive());
+			assertTrue(et.getRollbackOnly());
+			// Still the same transaction, so its uncommitted insert is visible
+			assertEquals(1, countInTransaction(persistence, prefix));
+		}
+		finally {
+			persistence.close();
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testFacesFailedActionStillReadsAndCommitsNothing() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			// restore view
+			persistence.begin();
+			// the action inserts something, then fails
+			insert(persistence, prefix + "action");
+			failAStatement(persistence);
+			// FacesAction
+			persistence.setRollbackOnly();
+			// a catch block in the action code
+			persistence.rollback();
+			// render response reads
+			assertEquals(1, countInTransaction(persistence, prefix));
+			// SkyveFacesPhaseListener after render response
+			persistence.commit(true);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testBeginAfterRollbackOfAFailedTransactionStartsANewOne() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + LOST);
+			failAStatement(persistence);
+			persistence.rollback();
+
+			persistence.begin();
+
+			EntityTransaction et = persistence.getEntityManager().getTransaction();
+			assertTrue(et.isActive());
+			assertFalse(et.getRollbackOnly());
+			assertEquals(0, countInTransaction(persistence, prefix));
+			insert(persistence, prefix + KEPT);
+			persistence.commit(false);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + KEPT), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testBeginWithoutRollbackOfAFailedTransactionStartsANewOne() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + LOST);
+			failAStatement(persistence);
+
+			persistence.begin();
+
+			assertFalse(persistence.getEntityManager().getTransaction().getRollbackOnly());
+			insert(persistence, prefix + KEPT);
+			persistence.commit(false);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + KEPT), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testBeginAfterSetRollbackOnlyStartsANewTransaction() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + LOST);
+			persistence.setRollbackOnly();
+
+			persistence.begin();
+
+			assertFalse(persistence.getEntityManager().getTransaction().getRollbackOnly());
+			insert(persistence, prefix + KEPT);
+			persistence.commit(false);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + KEPT), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testBeginJoinsAHealthyTransaction() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + "1");
+
+			persistence.begin();
+
+			assertEquals(1, countInTransaction(persistence, prefix));
+			insert(persistence, prefix + "2");
+			persistence.commit(false);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + "1", prefix + "2"), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testCommitAfterAFailureCommitsNothing() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			insert(persistence, prefix + "lost");
+			failAStatement(persistence);
+			persistence.rollback();
+			persistence.commit(false);
+
+			assertFalse(persistence.getEntityManager().getTransaction().isActive());
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testBeginRollsBackDynamicPersistenceOfARollbackOnlyTransaction() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		DynamicPersistence dynamicPersistence = mock(DynamicPersistence.class);
+		persistence.injectDynamicPersistence(dynamicPersistence);
+		try {
+			persistence.begin();
+			persistence.setRollbackOnly();
+			persistence.begin();
+
+			InOrder order = inOrder(dynamicPersistence);
+			order.verify(dynamicPersistence).begin();
+			order.verify(dynamicPersistence).rollback();
+			order.verify(dynamicPersistence).begin();
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testBeginDoesNotRollBackDynamicPersistenceOfAHealthyTransaction() {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		DynamicPersistence dynamicPersistence = mock(DynamicPersistence.class);
+		persistence.injectDynamicPersistence(dynamicPersistence);
+		try {
+			persistence.begin();
+			persistence.begin();
+
+			verify(dynamicPersistence, times(2)).begin();
+			verify(dynamicPersistence, never()).rollback();
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testBeginForgetsUniqueHashesOfARollbackOnlyTransaction() throws Exception {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			uniqueHashes(persistence).add("hash");
+			persistence.setRollbackOnly();
+
+			persistence.begin();
+
+			assertTrue(uniqueHashes(persistence).isEmpty());
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testBeginKeepsUniqueHashesOfAHealthyTransaction() throws Exception {
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			uniqueHashes(persistence).add("hash");
+
+			persistence.begin();
+
+			assertEquals(Set.of("hash"), uniqueHashes(persistence));
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	/**
+	 * The pattern from the downstream job that found this: one transaction per document,
+	 * and a failure is recorded in a transaction of its own.
+	 */
+	@Test
+	void testFailuresRecordedInTheirOwnTransactionAreCommitted() throws Exception {
+		String prefix = newPrefix();
+		List<String> keys = List.of(prefix + "1", TOO_LONG_BIZ_KEY, prefix + "3", TOO_LONG_BIZ_KEY, prefix + "5");
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		try {
+			persistence.begin();
+			for (int i = 0, l = keys.size(); i < l; i++) {
+				try {
+					insert(persistence, keys.get(i));
+					persistence.commit(false);
+				}
+				catch (@SuppressWarnings("unused") DomainException e) {
+					persistence.rollback();
+					persistence.begin();
+					insert(persistence, prefix + (i + 1) + "-failed");
+					persistence.commit(false);
+				}
+				finally {
+					persistence.begin();
+				}
+			}
+			persistence.commit(false);
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + "1", prefix + "2-failed", prefix + "3", prefix + "4-failed", prefix + "5"),
+							committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testIteratingJobCommittingEachElementKeepsTheElementsAfterAFailure() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		InsertContactsJob job = new InsertContactsJob(persistence,
+														List.of(prefix + "1", TOO_LONG_BIZ_KEY, prefix + "3", prefix + "4"),
+														1);
+		try {
+			persistence.begin();
+			assertJobReportsFailures(job, 1);
+			persistence.commit(false); // as the job runner does
+
+			assertEquals(4, job.getNumProcessedElements());
+			assertEquals(3, job.getNumSuccessfulElements());
+			assertEquals(1, job.getNumFailedElements());
+			assertEquals(3, job.getNumFlushedElements());
+			assertEquals(1, job.getNumRolledBackElements());
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			assertEquals(List.of(prefix + "1", prefix + "3", prefix + "4"), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	@Test
+	void testIteratingJobCommittingInBatchesKeepsTheBatchesAfterAFailure() throws Exception {
+		String prefix = newPrefix();
+		TestHibernatePersistence persistence = new TestHibernatePersistence();
+		InsertContactsJob job = new InsertContactsJob(persistence,
+														List.of(prefix + "1", prefix + "2", prefix + "3", TOO_LONG_BIZ_KEY, prefix + "5", prefix + "6", prefix + "7"),
+														2);
+		try {
+			persistence.begin();
+			assertJobReportsFailures(job, 1);
+			persistence.commit(false);
+
+			assertEquals(7, job.getNumProcessedElements());
+			assertEquals(6, job.getNumSuccessfulElements());
+			assertEquals(1, job.getNumFailedElements());
+		}
+		finally {
+			persistence.close();
+		}
+		try {
+			// 3 is rolled back with the failed 4; 1 and 2, and 5 and 6, are committed in pairs, and 7 by the final commit
+			assertEquals(List.of(prefix + "1", prefix + "2", prefix + "5", prefix + "6", prefix + "7"), committedBizKeys(prefix));
+		}
+		finally {
+			deleteCommitted(prefix);
+		}
+	}
+
+	/**
+	 * Inserts a contact per element, as a job processing received documents would.
+	 */
+	private static final class InsertContactsJob extends IteratingJob<String> {
+		private final TestHibernatePersistence persistence;
+		private final List<String> bizKeys;
+		private final int commitFrequency;
+
+		InsertContactsJob(TestHibernatePersistence persistence, List<String> bizKeys, int commitFrequency) {
+			this.persistence = persistence;
+			this.bizKeys = bizKeys;
+			this.commitFrequency = commitFrequency;
+			setPersistence(persistence);
+		}
+
+		@Override
+		protected Collection<String> getElements() {
+			return bizKeys;
+		}
+
+		@Override
+		protected void operation(String bizKey) {
+			insert(persistence, bizKey);
+		}
+
+		@Override
+		protected boolean continueOnFailure() {
+			return true;
+		}
+
+		@Override
+		protected int getCommitFrequency() {
+			return commitFrequency;
+		}
+	}
+
+	/** Run the job, which throws at the end when an element failed. */
+	private static void assertJobReportsFailures(IteratingJob<?> job, int failures) {
+		RuntimeException e = assertThrows(RuntimeException.class, job::execute);
+		assertEquals("Failed to process " + failures + " elements.", e.getMessage());
+	}
+
+	/** A bizKey prefix of this test's own, so that tests sharing the database cannot see each other's rows. */
+	private static String newPrefix() {
+		return "rbo-" + UUID.randomUUID().toString().substring(0, 8) + "-";
+	}
+
+	private static void insert(TestHibernatePersistence persistence, String bizKey) {
+		persistence.newSQL("insert into ADM_Contact (bizId, bizVersion, bizKey) values (:bizId, 0, :bizKey)")
+						.putParameter("bizId", UUID.randomUUID().toString(), false)
+						.putParameter("bizKey", bizKey, false)
+						.execute();
+	}
+
+	/** Fail an insert in the database, and check that Hibernate has marked the transaction rollback-only. */
+	private static void failAStatement(TestHibernatePersistence persistence) {
+		DomainException e = assertThrows(DomainException.class, () -> insert(persistence, TOO_LONG_BIZ_KEY));
+		assertTrue(e.getCause() instanceof PersistenceException, String.valueOf(e.getCause()));
+		EntityTransaction et = persistence.getEntityManager().getTransaction();
+		assertTrue(et.isActive());
+		assertTrue(et.getRollbackOnly());
+	}
+
+	/** The contacts starting with the prefix that this persistence's transaction can see. */
+	private static int countInTransaction(TestHibernatePersistence persistence, String prefix) {
+		Number result = persistence.newSQL("select count(*) from ADM_Contact where bizKey like :prefix")
+										.putParameter("prefix", prefix + '%', false)
+										.scalarResult(Number.class);
+		if (result == null) {
+			throw new AssertionError("No count");
+		}
+		return result.intValue();
+	}
+
+	/** The committed bizKeys starting with the prefix, read on a connection of their own. */
+	private static List<String> committedBizKeys(String prefix) throws SQLException {
+		List<String> result = new ArrayList<>();
+		try (Connection connection = DriverManager.getConnection(H2_URL, "sa", "");
+				PreparedStatement statement = connection.prepareStatement("select bizKey from ADM_Contact where bizKey like ? order by bizKey")) {
+			statement.setString(1, prefix + '%');
+			try (ResultSet rows = statement.executeQuery()) {
+				while (rows.next()) {
+					result.add(rows.getString(1));
+				}
+			}
+		}
+		return result;
+	}
+
+	private static void deleteCommitted(String prefix) throws SQLException {
+		try (Connection connection = DriverManager.getConnection(H2_URL, "sa", "");
+				PreparedStatement statement = connection.prepareStatement("delete from ADM_Contact where bizKey like ?")) {
+			statement.setString(1, prefix + '%');
+			statement.executeUpdate();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Set<String> uniqueHashes(AbstractHibernatePersistence persistence) throws Exception {
+		Field field = AbstractHibernatePersistence.class.getDeclaredField("uniqueHashes");
+		field.setAccessible(true);
+		return (Set<String>) field.get(persistence);
 	}
 
 	@Test

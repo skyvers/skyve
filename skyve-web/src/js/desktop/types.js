@@ -4397,7 +4397,7 @@ isc.BizHTMLItem.addMethods({
 				if (CKEDITOR) {
 					this._show();
 				} else {
-					SKYVE.Util.loadJS("ckeditor/ckeditor.js", function () {
+					SKYVE.Util.loadJS(`ckeditor/ckeditor.js?v=${SKYVE.Util.v}`, function () {
 						me._editButton._show();
 					});
 				}

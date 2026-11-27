@@ -112,7 +112,7 @@
 		
 		<!-- Password strength estimator -->
 		<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
-		<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
+		<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"/>
 		
 		<script type="text/javascript">
 			<!--

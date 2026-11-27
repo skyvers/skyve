@@ -20,18 +20,19 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<meta http-equiv="Content-Type" CONTENT="text/html; CHARSET=utf-8">
+		<base href="<%=basePath%>" />
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png">
 		<title><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></title>
-		<link rel="stylesheet" type="text/css" href="../../skyve/css/basic-min.css"/>
+		<link rel="stylesheet" type="text/css" href="skyve/css/basic-min.css?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"/>
 	</head>
 	<body BGCOLOR='#e0e0e0' MARGINHEIGHT=0 MARGINWIDTH=0 LEFTMARGIN=0 TOPMARGIN=0>
-		<script type="text/javascript">var isomorphicDir='../../<%=UtilImpl.SMART_CLIENT_DIR%>/modules/ISC_Containers.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Grids.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Forms.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_DataBinding.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Calendar.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_RichTextEditor.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/Enterprise/load_skin.js"></script>
+		<script type="text/javascript">var isomorphicDir='<%=UtilImpl.SMART_CLIENT_DIR%>/';</script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Core.js"></script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Foundation.js"></script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Containers.js"></script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Grids.js"></script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_DataBinding.js"></script>
+		<script type="text/javascript" src="<%=UtilImpl.SMART_CLIENT_DIR%>/skins/Tahoe/load_skin.js"></script>
 		<script type=text/javascript>
 			data = [
 			    {
@@ -39,8 +40,8 @@
 			        name: "Skyve Logo"
 			    }
 			];
-			imageURLPrefix = '../../../images/';
-			TileGrid.create({
+			imageURLPrefix = '<%=basePath%>images/';
+			isc.TileGrid.create({
 				autoDraw: true,
 				tileLayoutPolicy: 'flow',
 			    tileWidth: 200,
