@@ -318,13 +318,14 @@ public class DesktopView extends HarnessView {
 	}
 	
 	/**
-	 * Appends one script tag for a pre-resolved source URL.
+	 * Appends one script tag for a pre-resolved source URL, versioned with {@code ?v=} so that
+	 * browsers fetch the bundle again after an upgrade (*.js is cached for a year).
 	 *
 	 * @param result buffer receiving the script tag; must not be {@code null}
 	 * @param src script source URL; must not be {@code null}
 	 */
 	private static void appendScriptTag(@Nonnull StringBuilder result, @Nonnull String src) {
-		result.append(SCRIPT_OPEN).append(src).append(SCRIPT_CLOSE);
+		result.append(SCRIPT_OPEN).append(src).append("?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append(SCRIPT_CLOSE);
 	}
 	
 	/**
