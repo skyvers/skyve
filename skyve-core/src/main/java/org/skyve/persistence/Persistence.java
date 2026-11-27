@@ -46,11 +46,17 @@ public interface Persistence extends Serializable {
 	
 	/**
 	 * Begin a transaction.
+	 * An active transaction is joined, unless it is marked rollback-only.
+	 * That one is rolled back first, so the work after this call is not lost with it,
+	 * and beans loaded before this call are then detached.
 	 */
 	void begin();
-	
+
 	/**
-	 * Rollback immediately.
+	 * Rollback immediately, unless the transaction is marked rollback-only
+	 * (by {@link #setRollbackOnly()}, or by a statement that fails in the database, other than with a timeout).
+	 * That one is left open until {@link #commit(boolean)} or {@link #begin()} ends it,
+	 * so that beans loaded in it can still lazy load until then.
 	 */
 	void rollback();
 	

@@ -63,13 +63,18 @@ public class DeleteAllTaggedDataForTagJob extends Job {
 				int size = beans.size();
 				int processed = 0;
 				Iterator<Bean> it = beans.iterator();
+				boolean retrieve = false;
 				while (it.hasNext()) {
 					PersistentBean pb = (PersistentBean) it.next();
 					StringBuilder sb = new StringBuilder();
 					sb.append("Attempting to delete ");
 					sb.append(module.getName()).append(".").append(documentRef);
-					sb.append(" ").append(pb.getBizKey());
 					try {
+						if (retrieve) {
+							pb = PerformDocumentActionForTagJob.retrieve(pers, pb);
+						}
+						// Inside the try, since a bizKey can lazy load
+						sb.append(" ").append(pb.getBizKey());
 						// remove from tag and delete
 						tm.untag(tag.getBizId(), pb);
 						pers.delete(pb);
@@ -77,6 +82,11 @@ public class DeleteAllTaggedDataForTagJob extends Job {
 						pers.evictCached(pb);
 						pers.begin();
 					} catch (Exception e) {
+						// Roll back this item's work, or the next item's commit would roll back with it.
+						// That detaches the items still to come, so retrieve them from now on.
+						pers.rollback();
+						pers.begin();
+						retrieve = true;
 						sb.append(" - Unsuccessful");
 						sb.append("\n").append(e.getMessage());
 					}

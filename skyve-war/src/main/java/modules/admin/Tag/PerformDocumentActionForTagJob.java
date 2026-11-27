@@ -9,6 +9,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.job.Job;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -24,6 +25,7 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
+import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.domain.DataMaintenance.EvictOption;
 
@@ -97,6 +99,7 @@ public class PerformDocumentActionForTagJob extends Job {
 			int processed = 0;
 			Iterator<Bean> it = beans.iterator();
 			TagManager tm = EXT.getTagManager();
+			boolean retrieve = false;
 			while (it.hasNext()) {
 				PersistentBean pb = (PersistentBean) it.next();
 
@@ -108,8 +111,12 @@ public class PerformDocumentActionForTagJob extends Job {
 				} else {
 					sb.append(" unconditionally ");
 				}
-				sb.append("'").append(pb.getBizKey()).append("'");
 				try {
+					if (retrieve) {
+						pb = retrieve(pers, pb);
+					}
+					// Inside the try, since a bizKey can lazy load
+					sb.append("'").append(pb.getBizKey()).append("'");
 					boolean conditionSatisfied = true;
 					if (tag.getDocumentCondition() != null) {
 						conditionSatisfied = conditionSatisfied && pb.evaluateCondition(tag.getDocumentCondition());
@@ -158,6 +165,11 @@ public class PerformDocumentActionForTagJob extends Job {
 					}
 
 				} catch (Exception e) {
+					// Roll back this item's work, or the next item's commit would roll back with it.
+					// That detaches the items still to come, so retrieve them from now on.
+					pers.rollback();
+					pers.begin();
+					retrieve = true;
 					sb.append(" - Unsuccessful");
 					sb.append("\n").append(e.getMessage());
 				}
@@ -179,5 +191,17 @@ public class PerformDocumentActionForTagJob extends Job {
 		setPercentComplete(100);
 		log.add("Finished Document Action for Tagged Items Job at " + new Date());
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Tag action Job completed."));
+	}
+
+	/**
+	 * Retrieve a tagged item again, after a rollback has detached it.
+	 * Also used by {@link DeleteAllTaggedDataForTagJob}.
+	 */
+	static @Nonnull PersistentBean retrieve(@Nonnull Persistence pers, @Nonnull PersistentBean item) {
+		PersistentBean result = pers.retrieve(item.getBizModule(), item.getBizDocument(), item.getBizId());
+		if (result == null) {
+			throw new NoResultsException();
+		}
+		return result;
 	}
 }
