@@ -100,6 +100,10 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	protected abstract void operation(@Nonnull T element) throws Exception;
 
 	/**
+	 * When processing continues after a failure with a commit frequency above 0, the failed transaction is rolled back,
+	 * which detaches the beans loaded before it, including any loaded by {@link #getElements()}.
+	 * So an operation that lazy loads should retrieve its element again rather than use a bean loaded earlier.
+	 *
 	 * @return Boolean that determines whether processing should continue if the operation fails.
 	 */
 	@SuppressWarnings("static-method")
