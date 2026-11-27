@@ -21,9 +21,9 @@
 				<h:outputScript name="cropper.min.js"
 								library="cropperjs"
 								rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
-				<h:outputScript name="skyve/prime/upload-image.js"
+				<h:outputScript name="skyve/prime/upload-image.js?v=#{_skyveContent.webResourceFileVersion}"
 								rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
-				<h:outputScript name="skyve/prime/upload-video.js"
+				<h:outputScript name="skyve/prime/upload-video.js?v=#{_skyveContent.webResourceFileVersion}"
 								rendered="#{_skyveContent.videoUpload or _skyveContent.videoUploadAllowed}" />
 				<h:outputScript rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}">
 					window.skyveMaximumUploadSizeInBytes = #{_skyveContent.cameraMaximumSizeInBytes};

@@ -249,7 +249,7 @@ class DesktopViewTest {
 	}
 	
 	private static String script(String src) {
-		return "<script type=\"text/javascript\" src=\"" + src + "\"></script>";
+		return "<script type=\"text/javascript\" src=\"" + src + "?v=" + UtilImpl.WEB_RESOURCE_FILE_VERSION + "\"></script>";
 	}
 	
 	private static final class ResourceAwareDesktopView extends DesktopView {

@@ -248,50 +248,84 @@ public class LoadDemonstrationDataJob extends Job {
 
 	}
 */
-	private void clearPreviousData(@Nonnull Persistence persistence) throws Exception {
+	// package-private for tests
+	void clearPreviousData(@Nonnull Persistence persistence) {
 
 		// try to delete all staff (some may fail if users have been created)
 		DocumentQuery qStaff = persistence.newDocumentQuery(WhosinDocument.STAFF);
 		qStaff.getFilter().addEquals(Staff.demoDataPropertyName, Boolean.TRUE);
-
-		List<Staff> allStaff = qStaff.beanResults();
-		for (Staff s : allStaff) {
-			if (cancelled) {
-				return;
-			}
-			try {
-				Contact c = s.getContact();
-				persistence.delete(s);
-				persistence.delete(c);
-				persistence.commit(false);
-				persistence.evictCached(s);
-				persistence.evictCached(c);
-
-				// after evicting start a new transaction
-				persistence.begin();
-			} catch (@SuppressWarnings("unused") Exception e) {
-				// I figure these are probably not intended to be deleted, so
-				// just fail and move on
-			}
+		if (! deleteStaff(persistence, qStaff.beanResults())) {
+			return;
 		}
 
 		// try to delete all offices (some may fail if users have been created)
 		DocumentQuery qOffice = persistence.newDocumentQuery(WhosinDocument.OFFICE);
 		qOffice.getFilter().addEquals(Office.demoDataPropertyName, Boolean.TRUE);
+		deleteOffices(persistence, qOffice.beanResults());
+	}
 
-		List<Office> allOffices = qOffice.beanResults();
-		for (Office o : allOffices) {
+	/**
+	 * Delete the demonstration staff and their contacts, skipping those that cannot be deleted.
+	 *
+	 * @return false if the job was cancelled.
+	 */
+	private boolean deleteStaff(@Nonnull Persistence persistence, @Nonnull List<Staff> allStaff) {
+		boolean retrieve = false;
+		for (Staff listed : allStaff) {
+			if (cancelled) {
+				return false;
+			}
+			try {
+				Staff s = retrieve ? persistence.retrieve(WhosinDocument.STAFF, listed.getBizId()) : listed;
+				if (s != null) {
+					Contact c = s.getContact();
+					persistence.delete(s);
+					persistence.delete(c);
+					persistence.commit(false);
+					persistence.evictCached(s);
+					persistence.evictCached(c);
+
+					// after evicting start a new transaction
+					persistence.begin();
+				}
+			} catch (@SuppressWarnings("unused") Exception e) {
+				// I figure these are probably not intended to be deleted, so
+				// just fail and move on.
+				// Roll back this one's work, or the next one's commit would roll back with it.
+				// That detaches the staff still to come, so retrieve them from now on.
+				persistence.rollback();
+				persistence.begin();
+				retrieve = true;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Delete the demonstration offices, skipping those that cannot be deleted.
+	 */
+	private void deleteOffices(@Nonnull Persistence persistence, @Nonnull List<Office> allOffices) {
+		boolean retrieve = false;
+		for (Office listed : allOffices) {
 			if (cancelled) {
 				return;
 			}
 			try {
-				persistence.delete(o);
-				persistence.commit(false);
-				persistence.evictCached(o);
-				persistence.begin();
+				Office o = retrieve ? persistence.retrieve(WhosinDocument.OFFICE, listed.getBizId()) : listed;
+				if (o != null) {
+					persistence.delete(o);
+					persistence.commit(false);
+					persistence.evictCached(o);
+					persistence.begin();
+				}
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// I figure these are probably not intended to be deleted, so
-				// just fail and move on
+				// just fail and move on.
+				// Roll back this one's work, or the next one's commit would roll back with it.
+				// That detaches the offices still to come, so retrieve them from now on.
+				persistence.rollback();
+				persistence.begin();
+				retrieve = true;
 			}
 		}
 	}
