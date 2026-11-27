@@ -1087,7 +1087,7 @@ isc.BizListGrid.addMethods({
 									this._csrf = rpcResponse.httpHeaders["x-csrf-token"];
 
 									this.tagId = data.bizId;
-									this._tagsMenuButton.setTitle(value);
+									this._tagsMenuButton.setTitle(value.asHTML());
 									this.refresh();
 								}
 							},
@@ -1104,12 +1104,12 @@ isc.BizListGrid.addMethods({
 		 * @function
 		 * @name _tagsMenuButton.setTag
 		 * @param {string} tagId - the ID of the tag to set.
-		 * @param {string} title - the title of the tag to set.
+		 * @param {string} [title] - the tag's name, as text; none for no tag.
 		 */
 		this._tagsMenuButton.setTag = (tagId, title) => {
 			// Set the tag ID and update the title of the tags menu button
 			this.tagId = tagId;
-			this._tagsMenuButton.setTitle(title);
+			this._tagsMenuButton.setTitle(title ? title.asHTML() : isc.i18nMessages.bizListGrid_ToolbarMenuNoTag);
 
 			// Refresh the UI to reflect the changes
 			this.refresh();
@@ -1220,7 +1220,7 @@ isc.BizListGrid.addMethods({
 
 						// If deleting the tag, reset the tag menu button title
 						if (action === "D") {
-							this._tagsMenuButton.setTag(null, "No Tag");
+							this._tagsMenuButton.setTag(null);
 						}
 
 						this.refresh();

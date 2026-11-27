@@ -96,15 +96,30 @@ class SmartClientSnapshotAdapterTest {
 		assertThat(payload, containsString("\"sortState\":null"));
 	}
 
+	/**
+	 * The state SmartClient is sent (a Vue snapshot converted for it) reads back as the same snapshot. Before, the
+	 * group state's quotation marks were not escaped inside its JSON string, so a grouped payload did not parse.
+	 */
 	@Test
-	void toClientPayloadWithGroupContainsGroupState() {
+	void toClientPayloadReadsBackAsTheSameDisplayState() throws Exception {
+		bindMockUser();
 		Snapshot snapshot = new Snapshot();
 		snapshot.putColumn("name");
+		snapshot.putColumn("amount", Integer.valueOf(120));
+		snapshot.putSort("name", SortDirection.descending);
 		snapshot.setGroup("category");
+		snapshot.setSummary(AggregateFunction.Sum);
+
 		String payload = SnapshotAdapter.SMART_CLIENT.toClientPayload(snapshot);
 		assertNotNull(payload);
-		assertThat(payload, containsString("category"));
-		assertThat(payload, containsString("fieldName"));
+		Snapshot result = SnapshotAdapter.SMART_CLIENT.fromClientPayload(payload);
+
+		assertNotNull(result);
+		assertEquals(snapshot.getColumns(), result.getColumns());
+		assertEquals(List.copyOf(snapshot.getColumns().keySet()), List.copyOf(result.getColumns().keySet())); // in order
+		assertEquals(snapshot.getSorts(), result.getSorts());
+		assertEquals("category", result.getGroup());
+		assertEquals(AggregateFunction.Sum, result.getSummary());
 	}
 
 	@Test

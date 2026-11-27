@@ -30,6 +30,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.user.User;
+import org.skyve.util.OWASP;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ServletException;
@@ -117,6 +118,30 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 		assertUnexpectedWarning(response.body());
 	}
 
+	/**
+	 * A tag name is text. SmartClient shows a menu title as HTML, so the menu title is the name HTML-escaped in
+	 * the client with asHTML(), as setTag() does for the button title; both get the name escaped only for its
+	 * JavaScript string. Before, a stored name with markup in it was rendered as HTML in the menu.
+	 */
+	@Test
+	void tagNamesAreHtmlEscapedInMenuTitlesAndPassedToSetTagAsText() throws Exception {
+		String markupId = EXT.getTagManager().create("<b>bold</b>", true);
+		String apostropheId = EXT.getTagManager().create("Mike's tag", true);
+		String entityId = EXT.getTagManager().create("Say \"R&amp;D\"", true);
+
+		String body = service(newRequest(u)
+				.param("a", "L")
+				.param("ID", "tagButton")).doGet().body();
+
+		// in these JavaScript strings \/ is / and \x26 is &; the name is not HTML-escaped (or decoded) on the server
+		assertTrue(body.contains("{title:'<b>bold<\\/b>'.asHTML(),"), body);
+		assertTrue(body.contains("tagButton.setTag('" + OWASP.escapeJsString(markupId) + "','<b>bold<\\/b>')"), body);
+		assertTrue(body.contains("{title:'Mike\\'s tag'.asHTML(),"), body);
+		assertTrue(body.contains("tagButton.setTag('" + OWASP.escapeJsString(apostropheId) + "','Mike\\'s tag')"), body);
+		assertTrue(body.contains("{title:'Say \\\"R\\x26amp;D\\\"'.asHTML(),"), body);
+		assertTrue(body.contains("tagButton.setTag('" + OWASP.escapeJsString(entityId) + "','Say \\\"R\\x26amp;D\\\"')"), body);
+	}
+
 	@Test
 	void aNewTagWithoutTheSessionsCsrfTokenIsRefusedAndNotCreated() throws Exception {
 		String name = "refused-tag-" + System.nanoTime();
@@ -159,9 +184,10 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 
 	private static void assertBaseTagMenu(String body) {
 		assertTrue(body.contains("New Tag"), body);
-		assertTrue(body.contains("No Tag"), body);
+		assertTrue(body.contains("{title:isc.i18nMessages.bizListGrid_ToolbarMenuNoTag,"), body);
 		assertTrue(body.contains("tagButton.newTag()"), body);
-		assertTrue(body.contains("tagButton.setTag(null,'No Tag')"), body);
+		assertTrue(body.contains("tagButton.setTag(null)"), body);
+		assertFalse(body.contains("No Tag"), body); // the i18n message, not English
 	}
 
 	private static ServletHarness service(RequestBuilder request) throws IOException {

@@ -344,7 +344,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		result.append('"').append(SC_GROUP_STATE).append("\":\"");
 		String group = snapshot.getGroup();
 		if (group != null) {
-			result.append("([{").append(SC_FIELD_NAME).append(":\"").append(OWASP.escapeJsStringWithHtmlFormatting(group)).append("\"}])");
+			result.append("([{").append(SC_FIELD_NAME).append(":\\\"").append(OWASP.escapeJsStringWithHtmlFormatting(group)).append("\\\"}])");
 		}
 		result.append("\",");
 

@@ -259,19 +259,21 @@ public class SmartClientTagServlet extends HttpServlet {
 	    sb.append("[{title:'New Tag',icon:'icons/tag_add.png',click:'");
 	    sb.append(menuButtonId).append(".newTag()'},");
 	    sb.append("{isSeparator:true},");
-	    sb.append("{title:'No Tag',click:\"").append(menuButtonId).append(".setTag(null,'No Tag')\"},");
+	    sb.append("{title:isc.i18nMessages.bizListGrid_ToolbarMenuNoTag,click:\"").append(menuButtonId).append(".setTag(null)\"},");
 	    sb.append("{isSeparator:true}");
 
         for (DomainValue value : EXT.getTagManager().getTags()) {
-        	String escapedCode = OWASP.escapeJsStringWithHtmlFormatting(value.getCode());
-        	String escapedDescription = OWASP.escapeJsStringWithHtmlFormatting(value.getLocalisedDescription());
-        	
-        	// tag select menu
-            sb.append(",{title:'").append(escapedDescription).append("',icon:'icons/tag.png',click:function(){");
+        	String code = value.getCode();
+        	String escapedCode = OWASP.escapeJsString(code);
+        	String escapedDescription = OWASP.escapeJsString(value.getLocalisedDescription());
+
+        	// tag select menu: the name is text and SmartClient shows a menu title as HTML, so the client escapes
+        	// it with asHTML(), as setTag() does for the button title, and both show the same text
+            sb.append(",{title:'").append(escapedDescription).append("'.asHTML(),icon:'icons/tag.png',click:function(){");
             sb.append(menuButtonId).append(".setTag('").append(escapedCode).append("','");
             sb.append(escapedDescription).append("')},submenu:[");
 
-            boolean disabled = (tagId == null) || (! tagId.equals(escapedCode));
+            boolean disabled = (tagId == null) || (! tagId.equals(code));
 
             // Note - javascript escapes (like \') don't work in string methods
             // tag all menu
