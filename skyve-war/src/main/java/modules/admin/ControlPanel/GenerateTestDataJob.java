@@ -42,6 +42,9 @@ public class GenerateTestDataJob extends CancellableJob {
 		Persistence pers = CORE.getPersistence();
 		ControlPanelExtension bean = (ControlPanelExtension) getBean();
 		Tag tag = createOrRetrieveTag(pers, bean);
+		// Commit a new tag now, so that a failure creating the first item does not roll it back
+		pers.commit(false);
+		pers.begin();
 		
 		// create a DataBuilder which will also populate optional references
 		db = new DataBuilder()
@@ -73,6 +76,9 @@ public class GenerateTestDataJob extends CancellableJob {
 					pers.begin();
 
 				} catch (Exception e) {
+					// Roll back this item's work, or the next item's commit would roll back with it
+					pers.rollback();
+					pers.begin();
 					failed++;
 					log.add(String.format("Error creating instance of %s - %s", docName.getDocumentName(), e.getMessage()));
 					LOGGER.error(e.getMessage(), e);

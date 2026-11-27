@@ -17,6 +17,7 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
+import jakarta.annotation.Nonnull;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.DataMaintenance.RefreshOption;
@@ -81,10 +82,11 @@ public class RefreshDocumentTuplesJob extends Job {
 				// get relevant document to action
 				Persistence pers = CORE.getPersistence();
 				DocumentQuery q = pers.newDocumentQuery(doc.getModuleName(), doc.getDocumentName());
+				boolean retrieve = EvictOption.bean.equals(evict) || EvictOption.all.equals(evict);
 				for (PersistentBean bean : q.<PersistentBean>beanResults()) {
 					String bizId = bean.getBizId();
 					try {
-						if (EvictOption.bean.equals(evict) || EvictOption.all.equals(evict)) {
+						if (retrieve) {
                             bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bizId);
                             if (bean == null) {
                             	throw new NoResultsException();
@@ -106,13 +108,17 @@ public class RefreshDocumentTuplesJob extends Job {
 						pers.begin();
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
+						// Roll back this bean's work, or the next bean's commit would roll back with it.
+						// That detaches the beans still to come, so retrieve them from now on.
+						pers.rollback();
+						pers.begin();
+						retrieve = true;
 						log.add(String.format("%s - %s failed for id: %s",
 												sb.toString(),
 												dm.getRefreshOption().toLocalisedDescription(),
 												bizId));
-						if ((bean != null) && Boolean.TRUE.equals(flagFailedData)) {
-							bean.setBizFlagComment("Data refresh failed - Please validate data and try again.");
-							CORE.getPersistence().upsertBeanTuple(bean);
+						if (Boolean.TRUE.equals(flagFailedData)) {
+							flagFailed(pers, doc, bizId, log);
 						}
 					}
 					processed++;
@@ -135,5 +141,28 @@ public class RefreshDocumentTuplesJob extends Job {
 		setPercentComplete(100);
 		log.add("Finished Document Data Refresh Job at " + new Date());
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Refresh Documents job completed."));
+	}
+
+	/**
+	 * Flag the stored bean whose refresh failed, in a transaction of its own, so that the flag is kept.
+	 */
+	private static void flagFailed(@Nonnull Persistence pers, @Nonnull ModuleDocument doc, @Nonnull String bizId, @Nonnull List<String> log) {
+		try {
+			PersistentBean failed = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bizId);
+			if (failed != null) {
+				failed.setBizFlagComment("Data refresh failed - Please validate data and try again.");
+				pers.upsertBeanTuple(failed);
+				pers.commit(false);
+				// The row was written without Hibernate, so a later flush of this changed bean would fail its version check
+				pers.evictCached(failed);
+			}
+		}
+		catch (Exception e) {
+			pers.rollback();
+			log.add(String.format("Could not flag id: %s - %s", bizId, e.getMessage()));
+		}
+		finally {
+			pers.begin();
+		}
 	}
 }
